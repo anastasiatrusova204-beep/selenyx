@@ -8,6 +8,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 
 from bot.services.astro import get_moon_data, get_daily_energy
+from bot.keyboards.menus import zodiac_keyboard
 
 router = Router()
 
@@ -45,6 +46,14 @@ async def menu_moon(message: Message):
         f"{moon['phase_meaning']}\n\n"
         f"<b>Луна в {moon['sign_nom']} говорит:</b>\n"
         f"{moon['sign_meaning']}"
+    )
+
+
+@router.message(F.text == "✏️ Сменить знак")
+async def menu_change_sign(message: Message):
+    await message.answer(
+        "Выбери свой знак зодиака:",
+        reply_markup=zodiac_keyboard()
     )
 
 
