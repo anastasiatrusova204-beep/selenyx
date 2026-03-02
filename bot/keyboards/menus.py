@@ -6,18 +6,18 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 
 # Список знаков: (текст кнопки, внутренний ключ)
 ZODIAC_SIGNS = [
-    ("♈ Овен",      "aries"),
-    ("♉ Телец",     "taurus"),
-    ("♊ Близнецы",  "gemini"),
-    ("♋ Рак",       "cancer"),
-    ("♌ Лев",       "leo"),
-    ("♍ Дева",      "virgo"),
-    ("♎ Весы",      "libra"),
-    ("♏ Скорпион",  "scorpio"),
-    ("♐ Стрелец",   "sagittarius"),
-    ("♑ Козерог",   "capricorn"),
-    ("♒ Водолей",   "aquarius"),
-    ("♓ Рыбы",      "pisces"),
+    ("♈ Овен",     "aries"),
+    ("♉ Телец",    "taurus"),
+    ("♊ Близнецы", "gemini"),
+    ("♋ Рак",      "cancer"),
+    ("♌ Лев",      "leo"),
+    ("♍ Дева",     "virgo"),
+    ("♎ Весы",     "libra"),
+    ("♏ Скорпион", "scorpio"),
+    ("♐ Стрелец",  "sagittarius"),
+    ("♑ Козерог",  "capricorn"),
+    ("♒ Водолей",  "aquarius"),
+    ("♓ Рыбы",     "pisces"),
 ]
 
 # Словарь для обратного перевода ключа → текст (используем в подтверждении)
@@ -42,6 +42,6 @@ def zodiac_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text=label, callback_data=f"zodiac:{key}")
         for label, key in ZODIAC_SIGNS
     ]
-    # Разбиваем на ряды по 3 кнопки
-    rows = [buttons[i:i + 3] for i in range(0, len(buttons), 3)]
+    # Разбиваем на ряды по 2 кнопки — длинные названия не обрезаются
+    rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
     return InlineKeyboardMarkup(inline_keyboard=rows)

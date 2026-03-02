@@ -16,8 +16,8 @@ async def handle_moon(message: Message):
 
     await message.answer(
         f"{moon['phase_emoji']} <b>Луна в {moon['sign_prep']}</b>\n\n"
-        f"· Фаза: {moon['phase_name']}\n"
-        f"· Лунный день: {moon['lunar_day']}\n\n"
+        f"· <b>Фаза:</b> {moon['phase_name']}\n"
+        f"· <b>Лунный день:</b> {moon['lunar_day']}\n\n"
         f"{moon['phase_meaning']}\n\n"
         f"<b>Луна в {moon['sign_nom']} говорит:</b>\n"
         f"{moon['sign_meaning']}"

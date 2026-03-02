@@ -26,7 +26,7 @@ async def menu_today(message: Message):
     await message.answer(
         f"⚡️ <b>Энергия дня — {date_str}</b>\n\n"
         f"{day['phase_emoji']} {day['phase_name']} в {day['sign_prep']}\n\n"
-        f"{day['intro']}\n"
+        f"{day['intro']}\n\n"
         f"{day['sign_meaning']}\n\n"
         f"<b>Хорошо сегодня:</b>\n{good_list}\n\n"
         f"<b>Лучше отложить:</b>\n{avoid_list}\n\n"
@@ -40,8 +40,8 @@ async def menu_moon(message: Message):
 
     await message.answer(
         f"{moon['phase_emoji']} <b>Луна в {moon['sign_prep']}</b>\n\n"
-        f"· Фаза: {moon['phase_name']}\n"
-        f"· Лунный день: {moon['lunar_day']}\n\n"
+        f"· <b>Фаза:</b> {moon['phase_name']}\n"
+        f"· <b>Лунный день:</b> {moon['lunar_day']}\n\n"
         f"{moon['phase_meaning']}\n\n"
         f"<b>Луна в {moon['sign_nom']} говорит:</b>\n"
         f"{moon['sign_meaning']}"
