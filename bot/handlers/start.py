@@ -2,7 +2,7 @@
 # Онбординг: приветствие, выбор знака зодиака, сохранение в БД.
 
 from aiogram import Router, F
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery
 
 from bot.db import get_user, save_user_sign
@@ -33,6 +33,22 @@ async def handle_start(message: Message):
             "Чтобы начать, выбери свой знак зодиака:",
             reply_markup=zodiac_keyboard()
         )
+
+
+@router.message(Command("help"))
+async def handle_help(message: Message):
+    await message.answer(
+        "🌙 <b>Что умеет Selenyx:</b>\n\n"
+        "· <b>⚡️ Энергия дня</b> — подсказка на сегодня: что поддерживает, что отложить\n"
+        "· <b>🌙 Луна</b> — текущая фаза, знак и лунный день\n"
+        "· <b>✏️ Сменить знак</b> — выбрать другой знак зодиака\n"
+        "· <b>ℹ️ О боте</b> — что такое Selenyx\n\n"
+        "<b>Команды:</b>\n"
+        "· /start — начать заново\n"
+        "· /today — энергия дня\n"
+        "· /moon — положение Луны\n"
+        "· /help — это сообщение"
+    )
 
 
 # Этот обработчик срабатывает когда пользователь нажимает кнопку знака.

@@ -2,9 +2,12 @@
 # Команда /today — энергия дня на основе положения Луны.
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
+
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 from bot.services.astro import get_daily_energy
 
@@ -17,7 +20,7 @@ WEEKDAYS_RU = ["понедельник", "вторник", "среда", "чет
 async def handle_today(message: Message):
     day = get_daily_energy()
 
-    now = datetime.now()
+    now = datetime.now(tz=MOSCOW_TZ)
     date_str = f"{now.day} {['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][now.month - 1]}, {WEEKDAYS_RU[now.weekday()]}"
 
     good_list = "\n".join(f"· {item}" for item in day["good"])

@@ -4,8 +4,11 @@
 # Здесь мы ловим эти тексты и вызываем нужные функции.
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from aiogram import Router, F
 from aiogram.types import Message
+
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 from bot.services.astro import get_moon_data, get_daily_energy
 from bot.keyboards.menus import zodiac_keyboard
@@ -19,7 +22,7 @@ MONTHS_RU = ["января","февраля","марта","апреля","мая
 @router.message(F.text == "⚡️ Энергия дня")
 async def menu_today(message: Message):
     day = get_daily_energy()
-    now = datetime.now()
+    now = datetime.now(tz=MOSCOW_TZ)
     date_str = f"{now.day} {MONTHS_RU[now.month - 1]}, {WEEKDAYS_RU[now.weekday()]}"
     good_list  = "\n".join(f"· {i}" for i in day["good"])
     avoid_list = "\n".join(f"· {i}" for i in day["avoid"])

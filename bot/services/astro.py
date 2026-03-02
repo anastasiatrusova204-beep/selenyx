@@ -4,7 +4,10 @@
 
 import logging
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from kerykeion import AstrologicalSubject
+
+MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +131,7 @@ def get_moon_data() -> dict:
     Возвращает текущее положение Луны:
     знак, фаза, лунный день и краткие описания.
     """
-    now = datetime.now()
+    now = datetime.now(tz=MOSCOW_TZ)
 
     # Подавляем предупреждение о GeoNames — нам не нужны точные координаты для знака Луны
     logging.getLogger("root").setLevel(logging.ERROR)

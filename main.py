@@ -6,6 +6,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
+from aiogram.types import BotCommand
 
 from config import BOT_TOKEN
 from bot.handlers import start, today, moon, menu
@@ -38,6 +39,14 @@ async def main():
     dp.include_router(start.router)
     dp.include_router(today.router)
     dp.include_router(moon.router)
+
+    # Регистрируем команды — они появляются в меню «/» в Telegram
+    await bot.set_my_commands([
+        BotCommand(command="start",  description="Начать / вернуться в главное меню"),
+        BotCommand(command="today",  description="Энергия дня"),
+        BotCommand(command="moon",   description="Положение Луны"),
+        BotCommand(command="help",   description="Что умеет бот"),
+    ])
 
     logger.info("Бот запущен. Нажми Ctrl+C для остановки.")
 
