@@ -29,7 +29,8 @@ def main_menu() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="⚡️ Энергия дня"), KeyboardButton(text="🌙 Луна")],
-            [KeyboardButton(text="ℹ️ О боте"), KeyboardButton(text="✏️ Сменить знак")],
+            [KeyboardButton(text="✏️ Сменить знак")],
+            [KeyboardButton(text="ℹ️ О боте")],
         ],
         resize_keyboard=True,   # кнопки поменьше, не занимают пол-экрана
         persistent=True,        # меню не прячется после нажатия
