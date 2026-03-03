@@ -31,7 +31,7 @@ async def handle_today(message: Message):
     user = await get_user(message.from_user.id)
     zodiac_sign = user.get("zodiac_sign") if user else None
     zodiac_tip = get_zodiac_tip(zodiac_sign, day["phase_name"]) if zodiac_sign else ""
-    personal_block = f"\n✨ <b>Твой знак сегодня:</b>\n{zodiac_tip}" if zodiac_tip else ""
+    personal_block = f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n<tg-spoiler>{zodiac_tip}</tg-spoiler>" if zodiac_tip else ""
 
     await message.answer(
         f"⚡️ <b>Энергия дня — {date_str}</b>\n\n"
