@@ -10,8 +10,9 @@ from aiogram.types import Message
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
 
-from bot.services.astro import get_moon_data, get_daily_energy
+from bot.services.astro import get_moon_data, get_daily_energy, get_zodiac_tip
 from bot.keyboards.menus import zodiac_keyboard
+from bot.db import get_user
 
 router = Router()
 
@@ -27,6 +28,12 @@ async def menu_today(message: Message):
     good_list  = "\n".join(f"· {i}" for i in day["good"])
     avoid_list = "\n".join(f"· {i}" for i in day["avoid"])
 
+    # Персональный совет по знаку пользователя
+    user = await get_user(message.from_user.id)
+    zodiac_sign = user.get("zodiac_sign") if user else None
+    zodiac_tip = get_zodiac_tip(zodiac_sign, day["phase_name"]) if zodiac_sign else ""
+    personal_block = f"\n✨ <b>Твой знак сегодня:</b>\n{zodiac_tip}" if zodiac_tip else ""
+
     await message.answer(
         f"⚡️ <b>Энергия дня — {date_str}</b>\n\n"
         f"{day['phase_emoji']} {day['phase_name']} в {day['sign_prep']}\n\n"
@@ -35,6 +42,7 @@ async def menu_today(message: Message):
         f"<b>Хорошо сегодня:</b>\n{good_list}\n\n"
         f"<b>Лучше отложить:</b>\n{avoid_list}\n\n"
         f"💫 <b>Совет дня:</b>\n{day['tip']}"
+        f"{personal_block}"
     )
 
 
