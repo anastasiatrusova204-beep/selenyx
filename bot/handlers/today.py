@@ -37,7 +37,6 @@ async def handle_today(message: Message):
         f"⚡️ <b>Энергия дня — {date_str}</b>\n\n"
         f"{day['phase_emoji']} {day['phase_name']} в {day['sign_prep']}\n\n"
         f"{day['intro']}\n\n"
-        f"{day['sign_meaning']}\n\n"
         f"<b>Хорошо сегодня:</b>\n{good_list}\n\n"
         f"<b>Лучше отложить:</b>\n{avoid_list}\n\n"
         f"💫 <b>Совет дня:</b>\n{day['tip']}"

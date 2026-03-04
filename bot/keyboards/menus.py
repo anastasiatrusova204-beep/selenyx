@@ -25,24 +25,50 @@ ZODIAC_LABELS = {key: label for label, key in ZODIAC_SIGNS}
 
 
 def main_menu() -> ReplyKeyboardMarkup:
-    """Постоянное меню внизу экрана — три кнопки."""
+    """Постоянное меню внизу экрана."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="⚡️ Энергия дня"), KeyboardButton(text="🌙 Луна")],
+            [KeyboardButton(text="✨ Мой день")],
             [KeyboardButton(text="✏️ Сменить знак")],
             [KeyboardButton(text="ℹ️ О боте")],
         ],
-        resize_keyboard=True,   # кнопки поменьше, не занимают пол-экрана
-        persistent=True,        # меню не прячется после нажатия
+        resize_keyboard=True,
+        persistent=True,
     )
 
 
+def start_cta_keyboard() -> InlineKeyboardMarkup:
+    """Кнопка на стартовом экране — ведёт к выбору знака."""
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="Начать →", callback_data="cb_begin")
+    ]])
+
+
+def energy_tabs_keyboard() -> InlineKeyboardMarkup:
+    """Вкладки под экраном Мой день."""
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="✅ Хорошо сегодня", callback_data="cb_good"),
+        InlineKeyboardButton(text="🚫 Лучше отложить", callback_data="cb_avoid"),
+    ]])
+
+
+def energy_detail_keyboard() -> InlineKeyboardMarkup:
+    """Кнопки под раскрытой вкладкой — переключатель + назад + предсказание."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Хорошо сегодня", callback_data="cb_good"),
+            InlineKeyboardButton(text="🚫 Лучше отложить", callback_data="cb_avoid"),
+        ],
+        [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
+        [InlineKeyboardButton(text="🥠 Открыть личное предсказание →", callback_data="cb_prediction")],
+    ])
+
+
 def zodiac_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура с 12 знаками зодиака — 3 кнопки в ряд."""
+    """Клавиатура с 12 знаками зодиака — 2 кнопки в ряд."""
     buttons = [
         InlineKeyboardButton(text=label, callback_data=f"zodiac:{key}")
         for label, key in ZODIAC_SIGNS
     ]
-    # Разбиваем на ряды по 2 кнопки — длинные названия не обрезаются
     rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
     return InlineKeyboardMarkup(inline_keyboard=rows)

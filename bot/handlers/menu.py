@@ -1,64 +1,107 @@
 # bot/handlers/menu.py
-# Обработчики нажатий на кнопки главного меню.
-# Когда пользователь нажимает кнопку — Telegram присылает её текст как обычное сообщение.
-# Здесь мы ловим эти тексты и вызываем нужные функции.
+# Обработчики кнопок главного меню.
+# ✨ Мой день — объединяет энергию дня и лунный контекст.
 
-from datetime import datetime
-from zoneinfo import ZoneInfo
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
-MOSCOW_TZ = ZoneInfo("Europe/Moscow")
-
-from bot.services.astro import get_moon_data, get_daily_energy, get_zodiac_tip
-from bot.keyboards.menus import zodiac_keyboard
+from bot.services.astro import get_daily_energy, get_zodiac_tip, get_zodiac_extras
+from bot.keyboards.menus import zodiac_keyboard, energy_tabs_keyboard, energy_detail_keyboard
 from bot.db import get_user
 
 router = Router()
 
-WEEKDAYS_RU = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
-MONTHS_RU = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"]
 
+# ── Мой день ─────────────────────────────────────────────────────────────────
 
-@router.message(F.text == "⚡️ Энергия дня")
-async def menu_today(message: Message):
+def _my_day_text() -> tuple:
+    """Текст и клавиатура экрана Мой день."""
     day = get_daily_energy()
-    now = datetime.now(tz=MOSCOW_TZ)
-    date_str = f"{now.day} {MONTHS_RU[now.month - 1]}, {WEEKDAYS_RU[now.weekday()]}"
-    good_list  = "\n".join(f"· {i}" for i in day["good"])
-    avoid_list = "\n".join(f"· {i}" for i in day["avoid"])
+    text = (
+        f"✨ <b>Мой день</b>\n\n"
+        f"{day['intro']}\n\n"
+        f"· {day['phase_emoji']} Луна в {day['sign_nom']} · {day['lunar_day']} лунный день\n\n"
+        f"💫 <b>Совет дня:</b>\n{day['tip']}"
+    )
+    return text, energy_tabs_keyboard()
 
-    # Персональный совет по знаку пользователя
-    user = await get_user(message.from_user.id)
+
+@router.message(F.text == "✨ Мой день")
+async def menu_my_day(message: Message):
+    text, markup = _my_day_text()
+    await message.answer(text, reply_markup=markup)
+
+
+@router.callback_query(F.data == "cb_energy")
+async def cb_energy(callback: CallbackQuery):
+    text, markup = _my_day_text()
+    await callback.message.answer(text, reply_markup=markup)
+    await callback.answer()
+
+
+# ── Вкладки ───────────────────────────────────────────────────────────────────
+
+@router.callback_query(F.data == "cb_good")
+async def cb_good(callback: CallbackQuery):
+    day = get_daily_energy()
+    user = await get_user(callback.from_user.id)
+    zodiac_sign = user.get("zodiac_sign") if user else None
+    extras = get_zodiac_extras(zodiac_sign, day["phase_name"]) if zodiac_sign else {}
+    items = ([extras["good"]] if extras.get("good") else []) + day["good"]
+    good_list = "\n".join(f"· {i}" for i in items)
+    await callback.message.edit_text(
+        f"✅ <b>Хорошо сегодня:</b>\n\n{good_list}",
+        reply_markup=energy_detail_keyboard()
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_avoid")
+async def cb_avoid(callback: CallbackQuery):
+    day = get_daily_energy()
+    user = await get_user(callback.from_user.id)
+    zodiac_sign = user.get("zodiac_sign") if user else None
+    extras = get_zodiac_extras(zodiac_sign, day["phase_name"]) if zodiac_sign else {}
+    items = ([extras["avoid"]] if extras.get("avoid") else []) + day["avoid"]
+    avoid_list = "\n".join(f"· {i}" for i in items)
+    await callback.message.edit_text(
+        f"🚫 <b>Лучше отложить:</b>\n\n{avoid_list}",
+        reply_markup=energy_detail_keyboard()
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_energy_back")
+async def cb_energy_back(callback: CallbackQuery):
+    text, markup = _my_day_text()
+    await callback.message.edit_text(text, reply_markup=markup)
+    await callback.answer()
+
+
+# ── Предсказание ──────────────────────────────────────────────────────────────
+
+@router.callback_query(F.data == "cb_prediction")
+async def cb_prediction(callback: CallbackQuery):
+    day = get_daily_energy()
+    user = await get_user(callback.from_user.id)
     zodiac_sign = user.get("zodiac_sign") if user else None
     zodiac_tip = get_zodiac_tip(zodiac_sign, day["phase_name"]) if zodiac_sign else ""
-    personal_block = f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n<tg-spoiler>{zodiac_tip}</tg-spoiler>" if zodiac_tip else ""
 
-    await message.answer(
-        f"⚡️ <b>Энергия дня — {date_str}</b>\n\n"
-        f"{day['phase_emoji']} {day['phase_name']} в {day['sign_prep']}\n\n"
-        f"{day['intro']}\n\n"
-        f"{day['sign_meaning']}\n\n"
-        f"<b>Хорошо сегодня:</b>\n{good_list}\n\n"
-        f"<b>Лучше отложить:</b>\n{avoid_list}\n\n"
-        f"💫 <b>Совет дня:</b>\n{day['tip']}"
-        f"{personal_block}"
-    )
+    if zodiac_tip:
+        original = callback.message.html_text
+        await callback.message.edit_text(
+            original + f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n<tg-spoiler>{zodiac_tip}</tg-spoiler>",
+            reply_markup=None
+        )
+    else:
+        await callback.message.answer(
+            "Выбери свой знак зодиака — тогда я смогу открыть предсказание.",
+            reply_markup=zodiac_keyboard()
+        )
+    await callback.answer()
 
 
-@router.message(F.text == "🌙 Луна")
-async def menu_moon(message: Message):
-    moon = get_moon_data()
-
-    await message.answer(
-        f"{moon['phase_emoji']} <b>Луна в {moon['sign_prep']}</b>\n\n"
-        f"· <b>Фаза:</b> {moon['phase_name']}\n"
-        f"· <b>Лунный день:</b> {moon['lunar_day']}\n\n"
-        f"{moon['phase_meaning']}\n\n"
-        f"<b>Луна в {moon['sign_nom']} говорит:</b>\n"
-        f"{moon['sign_meaning']}"
-    )
-
+# ── Прочие кнопки меню ────────────────────────────────────────────────────────
 
 @router.message(F.text == "✏️ Сменить знак")
 async def menu_change_sign(message: Message):
