@@ -30,10 +30,12 @@
         └── Главное меню
               │
               ├── ✨ Мой день ──────────────────────────────────────────────┐
-              │     └── Intro фазы + знак Луны + лунный день               │
-              │           └── [Выбор вкладки]                              │
-              │                 ├── ✅ Хорошо → детали + кнопка предсказания│
-              │                 └── 🚫 Лучше отложить → детали + кнопка     │
+              │     └── Intro фазы + знак Луны + градус + лунный день       │
+              │           └── [4 доменных таба]                             │
+              │                 ├── 🏥 Здоровье → детали + кнопка           │
+              │                 ├── 💼 Работа → детали + кнопка             │
+              │                 ├── ❤️ Отношения → детали + кнопка          │
+              │                 └── 🧠 Психология → детали + кнопка         │
               │                       └── 🥠 Открыть предсказание → spoiler ┘
               │
               ├── ✏️ Сменить знак → список знаков → подтверждение
@@ -214,10 +216,12 @@ class UserState(StatesGroup):
       │     └── есть знак → MainMenu
       │
       ├── "✨ Мой день" → вычислить астро → показать intro
-      │     ├── callback "tab_good" → edit message (✅ вкладка)
-      │     ├── callback "tab_avoid" → edit message (🚫 вкладка)
-      │     ├── callback "open_cookie" → добавить spoiler, убрать кнопки
-      │     └── callback "back" → вернуться к intro
+      │     ├── callback "cb_domain_health" → edit (🏥 Здоровье)
+      │     ├── callback "cb_domain_work" → edit (💼 Работа)
+      │     ├── callback "cb_domain_love" → edit (❤️ Отношения)
+      │     ├── callback "cb_domain_psych" → edit (🧠 Психология)
+      │     ├── callback "cb_prediction" → добавить spoiler, убрать кнопки
+      │     └── callback "cb_energy_back" → вернуться к intro
       │
       ├── "✏️ Сменить знак" → changing_sign → выбор → сохранить → подтверждение
       │
@@ -451,14 +455,14 @@ async def get_today_data() -> AstroData:
 
 ```
 # Procfile
-worker: venv/bin/python3 main.py
+worker: venv/bin/python3 bot.py
 
 # railway.toml
 [build]
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "python3 main.py"
+startCommand = "python3 bot.py"
 restartPolicyType = "ON_FAILURE"
 ```
 
