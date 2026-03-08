@@ -247,8 +247,8 @@ MOON_ASPECT_HINTS: dict = {
 }
 
 _PLANET_NAMES_RU = {
-    "venus": "Луна–Венера", "mars": "Луна–Марс", "saturn": "Луна–Сатурн",
-    "mercury": "Луна–Меркурий", "jupiter": "Луна–Юпитер",
+    "venus": "Венера", "mars": "Марс", "saturn": "Сатурн",
+    "mercury": "Меркурий", "jupiter": "Юпитер",
 }
 _ASPECT_DEFS = [
     (0,   "соединение", 8),
@@ -958,22 +958,35 @@ def domain_detail_keyboard() -> InlineKeyboardMarkup:
     """Кнопки под раскрытым доменом — переключатель + назад."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="🏥", callback_data="cb_domain_health"),
-            InlineKeyboardButton(text="💼", callback_data="cb_domain_work"),
-            InlineKeyboardButton(text="❤️", callback_data="cb_domain_love"),
-            InlineKeyboardButton(text="🧠", callback_data="cb_domain_psych"),
+            InlineKeyboardButton(text="🏥 Здоровье", callback_data="cb_domain_health"),
+            InlineKeyboardButton(text="💼 Работа",   callback_data="cb_domain_work"),
+        ],
+        [
+            InlineKeyboardButton(text="❤️ Отношения", callback_data="cb_domain_love"),
+            InlineKeyboardButton(text="🧠 Психология", callback_data="cb_domain_psych"),
         ],
         [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
     ])
 
 
 def zodiac_keyboard() -> InlineKeyboardMarkup:
-    buttons = [
-        InlineKeyboardButton(text=label, callback_data=f"zodiac:{key}")
-        for label, key in ZODIAC_SIGNS
-    ]
-    rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
-    return InlineKeyboardMarkup(inline_keyboard=rows)
+    """Знаки зодиака, сгруппированные по стихиям."""
+    def btn(label: str, key: str) -> InlineKeyboardButton:
+        return InlineKeyboardButton(text=label, callback_data=f"zodiac:{key}")
+
+    def sep(text: str) -> list[InlineKeyboardButton]:
+        return [InlineKeyboardButton(text=text, callback_data="cb_ignore")]
+
+    return InlineKeyboardMarkup(inline_keyboard=[
+        sep("🔥 Огонь"),
+        [btn("♈ Овен", "aries"), btn("♌ Лев", "leo"), btn("♐ Стрелец", "sagittarius")],
+        sep("🌱 Земля"),
+        [btn("♉ Телец", "taurus"), btn("♍ Дева", "virgo"), btn("♑ Козерог", "capricorn")],
+        sep("💨 Воздух"),
+        [btn("♊ Близнецы", "gemini"), btn("♎ Весы", "libra"), btn("♒ Водолей", "aquarius")],
+        sep("💧 Вода"),
+        [btn("♋ Рак", "cancer"), btn("♏ Скорпион", "scorpio"), btn("♓ Рыбы", "pisces")],
+    ])
 
 
 # ─── Astro Functions ──────────────────────────────────────────────────────────
@@ -1231,7 +1244,7 @@ def _my_day_text() -> tuple[str, InlineKeyboardMarkup]:
         f"✨ <b>Мой день</b>\n\n"
         f"{day['intro']}\n\n"
         f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}° · {day['lunar_day']} лунный день\n"
-        f"· 🕯 {day['lunar_day_symbol']}\n\n"
+        f"· 🕯 Символ дня: {day['lunar_day_symbol']}\n\n"
         f"{day['lunar_day_energy']}\n\n"
         f"💫 <b>Практика дня:</b>\n{day['lunar_day_practice']}\n\n"
         f"Выбери, что важно сегодня:"
@@ -1342,12 +1355,12 @@ async def _show_domain(
 
     if domain_aspects:
         a = domain_aspects[0]
-        aspect_line = f"\n\n· ✨ {a['label']}: {a['hint']}"
+        aspect_line = f"\n\n· ✨ {a['label']} сегодня: {a['hint']}"
     else:
         primary = _DOMAIN_PRIMARY_PLANET.get(domain_key, "venus")
         label   = _PLANET_NAMES_RU.get(primary, primary)
         neutral = _PLANET_NEUTRAL.get(primary, "")
-        aspect_line = f"\n\n· 💫 {label}: {neutral}"
+        aspect_line = f"\n\n· 💫 {label} сегодня: {neutral}"
 
     text = (
         f"{domain_emoji} <b>{domain_name}</b>\n\n"
@@ -1392,7 +1405,7 @@ async def cb_prediction(callback: CallbackQuery) -> None:
     if zodiac_tip:
         original = callback.message.html_text
         await callback.message.edit_text(
-            original + f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n<tg-spoiler>{zodiac_tip}</tg-spoiler>",
+            original + f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n👇 Нажми на текст, чтобы открыть:\n<tg-spoiler>{zodiac_tip}</tg-spoiler>\n\n📅 Следующее обновление — завтра",
             reply_markup=prediction_shown_keyboard(),
         )
     else:
@@ -1400,6 +1413,11 @@ async def cb_prediction(callback: CallbackQuery) -> None:
             "Выбери свой знак зодиака — тогда я смогу открыть предсказание.",
             reply_markup=zodiac_keyboard(),
         )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_ignore")
+async def cb_ignore(callback: CallbackQuery) -> None:
     await callback.answer()
 
 
