@@ -925,7 +925,7 @@ def energy_detail_keyboard() -> InlineKeyboardMarkup:
 
 
 def domain_tabs_keyboard() -> InlineKeyboardMarkup:
-    """4 таба по доменам — основной экран Мой день."""
+    """4 таба по доменам + предсказание — основной экран Мой день."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="🏥 Здоровье", callback_data="cb_domain_health"),
@@ -935,11 +935,12 @@ def domain_tabs_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="❤️ Отношения",  callback_data="cb_domain_love"),
             InlineKeyboardButton(text="🧠 Психология", callback_data="cb_domain_psych"),
         ],
+        [InlineKeyboardButton(text="🥠 Предсказание дня", callback_data="cb_prediction")],
     ])
 
 
 def domain_detail_keyboard() -> InlineKeyboardMarkup:
-    """Кнопки под раскрытым доменом — переключатель + назад + предсказание."""
+    """Кнопки под раскрытым доменом — переключатель + назад."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="🏥", callback_data="cb_domain_health"),
@@ -948,7 +949,6 @@ def domain_detail_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="🧠", callback_data="cb_domain_psych"),
         ],
         [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
-        [InlineKeyboardButton(text="🥠 Открыть личное предсказание →", callback_data="cb_prediction")],
     ])
 
 
@@ -1212,19 +1212,13 @@ async def handle_today(message: Message) -> None:
 def _my_day_text() -> tuple[str, InlineKeyboardMarkup]:
     day = get_daily_energy()
 
-    aspect_line = ""
-    if day.get("aspects"):
-        a = day["aspects"][0]
-        aspect_line = f"\n· ✨ {a['label']}: {a['hint']}"
-
     text = (
         f"✨ <b>Мой день</b>\n\n"
         f"{day['intro']}\n\n"
         f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}° · {day['lunar_day']} лунный день\n"
         f"· 🕯 {day['lunar_day_symbol']}\n\n"
         f"{day['lunar_day_energy']}\n\n"
-        f"💫 <b>Практика дня:</b>\n{day['lunar_day_practice']}"
-        f"{aspect_line}\n\n"
+        f"💫 <b>Практика дня:</b>\n{day['lunar_day_practice']}\n\n"
         f"Выбери, что важно сегодня:"
     )
     return text, domain_tabs_keyboard()
