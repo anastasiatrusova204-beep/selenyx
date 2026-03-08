@@ -8,7 +8,7 @@
 import asyncio
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -20,6 +20,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from aiogram.types import (
     BotCommand,
     CallbackQuery,
@@ -60,7 +61,8 @@ if not BOT_TOKEN:
 # ─── Timezone & Locale ────────────────────────────────────────────────────────
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
-DB_PATH = os.path.join(os.path.dirname(__file__), "selenyx.db")
+_DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
+DB_PATH = os.path.join(_DATA_DIR, "selenyx.db")
 
 MONTHS_RU = [
     "января", "февраля", "марта", "апреля", "мая", "июня",
@@ -245,6 +247,68 @@ MOON_ASPECT_HINTS: dict = {
     ("jupiter", "квадрат"):    "риск переоценить силы — проверяйте детали перед решениями",
     ("jupiter", "оппозиция"):  "избыток оптимизма — сверяйтесь с реальностью",
 }
+
+# ─── Нумерология дня ──────────────────────────────────────────────────────────
+
+NUMEROLOGY_DAY: dict = {
+    1: "День силы и инициативы. Хорошо начинать новое, принимать решения, действовать первым.",
+    2: "День партнёрства и баланса. Прислушивайся к другим, ищи компромисс — он сработает.",
+    3: "День творчества и общения. Идеи приходят легко — фиксируй и делись.",
+    4: "День структуры и труда. То, что построишь сегодня с усердием, останется надолго.",
+    5: "День перемен и свободы. Держись гибко — неожиданное сегодня к лучшему.",
+    6: "День заботы и гармонии. Хорошее время для близких, дома и восстановления сил.",
+    7: "День анализа и глубины. Не торопись — сегодня важнее понять, чем сделать.",
+    8: "День силы и результата. Деловые переговоры, карьерные шаги — всё это в фокусе.",
+    9: "День завершения и отпускания. Закрывай незаконченное — цикл подходит к концу.",
+}
+
+
+def get_day_number(dt: "datetime") -> int:
+    """Нумерологическое число дня: сумма цифр даты до однозначного (1–9)."""
+    total = dt.day + dt.month + dt.year
+    while total > 9:
+        total = sum(int(d) for d in str(total))
+    return total
+
+
+# ─── Цвет дня ─────────────────────────────────────────────────────────────────
+
+# Цвет по дню недели (планета-управитель)
+_WEEKDAY_COLORS = [
+    ("белый или серебристый",      "Луна усиливает интуицию и внутренний покой"),       # пн
+    ("красный или терракотовый",   "Марс добавляет уверенности и решимости"),           # вт
+    ("жёлтый или лимонный",        "Меркурий обостряет ум и коммуникацию"),             # ср
+    ("синий или индиго",           "Юпитер расширяет горизонты и притягивает удачу"),   # чт
+    ("зелёный или розовый",        "Венера притягивает гармонию и красоту"),            # пт
+    ("тёмно-серый или сливовый",   "Сатурн усиливает концентрацию и дисциплину"),       # сб
+    ("золотой или оранжевый",      "Солнце заряжает жизненной силой и уверенностью"),   # вс
+]
+
+# Акцент по знаку Луны
+_MOON_SIGN_COLOR_HINT = {
+    "Овен":      "алый или коралловый акцент добавит решимости",
+    "Телец":     "пыльно-розовый или бежевый будет в гармонии с Тельцом",
+    "Близнецы":  "светлые тона и принты — твоя стихия сегодня",
+    "Рак":       "перламутровый или жемчужный усилит лунную энергию",
+    "Лев":       "золотые детали подчеркнут харизму дня",
+    "Дева":      "оливковый или хаки поддержит практичность Девы",
+    "Весы":      "мятный или пастельный розовый — идеальный баланс",
+    "Скорпион":  "тёмные тона усиливают глубину и магнетизм дня",
+    "Стрелец":   "фиолетовый акцент расширит горизонт возможностей",
+    "Козерог":   "классика — тёмно-коричневый или чёрный — даёт силу",
+    "Водолей":   "нестандартный акцентный цвет — электрик, морской волны",
+    "Рыбы":      "морская волна или сиреневый — в потоке дня",
+}
+
+
+def get_day_color() -> dict:
+    """Цвет дня: основной по планете дня + акцент по знаку Луны."""
+    now = datetime.now(tz=MOSCOW_TZ)
+    color, reason = _WEEKDAY_COLORS[now.weekday()]
+    moon = get_moon_data()
+    hint = _MOON_SIGN_COLOR_HINT.get(moon["sign_nom"], "")
+    return {"color": color, "reason": reason, "hint": hint, "sign_nom": moon["sign_nom"]}
+
 
 _PLANET_NAMES_RU = {
     "venus": "Венера", "mars": "Марс", "saturn": "Сатурн",
@@ -849,6 +913,17 @@ async def init_db() -> None:
             )
         """)
         await db.commit()
+        # Миграция: добавить колонки streak если их ещё нет
+        for col, definition in [
+            ("last_visit",   "TEXT"),
+            ("streak",       "INTEGER DEFAULT 0"),
+            ("notify_time",  "TEXT"),
+        ]:
+            try:
+                await db.execute(f"ALTER TABLE users ADD COLUMN {col} {definition}")
+                await db.commit()
+            except Exception:
+                pass  # Колонка уже существует
 
 
 async def get_user(user_id: int) -> Optional[dict]:
@@ -885,6 +960,50 @@ async def get_user_count() -> int:
             return row[0] if row else 0
 
 
+async def update_streak(user_id: int) -> int:
+    """Обновляет streak и возвращает актуальное значение."""
+    today     = datetime.now(tz=MOSCOW_TZ).date().isoformat()
+    yesterday = (datetime.now(tz=MOSCOW_TZ).date() - timedelta(days=1)).isoformat()
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT last_visit, streak FROM users WHERE user_id = ?", (user_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+        if not row:
+            return 0
+        last_visit = row["last_visit"]
+        streak = row["streak"] or 0
+        if last_visit == today:
+            return streak  # Уже открывали сегодня
+        new_streak = (streak + 1) if last_visit == yesterday else 1
+        await db.execute(
+            "UPDATE users SET last_visit = ?, streak = ? WHERE user_id = ?",
+            (today, new_streak, user_id),
+        )
+        await db.commit()
+        return new_streak
+
+
+async def save_notify_time(user_id: int, time_str: Optional[str]) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "UPDATE users SET notify_time = ? WHERE user_id = ?",
+            (time_str, user_id)
+        )
+        await db.commit()
+
+
+async def get_users_with_notify(time_str: str) -> list[dict]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM users WHERE notify_time = ?", (time_str,)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+
 # ─── Keyboards ────────────────────────────────────────────────────────────────
 
 
@@ -892,6 +1011,7 @@ def main_menu() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="✨ Мой день")],
+            [KeyboardButton(text="📅 Календарь"), KeyboardButton(text="🔔 Уведомления")],
             [KeyboardButton(text="✏️ Сменить знак")],
             [KeyboardButton(text="ℹ️ О боте")],
         ],
@@ -925,7 +1045,7 @@ def energy_detail_keyboard() -> InlineKeyboardMarkup:
 
 
 def domain_tabs_keyboard() -> InlineKeyboardMarkup:
-    """4 таба по доменам + предсказание — основной экран Мой день."""
+    """5 табов: 4 домена + цвет + предсказание — основной экран Мой день."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="🏥 Здоровье", callback_data="cb_domain_health"),
@@ -934,6 +1054,10 @@ def domain_tabs_keyboard() -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(text="❤️ Отношения",  callback_data="cb_domain_love"),
             InlineKeyboardButton(text="🧠 Психология", callback_data="cb_domain_psych"),
+        ],
+        [
+            InlineKeyboardButton(text="🎨 Цвет дня",    callback_data="cb_domain_color"),
+            InlineKeyboardButton(text="🌙 Лунный день", callback_data="cb_domain_day"),
         ],
         [InlineKeyboardButton(text="🥠 Предсказание дня", callback_data="cb_prediction")],
     ])
@@ -950,6 +1074,10 @@ def prediction_shown_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="❤️ Отношения",  callback_data="cb_domain_love"),
             InlineKeyboardButton(text="🧠 Психология", callback_data="cb_domain_psych"),
         ],
+        [
+            InlineKeyboardButton(text="🎨 Цвет дня",    callback_data="cb_domain_color"),
+            InlineKeyboardButton(text="🌙 Лунный день", callback_data="cb_domain_day"),
+        ],
         [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
     ])
 
@@ -965,8 +1093,30 @@ def domain_detail_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="❤️ Отношения", callback_data="cb_domain_love"),
             InlineKeyboardButton(text="🧠 Психология", callback_data="cb_domain_psych"),
         ],
+        [
+            InlineKeyboardButton(text="🎨 Цвет дня",    callback_data="cb_domain_color"),
+            InlineKeyboardButton(text="🌙 Лунный день", callback_data="cb_domain_day"),
+        ],
         [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
     ])
+
+
+def notify_keyboard(current: Optional[str] = None) -> InlineKeyboardMarkup:
+    times = ["07:00", "08:00", "09:00", "10:00", "11:00"]
+    rows, row = [], []
+    for t in times:
+        label = f"✅ {t}" if t == current else t
+        row.append(InlineKeyboardButton(text=label, callback_data=f"notify:{t}"))
+        if len(row) == 3:
+            rows.append(row)
+            row = []
+    if row:
+        rows.append(row)
+    rows.append([InlineKeyboardButton(
+        text="🔕 Отключить" if current else "— Отключено",
+        callback_data="notify:off",
+    )])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def zodiac_keyboard() -> InlineKeyboardMarkup:
@@ -1017,6 +1167,7 @@ def get_moon_data() -> dict:
     lunar_day = min(int(angle / 12.19) + 1, 30)
     lunar_day_info = LUNAR_DAYS.get(lunar_day, {})
     aspects = _compute_moon_aspects(subject)
+    day_number = get_day_number(now)
 
     return {
         "sign_key":           sign_key,
@@ -1032,6 +1183,8 @@ def get_moon_data() -> dict:
         "lunar_day_energy":   lunar_day_info.get("energy", ""),
         "lunar_day_practice": lunar_day_info.get("practice", ""),
         "aspects":            aspects,
+        "day_number":         day_number,
+        "day_number_text":    NUMEROLOGY_DAY.get(day_number, ""),
     }
 
 
@@ -1039,6 +1192,52 @@ def get_daily_energy() -> dict:
     moon = get_moon_data()
     energy = PHASE_ENERGY.get(moon["phase_name"], PHASE_ENERGY["Растущая Луна"])
     return {**moon, **energy}
+
+
+def _moon_for_date(dt: datetime) -> dict:
+    """Фаза и знак Луны для конкретной даты (полдень МСК, без аспектов)."""
+    logging.getLogger("root").setLevel(logging.ERROR)
+    subject = AstrologicalSubject(
+        "Cal", dt.year, dt.month, dt.day, 12, 0, "Moscow", "RU",
+    )
+    logging.getLogger("root").setLevel(logging.INFO)
+    sign_key = subject.moon.sign
+    moon_lon = subject.moon.abs_pos
+    sun_lon  = subject.sun.abs_pos
+    angle    = (moon_lon - sun_lon) % 360
+    emoji, phase_name = "🌙", "Растущая Луна"
+    for threshold, em, name, _ in PHASES:
+        if angle < threshold:
+            emoji, phase_name = em, name
+            break
+    lunar_day = min(int(angle / 12.19) + 1, 30)
+    return {
+        "sign_nom":   SIGNS_RU_NOM.get(sign_key, sign_key),
+        "phase_emoji": emoji,
+        "phase_name":  phase_name,
+        "lunar_day":   lunar_day,
+    }
+
+
+_KEY_PHASES = {"Новолуние", "Первая четверть", "Полнолуние", "Последняя четверть"}
+_MONTHS_GEN = ["янв", "фев", "мар", "апр", "май", "июн",
+               "июл", "авг", "сен", "окт", "ноя", "дек"]
+_WDAYS_SHORT = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"]
+
+
+def get_monthly_calendar() -> str:
+    """Возвращает готовый текст лунного календаря на 30 дней."""
+    now = datetime.now(tz=MOSCOW_TZ)
+    month_name = MONTHS_RU[now.month - 1]
+    lines = [f"📅 <b>Лунный календарь — {month_name} {now.year}</b>\n"]
+    for i in range(30):
+        dt = now + timedelta(days=i)
+        m  = _moon_for_date(dt)
+        day_str  = f"{dt.day:2d} {_MONTHS_GEN[dt.month - 1]}, {_WDAYS_SHORT[dt.weekday()]}"
+        is_key   = m["phase_name"] in _KEY_PHASES
+        line     = f"{day_str}  {m['phase_emoji']} {m['phase_name']} · {m['sign_nom']}"
+        lines.append(f"<b>{line}</b>" if is_key else line)
+    return "\n".join(lines)
 
 
 def _compute_moon_aspects(subject) -> list[dict]:
@@ -1069,6 +1268,42 @@ def get_zodiac_extras(zodiac_key: str, phase_name: str) -> dict:
     return ZODIAC_PHASE_EXTRAS.get(zodiac_key, {}).get(phase_name, {})
 
 
+async def send_daily_notifications(bot: Bot) -> None:
+    now = datetime.now(tz=MOSCOW_TZ)
+    time_str = now.strftime("%H:%M")
+    users = await get_users_with_notify(time_str)
+    if not users:
+        return
+    day = get_daily_energy()
+    dc = get_day_color()
+    for user in users:
+        try:
+            name = user.get("first_name") or "друг"
+            streak = await update_streak(user["user_id"])
+            streak_line = f" · 🔥 {streak} дн подряд" if streak > 1 else ""
+            color_line = f"· 🎨 {dc['color']}"
+            if dc["hint"]:
+                color_line += f" — {dc['hint']}"
+            text = (
+                f"🌙 <b>Доброе утро, {name}!</b>{streak_line}\n\n"
+                f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}°"
+                f" · {day['lunar_day']} лунный день\n"
+                f"· 🔢 Число дня: {day['day_number']}\n"
+                f"{color_line}\n\n"
+                f"⚡ <b>Энергия дня:</b>\n{day['lunar_day_energy']}\n\n"
+                f"💫 {day['lunar_day_practice']}"
+            )
+            await bot.send_message(
+                user["user_id"],
+                text,
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(text="✨ Мой день →", callback_data="cb_energy"),
+                ]]),
+            )
+        except Exception as e:
+            logger.warning(f"Уведомление не доставлено {user['user_id']}: {e}")
+
+
 # ─── Router ───────────────────────────────────────────────────────────────────
 
 router = Router()
@@ -1096,6 +1331,12 @@ async def handle_start(message: Message, state: FSMContext) -> None:
             f"· <b>Луна в</b> {moon['sign_prep']} · {moon['lunar_day']} лунный день\n"
             f"· <b>Твой знак:</b> {sign_label}",
             reply_markup=main_menu(),
+        )
+        await message.answer(
+            "Смотрим сегодняшний день?",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="✨ Мой день →", callback_data="cb_energy"),
+            ]]),
         )
     else:
         await message.answer(
@@ -1144,11 +1385,14 @@ async def handle_zodiac_choice(callback: CallbackQuery, state: FSMContext) -> No
         await callback.message.answer(
             f"Твоя небесная карта открыта, {name}.\n\n"
             f"Каждый день — новый слой: энергия дня, положение Луны "
-            f"и личное предсказание только для {sign_label}.\n\n"
-            "А впереди — ещё глубже: натальная карта и персональные прогнозы. "
-            "Всё это будет здесь.\n\n"
-            "Начнём?",
+            f"и личное предсказание только для {sign_label}.",
             reply_markup=main_menu(),
+        )
+        await callback.message.answer(
+            "Смотрим первый день?",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="✨ Мой день →", callback_data="cb_energy"),
+            ]]),
         )
     else:
         await callback.message.answer(
@@ -1171,8 +1415,6 @@ async def handle_help(message: Message) -> None:
         "· <b>ℹ️ О боте</b> — что такое Selenyx\n\n"
         "<b>Команды:</b>\n"
         "· /start — начать заново\n"
-        "· /today — мой день\n"
-        "· /moon — положение Луны\n"
         "· /help — это сообщение"
     )
 
@@ -1237,15 +1479,15 @@ async def handle_today(message: Message) -> None:
 # ─── ✨ Мой день ──────────────────────────────────────────────────────────────
 
 
-def _my_day_text() -> tuple[str, InlineKeyboardMarkup]:
+def _my_day_text(streak: int = 0) -> tuple[str, InlineKeyboardMarkup]:
     day = get_daily_energy()
+    streak_line = f" · 🔥 {streak} дн подряд" if streak > 1 else ""
 
     text = (
-        f"✨ <b>Мой день</b>\n\n"
+        f"✨ <b>Мой день</b>{streak_line}\n\n"
         f"{day['intro']}\n\n"
-        f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}° · {day['lunar_day']} лунный день\n"
-        f"· 🕯 Символ дня: {day['lunar_day_symbol']}\n\n"
-        f"{day['lunar_day_energy']}\n\n"
+        f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}° · {day['lunar_day']} лунный день\n\n"
+        f"⚡ <b>Энергия дня:</b>\n{day['lunar_day_energy']}\n\n"
         f"💫 <b>Практика дня:</b>\n{day['lunar_day_practice']}\n\n"
         f"Выбери, что важно сегодня:"
     )
@@ -1255,7 +1497,8 @@ def _my_day_text() -> tuple[str, InlineKeyboardMarkup]:
 @router.message(F.text == "✨ Мой день")
 async def menu_my_day(message: Message) -> None:
     await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
-    text, markup = _my_day_text()
+    streak = await update_streak(message.from_user.id)
+    text, markup = _my_day_text(streak)
     await message.answer(text, reply_markup=markup)
 
 
@@ -1341,6 +1584,7 @@ async def _show_domain(
     domain_name: str,
 ) -> None:
     """Общая логика для всех 4 доменов."""
+    await callback.bot.send_chat_action(callback.message.chat.id, ChatAction.TYPING)
     day = get_daily_energy()
     sign_key   = day["sign_key"]
     phase_name = day["phase_name"]
@@ -1390,6 +1634,62 @@ async def cb_domain_love(callback: CallbackQuery) -> None:
 @router.callback_query(F.data == "cb_domain_psych")
 async def cb_domain_psych(callback: CallbackQuery) -> None:
     await _show_domain(callback, "psych", "🧠", "Психология")
+
+
+@router.callback_query(F.data == "cb_domain_day")
+async def cb_domain_day(callback: CallbackQuery) -> None:
+    await callback.bot.send_chat_action(callback.message.chat.id, ChatAction.TYPING)
+    day = get_daily_energy()
+    dc  = get_day_color()
+
+    symbol = day["lunar_day_symbol"]
+    parts  = [p.strip() for p in symbol.split("/")]
+    symbol_line = " и ".join(parts) if len(parts) > 1 else symbol
+
+    text = (
+        f"🌙 <b>Лунный день — простым языком</b>\n\n"
+        f"<b>Сегодня {day['lunar_day']} лунный день</b>\n"
+        f"Луна прошла {day['lunar_day']} из 30 дней своего цикла.\n\n"
+        f"🕯 <b>Символ: {symbol}</b>\n"
+        f"{symbol_line} — это метафора сегодняшней энергии. "
+        f"Не буквальный образ, а подсказка: как воспринимать день и на что настроиться.\n\n"
+        f"<b>Что это значит сегодня:</b>\n"
+        f"{day['lunar_day_energy']}\n\n"
+        f"<b>Что делать с этим:</b>\n"
+        f"{day['lunar_day_practice']}\n\n"
+        f"🔢 <b>Число дня: {day['day_number']}</b>\n"
+        f"Нумерология складывает цифры сегодняшней даты в одно число (1–9) — "
+        f"каждое число описывает общий ритм дня для всех.\n"
+        f"{day['day_number_text']}"
+    )
+    await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_domain_color")
+async def cb_domain_color(callback: CallbackQuery) -> None:
+    await callback.bot.send_chat_action(callback.message.chat.id, ChatAction.TYPING)
+    dc = get_day_color()
+    weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    planets  = ["Луна", "Марс", "Меркурий", "Юпитер", "Венера", "Сатурн", "Солнце"]
+    now      = datetime.now(tz=MOSCOW_TZ)
+    weekday_name = weekdays[now.weekday()]
+    planet_name  = planets[now.weekday()]
+
+    text = (
+        f"🎨 <b>Цвет дня</b>\n\n"
+        f"<b>{weekday_name} — день {planet_name}а</b>\n"
+        f"Основной цвет: <b>{dc['color']}</b>\n"
+        f"{dc['reason']}\n\n"
+        f"🌙 <b>Луна в {dc['sign_nom']}</b>\n"
+        f"{dc['hint']}\n\n"
+        f"<b>Как использовать:</b>\n"
+        f"· Одежда или аксессуар в основном цвете\n"
+        f"· Даже один элемент — шарф, серьги, сумка — работает\n"
+        f"· Акцент по знаку Луны усиливает эффект"
+    )
+    await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
+    await callback.answer()
 
 
 # ─── Fortune cookie ───────────────────────────────────────────────────────────
@@ -1447,8 +1747,72 @@ async def menu_about(message: Message) -> None:
         "Расчёты на основе Swiss Ephemeris — той же системы, "
         "что используют профессиональные астрологи.\n\n"
         "Selenyx не предсказывает будущее.\n"
-        "Он помогает лучше понять сегодняшний день."
+        "Он помогает лучше понять сегодняшний день.\n\n"
+        "💬 Вопросы и предложения: @Selenyx_mybot",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="✏️ Сменить знак", callback_data="cb_show_zodiac"),
+        ]]),
     )
+
+
+@router.callback_query(F.data == "cb_show_zodiac")
+async def cb_show_zodiac(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(UserState.choosing_sign)
+    await callback.message.answer("Выбери свой знак зодиака:", reply_markup=zodiac_keyboard())
+    await callback.answer()
+
+
+# ─── Лунный календарь ────────────────────────────────────────────────────────
+
+
+@router.message(F.text == "📅 Календарь")
+async def menu_calendar(message: Message) -> None:
+    await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+    text = get_monthly_calendar()
+    await message.answer(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="✨ Мой день →", callback_data="cb_energy"),
+        ]]),
+    )
+
+
+# ─── Уведомления ─────────────────────────────────────────────────────────────
+
+
+@router.message(F.text == "🔔 Уведомления")
+async def menu_notifications(message: Message) -> None:
+    user = await get_user(message.from_user.id)
+    current = user.get("notify_time") if user else None
+    status = (
+        f"Сейчас: уведомление в <b>{current}</b> по Москве"
+        if current else "Сейчас: уведомления отключены"
+    )
+    await message.answer(
+        f"🔔 <b>Утреннее уведомление</b>\n\n{status}\n\n"
+        "Выбери время — каждое утро буду присылать энергию дня:",
+        reply_markup=notify_keyboard(current),
+    )
+
+
+@router.callback_query(F.data.startswith("notify:"))
+async def cb_notify(callback: CallbackQuery) -> None:
+    time_val = callback.data[7:]
+    if time_val == "off":
+        await save_notify_time(callback.from_user.id, None)
+        await callback.message.edit_text(
+            "🔔 <b>Утреннее уведомление</b>\n\nУведомления отключены.",
+            reply_markup=notify_keyboard(None),
+        )
+        await callback.answer("Уведомления отключены")
+    else:
+        await save_notify_time(callback.from_user.id, time_val)
+        await callback.message.edit_text(
+            f"🔔 <b>Утреннее уведомление</b>\n\n"
+            f"Готово — каждое утро в <b>{time_val}</b> по Москве буду присылать прогноз.",
+            reply_markup=notify_keyboard(time_val),
+        )
+        await callback.answer(f"✅ {time_val}")
 
 
 # ─── /admin ───────────────────────────────────────────────────────────────────
@@ -1513,7 +1877,9 @@ async def handle_broadcast(message: Message) -> None:
 @router.message()
 async def handle_unknown(message: Message) -> None:
     await message.answer(
-        "Не понял команду. Воспользуйся кнопками меню или напиши /help."
+        "Кажется, я не понял это сообщение 🌙\n\n"
+        "Пользуйся кнопками меню — там всё нужное.",
+        reply_markup=main_menu(),
     )
 
 
@@ -1528,13 +1894,15 @@ async def main() -> None:
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
+    scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+    scheduler.add_job(send_daily_notifications, "cron", minute="*", args=[bot])
+    scheduler.start()
+
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
 
     await bot.set_my_commands([
         BotCommand(command="start",     description="Начать / вернуться в главное меню"),
-        BotCommand(command="today",     description="Энергия дня"),
-        BotCommand(command="moon",      description="Положение Луны"),
         BotCommand(command="help",      description="Что умеет бот"),
     ])
 
