@@ -1288,6 +1288,23 @@ _DOMAIN_PLANETS: dict = {
     "psych":  ["saturn", "jupiter"],
 }
 
+# Основная планета домена (для подписи когда нет активного аспекта)
+_DOMAIN_PRIMARY_PLANET: dict = {
+    "health": "mars",
+    "work":   "mercury",
+    "love":   "venus",
+    "psych":  "saturn",
+}
+
+# Нейтральный фон планеты — показывается когда нет активного аспекта
+_PLANET_NEUTRAL: dict = {
+    "mars":    "спокойная энергия — без резких подъёмов и спадов",
+    "mercury": "обычный фон для общения и дел",
+    "venus":   "нейтральный фон — хорошее время для спокойного контакта",
+    "saturn":  "ровный день без давления и ограничений",
+    "jupiter": "без ярких возможностей, но и без препятствий",
+}
+
 
 async def _show_domain(
     callback: CallbackQuery,
@@ -1307,10 +1324,15 @@ async def _show_domain(
 
     relevant = _DOMAIN_PLANETS.get(domain_key, [])
     domain_aspects = [a for a in day.get("aspects", []) if a["planet_key"] in relevant]
-    aspect_line = (
-        f"\n\n· ✨ {domain_aspects[0]['label']}: {domain_aspects[0]['hint']}"
-        if domain_aspects else ""
-    )
+
+    if domain_aspects:
+        a = domain_aspects[0]
+        aspect_line = f"\n\n· ✨ {a['label']}: {a['hint']}"
+    else:
+        primary = _DOMAIN_PRIMARY_PLANET.get(domain_key, "venus")
+        label   = _PLANET_NAMES_RU.get(primary, primary)
+        neutral = _PLANET_NEUTRAL.get(primary, "")
+        aspect_line = f"\n\n· 💫 {label}: {neutral}"
 
     text = (
         f"{domain_emoji} <b>{domain_name}</b>\n\n"
