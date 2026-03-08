@@ -939,6 +939,21 @@ def domain_tabs_keyboard() -> InlineKeyboardMarkup:
     ])
 
 
+def prediction_shown_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура после раскрытия предсказания — табы + назад."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="🏥 Здоровье", callback_data="cb_domain_health"),
+            InlineKeyboardButton(text="💼 Работа",   callback_data="cb_domain_work"),
+        ],
+        [
+            InlineKeyboardButton(text="❤️ Отношения",  callback_data="cb_domain_love"),
+            InlineKeyboardButton(text="🧠 Психология", callback_data="cb_domain_psych"),
+        ],
+        [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
+    ])
+
+
 def domain_detail_keyboard() -> InlineKeyboardMarkup:
     """Кнопки под раскрытым доменом — переключатель + назад."""
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -1378,7 +1393,7 @@ async def cb_prediction(callback: CallbackQuery) -> None:
         original = callback.message.html_text
         await callback.message.edit_text(
             original + f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n<tg-spoiler>{zodiac_tip}</tg-spoiler>",
-            reply_markup=None,
+            reply_markup=prediction_shown_keyboard(),
         )
     else:
         await callback.message.answer(
