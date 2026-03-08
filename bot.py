@@ -8,6 +8,7 @@
 import asyncio
 import logging
 import os
+import re
 from datetime import datetime, timedelta
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -133,6 +134,57 @@ SIGN_MEANING = {
     "Aqu": "Время для инноваций, общения и нестандартных решений.",
     "Pis": "День для интуиции, творчества и мечтаний.",
 }
+
+# ─── Натальная карта — описания планет в знаках ───────────────────────────────
+
+SUN_SIGN_DESC: dict = {
+    "Ari": "Прирождённый лидер с яркой энергией. Начинаешь быстро, заряжаешь других энтузиазмом — сила в действии и смелости.",
+    "Tau": "Надёжный, чувственный, ценящий стабильность. Умеешь создавать красоту и уют вокруг себя.",
+    "Gem": "Любопытный, гибкий, общительный. Легко схватываешь новое и умеешь говорить с любым человеком.",
+    "Can": "Глубоко чувствующий и интуитивный. Дом и близкие — твоя главная сила и главный приоритет.",
+    "Leo": "Яркий, творческий, харизматичный. Рождён вдохновлять — люди тянутся к твоей уверенности и теплу.",
+    "Vir": "Внимательный к деталям, аналитичный, практичный. Умеешь видеть то, что другие пропускают.",
+    "Lib": "Ценишь гармонию, красоту и справедливость. Прирождённый дипломат — умеешь находить баланс.",
+    "Sco": "Интенсивный, глубокий, проницательный. Видишь суть там, где другие видят только поверхность.",
+    "Sag": "Оптимистичный, свободолюбивый, ищущий смысл. Тебе нужны горизонты — и ты умеешь их находить.",
+    "Cap": "Целеустремлённый, дисциплинированный, серьёзный. Умеешь строить долгосрочное и достигать целей.",
+    "Aqu": "Независимый, нестандартный, думающий о будущем. Видишь то, что другие ещё не замечают.",
+    "Pis": "Чуткий, интуитивный, творческий. Чувствуешь невидимые связи и живёшь глубже, чем кажется.",
+}
+
+MOON_SIGN_DESC: dict = {
+    "Ari": "Эмоции яркие и быстрые — вспыхиваешь и так же быстро отпускаешь. Нужны свобода и движение вперёд.",
+    "Tau": "Стабильность и комфорт — главные эмоциональные потребности. Медленно разогреваешься, но верность — надолго.",
+    "Gem": "Мысли и чувства переплетены. Нужно говорить о том, что чувствуешь — иначе внутренний хаос.",
+    "Can": "Очень сильные чувства и острая интуиция. Глубоко привязываешься и остро нуждаешься в безопасности.",
+    "Leo": "Эмоции яркие и открытые. Тебе нужно признание и тепло — и ты отдаёшь их с той же щедростью.",
+    "Vir": "Переживания уходят внутрь. Анализируешь свои чувства — иногда бываешь слишком критичен к себе.",
+    "Lib": "Ищешь гармонию в отношениях — конфликты даются тяжело. Нужны партнёрство и взаимность.",
+    "Sco": "Эмоции глубокие и интенсивные. Чувствуешь людей насквозь — и сам нуждаешься в глубокой связи.",
+    "Sag": "Эмоции лёгкие и оптимистичные. Нужны свобода и смысл — в отношениях ценишь честность.",
+    "Cap": "Сдержан в проявлении чувств, но глубоко надёжен. Показываешь заботу делами, не словами.",
+    "Aqu": "Эмоции рациональные, нужна дистанция. Ценишь людей, которые принимают твою уникальность.",
+    "Pis": "Очень тонкая эмоциональная настройка — буквально чувствуешь настроение других. Граница с миром размыта.",
+}
+
+ASC_SIGN_DESC: dict = {
+    "Ari": "Производишь впечатление энергичного, прямого, уверенного — человека, который знает чего хочет.",
+    "Tau": "Окружающие видят тебя спокойным, надёжным, приятным. Внушаешь доверие с первого взгляда.",
+    "Gem": "Выглядишь лёгким, общительным, любопытным. Легко знакомишься — разговор идёт сам собой.",
+    "Can": "Тёплый, заботливый, располагающий — люди сразу чувствуют, что ты внимателен к ним.",
+    "Leo": "Яркий, заметный, уверенный — входишь в комнату, и это чувствуется.",
+    "Vir": "Производишь впечатление собранного, аккуратного, компетентного человека.",
+    "Lib": "Элегантный, мягкий, приятный в общении — умеешь расположить к себе без усилий.",
+    "Sco": "Загадочный, глубокий, интенсивный. Люди чувствуют твою силу ещё до того, как ты скажешь слово.",
+    "Sag": "Открытый, оптимистичный, дружелюбный. С тобой легко и хочется говорить о большом.",
+    "Cap": "Серьёзный, надёжный, профессиональный. Внушаешь уважение с первого впечатления.",
+    "Aqu": "Необычный, независимый, оригинальный — таких как ты сложно перепутать с другими.",
+    "Pis": "Мягкий, загадочный, чуткий. Люди чувствуют твою эмпатию — и тянутся к тебе.",
+}
+
+_DATE_RE = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$")
+_TIME_RE = re.compile(r"^(\d{1,2}):(\d{2})$")
+
 
 PHASE_ENERGY: dict = {
     "Новолуние": {
@@ -262,12 +314,54 @@ NUMEROLOGY_DAY: dict = {
     9: "День завершения и отпускания. Закрывай незаконченное — цикл подходит к концу.",
 }
 
+NUMEROLOGY_LIFE_PATH: dict = {
+    1: "Лидер и первопроходец. Твой путь — самостоятельность, инициатива и умение прокладывать новые дороги.",
+    2: "Дипломат и партнёр. Твой путь — сотрудничество, чуткость к людям и умение находить баланс.",
+    3: "Творец и коммуникатор. Твой путь — самовыражение, радость жизни и вдохновение других.",
+    4: "Строитель и практик. Твой путь — надёжность, упорство и создание прочной основы.",
+    5: "Искатель и путешественник. Твой путь — свобода, перемены и умение адаптироваться к новому.",
+    6: "Опекун и наставник. Твой путь — забота, ответственность и создание гармонии вокруг.",
+    7: "Мыслитель и исследователь. Твой путь — глубина, духовность и поиск истины.",
+    8: "Организатор и достиженец. Твой путь — реализация амбиций, власть и материальное мастерство.",
+    9: "Гуманист и мудрец. Твой путь — служение, мудрость и умение отпускать.",
+}
+
+NUMEROLOGY_PERSONAL_YEAR: dict = {
+    1: "Год новых начал. Самое время запускать проекты, менять курс и делать первый шаг.",
+    2: "Год терпения и союзов. Отношения и партнёрства выходят на первый план — слушай и строй связи.",
+    3: "Год роста и самовыражения. Твои идеи ищут выход — делись ими с миром.",
+    4: "Год труда и фундамента. Заложи основу сейчас — результат придёт позже.",
+    5: "Год перемен и свободы. Будь гибким — судьба принесёт неожиданные повороты.",
+    6: "Год ответственности и заботы. Дом, семья и близкие — в приоритете.",
+    7: "Год внутренней работы. Анализируй, учись, ищи глубину — не время для спешки.",
+    8: "Год силы и результата. Твои усилия прошлых лет дают плоды — действуй уверенно.",
+    9: "Год завершения цикла. Отпускай лишнее и готовься к новому витку жизни.",
+}
+
 
 def get_day_number(dt: "datetime") -> int:
     """Нумерологическое число дня: сумма цифр даты до однозначного (1–9)."""
     total = dt.day + dt.month + dt.year
     while total > 9:
         total = sum(int(d) for d in str(total))
+    return total
+
+
+def get_life_path_number(birth_date: str) -> int:
+    """Число судьбы: сумма цифр даты рождения до однозначного (1–9)."""
+    d, m, y = (int(x) for x in birth_date.split("."))
+    total = d + m + y
+    while total > 9:
+        total = sum(int(dig) for dig in str(total))
+    return total
+
+
+def get_personal_year_number(life_path: int, year: int) -> int:
+    """Число личного года = число судьбы + цифры текущего года."""
+    year_sum = sum(int(dig) for dig in str(year))
+    total = life_path + year_sum
+    while total > 9:
+        total = sum(int(dig) for dig in str(total))
     return total
 
 
@@ -895,8 +989,10 @@ PHASE_DOMAIN_CONTEXT: dict = {
 
 
 class UserState(StatesGroup):
-    choosing_sign = State()   # онбординг: ждём выбор знака
-    changing_sign = State()   # смена знака: ждём новый выбор
+    choosing_sign    = State()   # онбординг: ждём выбор знака
+    changing_sign    = State()   # смена знака: ждём новый выбор
+    entering_birth_date = State()  # натальная карта: ждём дату
+    entering_birth_time = State()  # натальная карта: ждём время
 
 
 # ─── Database ─────────────────────────────────────────────────────────────────
@@ -918,6 +1014,8 @@ async def init_db() -> None:
             ("last_visit",   "TEXT"),
             ("streak",       "INTEGER DEFAULT 0"),
             ("notify_time",  "TEXT"),
+            ("birth_date",   "TEXT"),
+            ("birth_time",   "TEXT"),
         ]:
             try:
                 await db.execute(f"ALTER TABLE users ADD COLUMN {col} {definition}")
@@ -1004,6 +1102,15 @@ async def get_users_with_notify(time_str: str) -> list[dict]:
             return [dict(r) for r in rows]
 
 
+async def save_birth_data(user_id: int, birth_date: str, birth_time: Optional[str]) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "UPDATE users SET birth_date = ?, birth_time = ? WHERE user_id = ?",
+            (birth_date, birth_time, user_id),
+        )
+        await db.commit()
+
+
 # ─── Keyboards ────────────────────────────────────────────────────────────────
 
 
@@ -1012,7 +1119,7 @@ def main_menu() -> ReplyKeyboardMarkup:
         keyboard=[
             [KeyboardButton(text="✨ Мой день")],
             [KeyboardButton(text="📅 Календарь"), KeyboardButton(text="🔔 Уведомления")],
-            [KeyboardButton(text="✏️ Сменить знак")],
+            [KeyboardButton(text="🌟 Моя карта"), KeyboardButton(text="✏️ Сменить знак")],
             [KeyboardButton(text="ℹ️ О боте")],
         ],
         resize_keyboard=True,
@@ -1045,7 +1152,7 @@ def energy_detail_keyboard() -> InlineKeyboardMarkup:
 
 
 def domain_tabs_keyboard() -> InlineKeyboardMarkup:
-    """5 табов: 4 домена + цвет + предсказание — основной экран Мой день."""
+    """6 табов: 4 домена + цвет + лунный день + нумерология + предсказание."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="🏥 Здоровье", callback_data="cb_domain_health"),
@@ -1059,6 +1166,7 @@ def domain_tabs_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="🎨 Цвет дня",    callback_data="cb_domain_color"),
             InlineKeyboardButton(text="🌙 Лунный день", callback_data="cb_domain_day"),
         ],
+        [InlineKeyboardButton(text="🔢 Нумерология дня", callback_data="cb_domain_numerology")],
         [InlineKeyboardButton(text="🥠 Предсказание дня", callback_data="cb_prediction")],
     ])
 
@@ -1078,6 +1186,7 @@ def prediction_shown_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="🎨 Цвет дня",    callback_data="cb_domain_color"),
             InlineKeyboardButton(text="🌙 Лунный день", callback_data="cb_domain_day"),
         ],
+        [InlineKeyboardButton(text="🔢 Нумерология дня", callback_data="cb_domain_numerology")],
         [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
     ])
 
@@ -1097,6 +1206,7 @@ def domain_detail_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="🎨 Цвет дня",    callback_data="cb_domain_color"),
             InlineKeyboardButton(text="🌙 Лунный день", callback_data="cb_domain_day"),
         ],
+        [InlineKeyboardButton(text="🔢 Нумерология дня", callback_data="cb_domain_numerology")],
         [InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back")],
     ])
 
@@ -1186,6 +1296,48 @@ def get_moon_data() -> dict:
         "day_number":         day_number,
         "day_number_text":    NUMEROLOGY_DAY.get(day_number, ""),
     }
+
+
+def get_natal_chart(birth_date: str, birth_time: Optional[str] = None) -> dict:
+    """Рассчитывает натальную карту по дате (и времени) рождения."""
+    d, m, y = (int(x) for x in birth_date.split("."))
+    has_time = bool(birth_time)
+    h, mn = (int(x) for x in birth_time.split(":")) if has_time else (12, 0)
+    logging.getLogger("root").setLevel(logging.ERROR)
+    subject = AstrologicalSubject("User", y, m, d, h, mn, "Moscow", "RU")
+    logging.getLogger("root").setLevel(logging.INFO)
+    sun_key  = subject.sun.sign
+    moon_key = subject.moon.sign
+    asc_key  = subject.first_house.sign if has_time else None
+    return {
+        "sun_key":  sun_key,
+        "sun_sign": SIGNS_RU_NOM.get(sun_key, sun_key),
+        "sun_desc": SUN_SIGN_DESC.get(sun_key, ""),
+        "moon_key":  moon_key,
+        "moon_sign": SIGNS_RU_NOM.get(moon_key, moon_key),
+        "moon_desc": MOON_SIGN_DESC.get(moon_key, ""),
+        "asc_key":  asc_key,
+        "asc_sign": SIGNS_RU_NOM.get(asc_key, "") if asc_key else None,
+        "asc_desc": ASC_SIGN_DESC.get(asc_key, "") if asc_key else None,
+        "has_time": has_time,
+    }
+
+
+def _format_natal_text(chart: dict, birth_date: str, birth_time: Optional[str]) -> str:
+    lines = ["🌟 <b>Твоя натальная карта</b>\n"]
+    lines.append(f"☀️ <b>Солнце в {chart['sun_sign']}</b>")
+    lines.append(chart["sun_desc"])
+    lines.append(f"\n🌙 <b>Луна в {chart['moon_sign']}</b>")
+    lines.append(chart["moon_desc"])
+    if chart["asc_sign"]:
+        lines.append(f"\n↑ <b>Асцендент в {chart['asc_sign']}</b>")
+        lines.append(chart["asc_desc"])
+    else:
+        lines.append("\n↑ <b>Асцендент</b> — не рассчитан")
+        lines.append("Чтобы узнать асцендент, нужно точное время рождения.")
+    lines.append(f"\n<i>Дата рождения: {birth_date}"
+                 + (f", {birth_time}" if birth_time else "") + "</i>")
+    return "\n".join(lines)
 
 
 def get_daily_energy() -> dict:
@@ -1656,11 +1808,7 @@ async def cb_domain_day(callback: CallbackQuery) -> None:
         f"<b>Что это значит сегодня:</b>\n"
         f"{day['lunar_day_energy']}\n\n"
         f"<b>Что делать с этим:</b>\n"
-        f"{day['lunar_day_practice']}\n\n"
-        f"🔢 <b>Число дня: {day['day_number']}</b>\n"
-        f"Нумерология складывает цифры сегодняшней даты в одно число (1–9) — "
-        f"каждое число описывает общий ритм дня для всех.\n"
-        f"{day['day_number_text']}"
+        f"{day['lunar_day_practice']}"
     )
     await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
     await callback.answer()
@@ -1688,6 +1836,41 @@ async def cb_domain_color(callback: CallbackQuery) -> None:
         f"· Даже один элемент — шарф, серьги, сумка — работает\n"
         f"· Акцент по знаку Луны усиливает эффект"
     )
+    await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_domain_numerology")
+async def cb_domain_numerology(callback: CallbackQuery) -> None:
+    await callback.bot.send_chat_action(callback.message.chat.id, ChatAction.TYPING)
+    day  = get_daily_energy()
+    now  = datetime.now(tz=MOSCOW_TZ)
+    user = await get_user(callback.from_user.id)
+    birth_date = user.get("birth_date") if user else None
+
+    text = (
+        f"🔢 <b>Нумерология дня</b>\n\n"
+        f"<b>Число дня: {day['day_number']}</b>\n"
+        f"Нумерология складывает цифры сегодняшней даты в одно число — "
+        f"каждое описывает общий ритм дня для всех.\n"
+        f"{day['day_number_text']}"
+    )
+
+    if birth_date:
+        life_path = get_life_path_number(birth_date)
+        personal_year = get_personal_year_number(life_path, now.year)
+        text += (
+            f"\n\n<b>Твоё число судьбы: {life_path}</b>\n"
+            f"{NUMEROLOGY_LIFE_PATH.get(life_path, '')}\n\n"
+            f"<b>Личный год {now.year}: {personal_year}</b>\n"
+            f"{NUMEROLOGY_PERSONAL_YEAR.get(personal_year, '')}"
+        )
+    else:
+        text += (
+            f"\n\n<i>Введи дату рождения в разделе 🌟 Моя карта — "
+            f"и я покажу твоё число судьбы и личный год.</i>"
+        )
+
     await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
     await callback.answer()
 
@@ -1759,6 +1942,118 @@ async def menu_about(message: Message) -> None:
 async def cb_show_zodiac(callback: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(UserState.choosing_sign)
     await callback.message.answer("Выбери свой знак зодиака:", reply_markup=zodiac_keyboard())
+    await callback.answer()
+
+
+# ─── Натальная карта ─────────────────────────────────────────────────────────
+
+
+def _natal_keyboard(has_data: bool) -> InlineKeyboardMarkup:
+    if has_data:
+        return InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="🔄 Обновить данные", callback_data="cb_natal_reset"),
+        ]])
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="⏭ Пропустить время", callback_data="cb_natal_skip_time"),
+    ]])
+
+
+@router.message(F.text == "🌟 Моя карта")
+async def menu_my_chart(message: Message, state: FSMContext) -> None:
+    user = await get_user(message.from_user.id)
+    birth_date = user.get("birth_date") if user else None
+    if birth_date:
+        await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+        birth_time = user.get("birth_time")
+        chart = get_natal_chart(birth_date, birth_time)
+        text = _format_natal_text(chart, birth_date, birth_time)
+        await message.answer(text, reply_markup=_natal_keyboard(has_data=True))
+    else:
+        await state.set_state(UserState.entering_birth_date)
+        await message.answer(
+            "🌟 <b>Натальная карта</b>\n\n"
+            "Введи дату рождения в формате:\n"
+            "<b>ДД.ММ.ГГГГ</b>\n\n"
+            "Например: <code>15.05.1990</code>"
+        )
+
+
+@router.message(UserState.entering_birth_date)
+async def handle_birth_date(message: Message, state: FSMContext) -> None:
+    text = message.text.strip()
+    m = _DATE_RE.match(text)
+    if not m:
+        await message.answer(
+            "Не получилось распознать дату. Попробуй ещё раз в формате:\n"
+            "<b>ДД.ММ.ГГГГ</b> — например: <code>15.05.1990</code>"
+        )
+        return
+    d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if not (1 <= d <= 31 and 1 <= mo <= 12 and 1900 <= y <= 2025):
+        await message.answer("Дата выглядит неправильной. Проверь и попробуй снова.")
+        return
+    birth_date = f"{d:02d}.{mo:02d}.{y}"
+    await state.update_data(birth_date=birth_date)
+    await state.set_state(UserState.entering_birth_time)
+    await message.answer(
+        f"Дата принята: <b>{birth_date}</b> ✓\n\n"
+        "Знаешь точное время рождения?\n"
+        "Введи в формате <b>ЧЧ:ММ</b> — например: <code>14:30</code>\n\n"
+        "Время нужно для расчёта асцендента.\n"
+        "Если не знаешь — нажми кнопку ниже.",
+        reply_markup=_natal_keyboard(has_data=False),
+    )
+
+
+@router.message(UserState.entering_birth_time)
+async def handle_birth_time(message: Message, state: FSMContext) -> None:
+    text = message.text.strip()
+    m = _TIME_RE.match(text)
+    if not m:
+        await message.answer(
+            "Не получилось распознать время. Введи в формате <b>ЧЧ:ММ</b> "
+            "или нажми «Пропустить время».",
+            reply_markup=_natal_keyboard(has_data=False),
+        )
+        return
+    h, mn = int(m.group(1)), int(m.group(2))
+    if not (0 <= h <= 23 and 0 <= mn <= 59):
+        await message.answer("Время выглядит неправильным. Попробуй снова.")
+        return
+    birth_time = f"{h:02d}:{mn:02d}"
+    data = await state.get_data()
+    birth_date = data["birth_date"]
+    await state.clear()
+    await save_birth_data(message.from_user.id, birth_date, birth_time)
+    await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
+    chart = get_natal_chart(birth_date, birth_time)
+    text = _format_natal_text(chart, birth_date, birth_time)
+    await message.answer(text, reply_markup=_natal_keyboard(has_data=True))
+
+
+@router.callback_query(F.data == "cb_natal_skip_time")
+async def cb_natal_skip_time(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    birth_date = data.get("birth_date")
+    if not birth_date:
+        await callback.answer("Сначала введи дату рождения")
+        return
+    await state.clear()
+    await save_birth_data(callback.from_user.id, birth_date, None)
+    await callback.bot.send_chat_action(callback.message.chat.id, ChatAction.TYPING)
+    chart = get_natal_chart(birth_date, None)
+    text = _format_natal_text(chart, birth_date, None)
+    await callback.message.edit_text(text, reply_markup=_natal_keyboard(has_data=True))
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_natal_reset")
+async def cb_natal_reset(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(UserState.entering_birth_date)
+    await callback.message.answer(
+        "Введи новую дату рождения в формате:\n"
+        "<b>ДД.ММ.ГГГГ</b> — например: <code>15.05.1990</code>"
+    )
     await callback.answer()
 
 
