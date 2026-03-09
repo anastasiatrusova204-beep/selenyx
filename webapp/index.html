@@ -456,6 +456,10 @@ document.getElementById('sticker-wrap').addEventListener('click', () => {
 });
 
 // ── Card click ─────────────────────────────────────────────────
+// sendData работает только при открытии через keyboard-кнопку.
+// При открытии через menu-button используем deep link + close().
+const BOT_USERNAME = 'Selenyx_mybot';
+
 document.querySelectorAll('.card').forEach(card => {
   card.addEventListener('click', () => {
     haptic('light');
@@ -465,12 +469,15 @@ document.querySelectorAll('.card').forEach(card => {
     card.style.transform = 'scale(0.91)';
     setTimeout(() => { card.style.transform = ''; }, 200);
 
-    // Send to bot and close
     setTimeout(() => {
-      if (tg?.sendData) {
+      try {
+        // Пробуем sendData (только для keyboard-button контекста)
         tg.sendData(`action:${action}`);
+      } catch (_) {
+        // Fallback: deep link + закрыть webapp
+        tg?.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=wa_${action}`);
+        setTimeout(() => tg?.close(), 300);
       }
-      // tg.close() is called automatically after sendData in most cases
     }, 250);
   });
 });

@@ -1660,6 +1660,13 @@ router = Router()
 @router.message(CommandStart())
 async def handle_start(message: Message, state: FSMContext) -> None:
     await state.clear()
+
+    # Deep link из Mini App: /start wa_my_day / wa_moon / wa_natal / wa_compat
+    payload = message.text.split(maxsplit=1)[1] if message.text and " " in message.text else ""
+    if payload.startswith("wa_"):
+        await _dispatch_webapp_action(message, payload[3:])
+        return
+
     name = message.from_user.first_name or "друг"
     user = await get_user(message.from_user.id)
 
@@ -2778,11 +2785,8 @@ async def handle_broadcast(message: Message) -> None:
 # ─── Mini App (Web App) ───────────────────────────────────────────────────────
 
 
-@router.message(F.web_app_data)
-async def handle_webapp_data(message: Message) -> None:
-    """Получает action от Mini App и выполняет соответствующее действие."""
-    raw    = message.web_app_data.data or ""
-    action = raw.split(":")[-1] if ":" in raw else raw
+async def _dispatch_webapp_action(message: Message, action: str) -> None:
+    """Общий обработчик действий Mini App — вызывается из web_app_data и deep link."""
     streak = await update_streak(message.from_user.id)
 
     if action == "my_day":
@@ -2833,17 +2837,24 @@ async def handle_webapp_data(message: Message) -> None:
             await message.answer(
                 f"💞 <b>Совместимость</b>\n\n"
                 f"Твой знак: {emoji} <b>{my_name}</b>\n\n"
-                f"Выбери знак, с которым хочешь проверить совместимость:",
+                f"Выбери знак:",
                 reply_markup=compat_pick_keyboard(),
             )
         else:
             await message.answer(
-                "Сначала выбери свой знак зодиака — нажми ✏️ Сменить знак.",
+                "Сначала выбери свой знак — нажми ✏️ Сменить знак.",
                 reply_markup=main_menu(),
             )
 
     else:
-        await message.answer("Привет! Используй меню ниже.", reply_markup=main_menu())
+        await message.answer("Используй меню ниже.", reply_markup=main_menu())
+
+
+@router.message(F.web_app_data)
+async def handle_webapp_data(message: Message) -> None:
+    raw    = message.web_app_data.data or ""
+    action = raw.split(":")[-1] if ":" in raw else raw
+    await _dispatch_webapp_action(message, action)
 
 
 # ─── Catch-all ────────────────────────────────────────────────────────────────
