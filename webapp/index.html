@@ -470,14 +470,8 @@ document.querySelectorAll('.card').forEach(card => {
     setTimeout(() => { card.style.transform = ''; }, 200);
 
     setTimeout(() => {
-      try {
-        // Пробуем sendData (только для keyboard-button контекста)
-        tg.sendData(`action:${action}`);
-      } catch (_) {
-        // Fallback: deep link + закрыть webapp
-        tg?.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=wa_${action}`);
-        setTimeout(() => tg?.close(), 300);
-      }
+      // openTelegramLink работает в любом контексте и закрывает webapp автоматически
+      tg?.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=wa_${action}`);
     }, 250);
   });
 });
