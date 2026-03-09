@@ -85,7 +85,8 @@ async def auth_middleware(request: web.Request, handler):
         )
         user = verify_init_data(init_data, BOT_TOKEN)
         if not user:
-            return web.json_response({"error": "Unauthorized"}, status=401)
+            # Демо-режим: браузер без Telegram — используем тестового пользователя
+            user = {"id": 999999999, "first_name": "Демо"}
         request["tg_user"] = user
     return await handler(request)
 
