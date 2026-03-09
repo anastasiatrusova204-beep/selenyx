@@ -630,8 +630,12 @@
       <span class="aspect-hint">${a.hint}</span></div>`).join('')||
       `<div style="color:var(--hint);font-size:14px;padding:8px 0">Активных аспектов нет</div>`;
     const retro=(d.retrogrades||[]).length?`<div class="info-card" style="border-color:rgba(239,154,154,.3)">
-      <div style="color:var(--red);font-size:13px;margin-bottom:4px">⚠ Ретроградные планеты</div>
-      <div style="font-size:14px">${d.retrogrades.join(', ')}</div></div>`:'';
+      <div style="color:var(--red);font-size:13px;margin-bottom:8px">⚠ Ретроградные планеты</div>
+      ${d.retrogrades.map(r=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
+        <span style="font-size:16px;min-width:20px">${r.emoji||'⚠'}</span>
+        <div><div style="font-size:14px;font-weight:600">${r.name||r}</div>
+        <div style="font-size:12px;color:var(--hint);margin-top:2px">${r.hint||''}</div></div>
+      </div>`).join('')}</div>`:'';
     const c=d.color||{};
     const col=c.color?`<div class="color-day-card">
       <div style="font-size:12px;color:var(--hint);margin-bottom:6px">🎨 Цвет дня</div>

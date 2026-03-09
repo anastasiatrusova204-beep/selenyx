@@ -17,6 +17,7 @@ from data import (
     _PLANET_NAMES_RU, _ASPECT_DEFS,
     ZODIAC_PHASE_TIPS, ZODIAC_PHASE_EXTRAS,
     MONTHS_RU, WEEKDAYS_RU,
+    _RETRO_HINTS,
 )
 
 MOSCOW_TZ = ZoneInfo("Europe/Moscow")
@@ -92,7 +93,13 @@ def get_moon_data() -> dict:
     day_number = get_day_number(now)
 
     retrogrades = [
-        p for p in ["mercury", "venus", "mars", "jupiter", "saturn"]
+        {
+            "key":   p,
+            "emoji": _RETRO_HINTS[p]["emoji"],
+            "name":  _RETRO_HINTS[p]["name"],
+            "hint":  _RETRO_HINTS[p]["hint"],
+        }
+        for p in ["mercury", "venus", "mars", "jupiter", "saturn"]
         if getattr(subject, p).retrograde
     ]
 
