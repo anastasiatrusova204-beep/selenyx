@@ -107,43 +107,7 @@
     }
     @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-    .cards-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px; font-weight: 600; letter-spacing: 1px;
-      color: var(--hint); margin-bottom: 24px; text-align: center;
-    }
-    .cards-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 16px; width: 100%; max-width: 320px; padding: 0 20px;
-    }
-    .card {
-      background: var(--bg2); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: var(--radius); padding: 24px 16px;
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      cursor: pointer; touch-action: manipulation;
-      transition: transform 0.15s, border-color 0.15s;
-      opacity: 0; transform: scale(0.8) translateY(20px);
-    }
-    .card.visible { animation: card-spring 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-    @keyframes card-spring {
-      from { opacity: 0; transform: scale(0.8) translateY(20px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .card:active { transform: scale(0.93); border-color: rgba(124,77,255,0.5); }
-    .card-icon { font-size: 32px; }
-    .card-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 16px; font-weight: 600; color: var(--text); text-align: center;
-    }
-
-    #back-btn {
-      position: fixed; bottom: calc(16px + env(safe-area-inset-bottom));
-      left: 50%; transform: translateX(-50%);
-      background: transparent; color: var(--hint); font-size: 13px;
-      padding: 8px 20px; letter-spacing: 1px;
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
-      transition: opacity 0.2s; display: none;
-    }
+    /* cards-screen удалён — переход сразу в app */
 
     /* ─── App ─── */
     #app {
@@ -187,6 +151,12 @@
       padding: 24px; gap: 20px; opacity: 0; pointer-events: none; transition: opacity 0.4s;
     }
     #onboarding.active { opacity: 1; pointer-events: auto; }
+    .onb-back {
+      position: absolute; top: calc(16px + env(safe-area-inset-top)); left: 16px;
+      background: transparent; color: var(--hint); font-size: 14px;
+      padding: 8px 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      touch-action: manipulation;
+    }
     .onb-title {
       font-family: 'Cormorant Garamond', serif;
       font-size: 28px; font-weight: 700; text-align: center;
@@ -398,6 +368,13 @@
     .cta-btn { background: var(--btn); color: #fff; border-radius: 14px; padding: 16px 32px; font-size: 16px; font-weight: 500; width: 100%; max-width: 280px; transition: opacity 0.2s, transform 0.15s; margin-bottom: 16px; touch-action: manipulation; }
     .cta-btn:active { opacity: 0.8; transform: scale(0.97); }
     .cta-hint-text { font-size: 13px; color: var(--hint); text-align: center; cursor: pointer; touch-action: manipulation; animation: blink 2.5s ease-in-out infinite; }
+    /* Fix 7: CTA в браузере — вторичная ссылка на Telegram */
+    .cta-tg-link { font-size: 12px; color: var(--hint); text-align: center; margin-top: 8px; opacity: 0.6; }
+    .cta-tg-link a { color: inherit; text-decoration: underline; }
+
+    /* Fix 5: Blur предсказания до тапа */
+    .prediction-text:not(.revealed) { filter: blur(5px); user-select: none; cursor: pointer; transition: filter 0.3s; }
+    .prediction-text.revealed { filter: none; transition: filter 0.3s; }
 
     /* ─── App Header ─── */
     #app-header {
@@ -464,27 +441,18 @@
         <span>✓ Реальный расчёт</span>
       </div>
 
-      <button class="cta-btn" id="cta-btn">🌙 Открыть в Telegram</button>
-      <div class="cta-hint-text" id="hint">или нажми на луну чтобы посмотреть здесь</div>
+      <button class="cta-btn" id="cta-btn">🌙 Начать</button>
+      <div class="cta-tg-link" id="tg-link" style="display:none">
+        <a href="https://t.me/Selenyx_mybot" target="_blank">Открыть в Telegram</a>
+      </div>
     </div>
   </div>
 
-  <!-- Экран карточек -->
-  <div class="screen" id="cards-screen">
-    <div class="cards-title">что смотрим сегодня?</div>
-    <div class="cards-grid">
-      <div class="card" data-action="today"><div class="card-icon">✨</div><div class="card-label">Мой день</div></div>
-      <div class="card" data-action="moon"><div class="card-icon">🌙</div><div class="card-label">Луна</div></div>
-      <div class="card" data-action="natal"><div class="card-icon">🌟</div><div class="card-label">Моя карта</div></div>
-      <div class="card" data-action="compat"><div class="card-icon">💞</div><div class="card-label">Совместимость</div></div>
-    </div>
-    <button id="back-btn">← вернуться</button>
-  </div>
-
-  <!-- Онбординг -->
+  <!-- Онбординг (Fix 2: исправлен заголовок + добавлена кнопка назад) -->
   <div id="onboarding">
-    <div class="onb-title">🌙 Выбери знак Луны</div>
-    <div class="onb-sub">Укажи свой знак зодиака — буду давать персональные советы</div>
+    <button class="onb-back" id="onb-back-btn">← назад</button>
+    <div class="onb-title">Выбери знак зодиака</div>
+    <div class="onb-sub">Это нужно для персональных подсказок по сферам жизни</div>
     <div class="sign-grid" id="sign-grid"></div>
   </div>
 
@@ -517,7 +485,7 @@
 
   <!-- Шапка приложения (показывается поверх вкладок) -->
   <div id="app-header">
-    <button class="app-header-back" id="app-back-btn">← назад</button>
+    <button class="app-header-back" id="app-back-btn">🏠 На главную</button>
     <div class="app-header-title">SELENYX</div>
     <div class="app-header-spacer"></div>
   </div>
@@ -590,29 +558,27 @@
     }
   }
 
-  function getTargets(){
-    return [...document.querySelectorAll('.card')].map(c=>{const r=c.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};});
-  }
 
   function explode(){
     CV.width=innerWidth; CV.height=innerHeight;
     const cx=innerWidth/2, cy=innerHeight/2;
-    document.getElementById('cards-screen').classList.add('active');
     document.getElementById('moon-screen').classList.remove('active');
-    document.getElementById('back-btn').style.display='block';
-    targets=getTargets();
-    particles=Array.from({length:100},(_,i)=>new P(cx,cy,targets[i%targets.length]));
+    // Частицы разлетаются во все стороны и гаснут — через 850ms входим в app
+    particles=Array.from({length:100},()=>{
+      const angle=Math.random()*Math.PI*2, speed=4+Math.random()*10;
+      const p=new P(cx,cy,{x:cx+Math.cos(angle)*200,y:cy+Math.sin(angle)*200});
+      p.vx=Math.cos(angle)*speed; p.vy=Math.sin(angle)*speed;
+      return p;
+    });
     phase='explode'; animStart=performance.now();
     tg?.HapticFeedback?.impactOccurred('medium');
   }
 
   function showMoon(){
-    document.getElementById('cards-screen').classList.remove('active');
     document.getElementById('moon-screen').classList.add('active');
-    document.getElementById('back-btn').style.display='none';
     document.getElementById('app').classList.remove('active');
     document.getElementById('app-header').classList.remove('visible');
-    document.querySelectorAll('.card').forEach(c=>{c.classList.remove('visible');c.style.opacity='0';c.style.transform='';});
+    document.getElementById('onboarding').classList.remove('active');
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
   }
 
@@ -622,17 +588,17 @@
     drawStars(t);
     ctx.clearRect(0,0,CV.width,CV.height);
     if(phase==='explode'){
-      const el=t-animStart;
       for(const p of particles) p.stepExp();
       for(const p of particles) p.draw();
-      if(el>850){
-        phase='converge'; animStart=t;
-        document.querySelectorAll('.card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),i*90));
+      if(t-animStart>750){
+        phase='idle'; particles=[]; ctx.clearRect(0,0,CV.width,CV.height);
+        // Прямой вход: если знак есть — в app, если нет — онбординг
+        if(me?.sign){
+          showApp('today');
+        } else {
+          document.getElementById('onboarding').classList.add('active');
+        }
       }
-    } else if(phase==='converge'){
-      for(const p of particles) p.stepConv();
-      for(const p of particles) p.draw();
-      if(t-animStart>1050) phase='idle';
     }
   }
 
@@ -648,10 +614,9 @@
 
   function showApp(tab='today'){
     document.getElementById('app').classList.add('active');
-    document.getElementById('cards-screen').classList.remove('active');
-    document.getElementById('back-btn').style.display='none';
     document.getElementById('app-header').classList.add('visible');
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
+    currentTab=''; // сброс чтобы switchTab не пропустил первую вкладку
     switchTab(tab);
   }
 
@@ -723,7 +688,8 @@
     }).join('')||
       `<div style="color:var(--hint);font-size:14px;padding:8px 0">Активных аспектов нет</div>`;
     const retro=(d.retrogrades||[]).length?`<div class="info-card" style="border-color:rgba(239,154,154,.3)">
-      <div style="color:var(--red);font-size:13px;margin-bottom:8px">⚠ Ретроградные планеты</div>
+      <div style="color:var(--red);font-size:13px;margin-bottom:4px">⚠ Ретроградные планеты</div>
+      <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Планета "движется назад" — её сферы требуют осторожности</div>
       ${d.retrogrades.map(r=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
         <span style="font-size:16px;min-width:20px">${r.emoji||'⚠'}</span>
         <div><div style="font-size:14px;font-weight:600">${r.name||r}</div>
@@ -751,8 +717,11 @@
         <div class="ld-practice">💫 ${d.lunar_day_practice}</div>
       </div>
       ${retro}
-      <div class="section"><div class="section-title">🪐 Аспекты Луны</div>
-      <div class="info-card">${asp}</div></div>
+      <div class="section">
+        <div class="section-title">🪐 Аспекты Луны</div>
+        <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Как Луна взаимодействует с планетами прямо сейчас</div>
+        <div class="info-card">${asp}</div>
+      </div>
       ${col}${num}`;
   }
 
@@ -795,6 +764,10 @@
   }
 
   function renderCompat(result=null){
+    const myInfo=me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
+    const myLabel=myInfo
+      ? `<div style="font-size:13px;color:var(--hint);margin-bottom:14px">Твой знак: <b style="color:var(--text)">${myInfo.e} ${myInfo.n}</b></div>`
+      : '';
     const picker=ZODIAC.map(s=>`<div class="sign-pick-btn${compatSign===s.k?' selected':''}" data-sign="${s.k}">
       <span class="sign-pick-emoji">${s.e}</span><span class="sign-pick-name">${s.n}</span></div>`).join('');
     const res=result?`<div class="compat-result">
@@ -808,6 +781,7 @@
         <div class="gate-note">~330 ₽ · разовая покупка</div></div></div>`:'';
     document.getElementById('tab-compat').innerHTML=`
       <div class="section-title" style="margin-top:12px">💞 Совместимость</div>
+      ${myLabel}
       <p style="color:var(--hint);font-size:14px;margin-bottom:16px">Выбери знак партнёра</p>
       <div class="sign-picker-grid">${picker}</div>
       <div id="compat-res">${res}</div>`;
@@ -880,36 +854,16 @@
 
   // ── Events ────────────────────────────────────────────────────────────────
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
-  document.getElementById('back-btn')?.addEventListener('click',showMoon);
   document.getElementById('app-back-btn')?.addEventListener('click',showMoon);
+  document.getElementById('onb-back-btn')?.addEventListener('click',showMoon);
 
-  // CTA кнопка: в Telegram — входим в приложение, в браузере — открываем бот
-  document.getElementById('cta-btn')?.addEventListener('click',()=>{
-    if(tg?.initData){
-      explode(); // уже в Telegram — запускаем анимацию и входим в приложение
-    } else {
-      window.open('https://t.me/Selenyx_mybot?start=from_webapp','_blank');
-    }
-  });
-
-  document.querySelectorAll('.card').forEach(card=>{
-    card.addEventListener('click',async()=>{
-      const action=card.dataset.action;
-      tg?.HapticFeedback?.impactOccurred('light');
-      card.style.transform='scale(0.92)';
-      setTimeout(()=>{card.style.transform='';},200);
-
-      if(!me?.registered&&!me?.sign){
-        setTimeout(showOnboarding,220); return;
-      }
-      setTimeout(async()=>{
-        if(!todayData&&(action==='today'||!tabLoaded.today))
-          todayData=await api('/api/today').catch(()=>null);
-        showApp(action);
-        if(!tabLoaded[action]) await loadTab(action);
-      },250);
-    });
-  });
+  // CTA всегда входит в приложение (Fix 7)
+  document.getElementById('cta-btn')?.addEventListener('click', explode);
+  // Показываем вторичную ссылку на Telegram только в браузере (не в Telegram)
+  if(!tg?.initData){
+    const tgLink=document.getElementById('tg-link');
+    if(tgLink) tgLink.style.display='block';
+  }
 
   document.querySelectorAll('.tab-item').forEach(item=>{
     item.addEventListener('click',()=>switchTab(item.dataset.tab));
