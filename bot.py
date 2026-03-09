@@ -68,7 +68,7 @@ _railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
     f"https://{_railway_domain}/webapp" if _railway_domain else ""
 )
-WEBAPP_DIR = Path(__file__).parent / "webapp"
+WEBAPP_DIR = Path(__file__).resolve().parent / "webapp"
 
 # ─── Timezone & Locale ────────────────────────────────────────────────────────
 
@@ -2910,13 +2910,14 @@ async def _start_webserver() -> None:
 
     async def handle_webapp(request: aiohttp_web.Request) -> aiohttp_web.Response:
         index = WEBAPP_DIR / "index.html"
+        logger.info(f"Webapp request: path={index}, exists={index.exists()}")
         if index.exists():
             return aiohttp_web.Response(
                 body=index.read_bytes(),
                 content_type="text/html",
                 charset="utf-8",
             )
-        return aiohttp_web.Response(text="Mini App not found", status=404)
+        return aiohttp_web.Response(text=f"Mini App not found at {index}", status=404)
 
     async def handle_health(request: aiohttp_web.Request) -> aiohttp_web.Response:
         return aiohttp_web.Response(text="ok")
