@@ -2251,6 +2251,7 @@ _GLOSSARY: dict = {
 
 def _about_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📊 Моя статистика", callback_data="cb_stats")],
         [InlineKeyboardButton(text="✏️ Сменить знак", callback_data="cb_show_zodiac")],
         [
             InlineKeyboardButton(text="❓ Частые вопросы", callback_data="cb_faq"),
@@ -2342,6 +2343,75 @@ async def cb_glossary_term(callback: CallbackQuery) -> None:
         ]]),
     )
     await callback.answer()
+
+
+@router.callback_query(F.data == "cb_stats")
+async def cb_stats(callback: CallbackQuery) -> None:
+    user = await get_user(callback.from_user.id)
+    if not user:
+        await callback.answer("Данные не найдены", show_alert=True)
+        return
+
+    # Дней с регистрации
+    created_raw = user.get("created_at") or ""
+    try:
+        created_dt = datetime.fromisoformat(created_raw[:10])
+        days_total = (datetime.now(tz=MOSCOW_TZ).date() - created_dt.date()).days + 1
+    except Exception:
+        days_total = 1
+
+    streak      = user.get("streak") or 0
+    sign_key    = (user.get("zodiac_sign") or "").capitalize()
+    sign_name   = SIGNS_RU_NOM.get(sign_key, "—")
+    sign_emoji  = _SIGN_EMOJI.get(sign_key, "")
+    has_natal   = bool(user.get("birth_date"))
+    notify_time = user.get("notify_time")
+
+    # Примерное кол-во пройденных фаз (фаза ~3.7 дней)
+    phases_passed = max(1, round(days_total / 3.7))
+
+    notify_line = f"🔔 Уведомление: {notify_time} по Москве" if notify_time else "🔕 Уведомления отключены"
+    natal_line  = "🌟 Натальная карта: заполнена" if has_natal else "🌟 Натальная карта: не заполнена"
+
+    # Мотивационный уровень по дням
+    if days_total >= 30:
+        level = "🌕 Мастер лунного ритма"
+    elif days_total >= 14:
+        level = "🌔 Практик"
+    elif days_total >= 7:
+        level = "🌓 Исследователь"
+    else:
+        level = "🌒 Новичок"
+
+    text = (
+        f"📊 <b>Твоя статистика</b>\n\n"
+        f"· {sign_emoji} Знак: <b>{sign_name}</b>\n"
+        f"· 📅 С нами: <b>{days_total} {_days_word(days_total)}</b>\n"
+        f"· 🔥 Текущий стрик: <b>{streak} {_days_word(streak)}</b>\n"
+        f"· 🌙 Фаз Луны пройдено: ~{phases_passed}\n\n"
+        f"{notify_line}\n"
+        f"{natal_line}\n\n"
+        f"<b>{level}</b>"
+    )
+    await callback.message.edit_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="← Назад", callback_data="cb_about_back"),
+        ]]),
+    )
+    await callback.answer()
+
+
+def _days_word(n: int) -> str:
+    """Склонение слова 'день'."""
+    if 11 <= (n % 100) <= 14:
+        return "дней"
+    r = n % 10
+    if r == 1:
+        return "день"
+    if 2 <= r <= 4:
+        return "дня"
+    return "дней"
 
 
 @router.callback_query(F.data == "cb_about_back")
