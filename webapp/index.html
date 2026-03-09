@@ -379,6 +379,25 @@
     }
     @keyframes shimmer { to { background-position: -300% 0; } }
     .error-msg { color: var(--red); font-size: 14px; padding: 16px; text-align: center; }
+
+    /* ─── Лендинг ─── */
+    #moon-screen { overflow-y: auto; -webkit-overflow-scrolling: touch; justify-content: flex-start; align-items: stretch; padding: 0; }
+    .landing-inner { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding: 52px 24px calc(40px + env(safe-area-inset-bottom)); }
+    .landing-moon-wrap { position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; margin-bottom: 16px; }
+    .landing-moon-wrap .moon-emoji { font-size: 56px; }
+    .landing-brand { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 700; letter-spacing: 4px; margin-bottom: 4px; }
+    .landing-brand-sub { color: var(--hint); font-size: 12px; letter-spacing: 2px; margin-bottom: 28px; }
+    .landing-headline { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 12px; line-height: 1.25; }
+    .landing-sub { font-size: 14px; color: var(--hint); text-align: center; line-height: 1.6; max-width: 280px; margin-bottom: 28px; }
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 320px; margin-bottom: 24px; }
+    .feature-tile { background: var(--bg2); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 18px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .feature-icon { font-size: 28px; margin-bottom: 4px; }
+    .feature-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--text); }
+    .feature-desc { font-size: 12px; color: var(--hint); line-height: 1.5; }
+    .trust-row { display: flex; gap: 14px; margin-bottom: 28px; font-size: 12px; color: var(--hint); flex-wrap: wrap; justify-content: center; }
+    .cta-btn { background: var(--btn); color: #fff; border-radius: 14px; padding: 16px 32px; font-size: 16px; font-weight: 500; width: 100%; max-width: 280px; transition: opacity 0.2s, transform 0.15s; margin-bottom: 16px; touch-action: manipulation; }
+    .cta-btn:active { opacity: 0.8; transform: scale(0.97); }
+    .cta-hint-text { font-size: 13px; color: var(--hint); text-align: center; cursor: pointer; touch-action: manipulation; animation: blink 2.5s ease-in-out infinite; }
   </style>
 </head>
 <body>
@@ -387,17 +406,51 @@
   <canvas id="canvas"></canvas>
   <div id="loading"><div class="spinner"></div></div>
 
-  <!-- Экран с Луной -->
+  <!-- Лендинг -->
   <div class="screen active" id="moon-screen">
-    <div class="brand">
-      <div class="brand-name">SELENYX</div>
-      <div class="brand-sub">космический навигатор</div>
+    <div class="landing-inner">
+      <div class="landing-moon-wrap" id="sticker-wrap">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <div class="moon-emoji">🌙</div>
+      </div>
+      <div class="landing-brand">SELENYX</div>
+      <div class="landing-brand-sub">космический навигатор</div>
+
+      <h1 class="landing-headline">Узнай, куда направить<br>силы сегодня</h1>
+      <p class="landing-sub">Персональные подсказки на основе реального положения Луны — без консультаций и сложной терминологии</p>
+
+      <div class="feature-grid">
+        <div class="feature-tile">
+          <div class="feature-icon">✨</div>
+          <div class="feature-name">Мой день</div>
+          <div class="feature-desc">Энергия по 4 сферам жизни</div>
+        </div>
+        <div class="feature-tile">
+          <div class="feature-icon">🌙</div>
+          <div class="feature-name">Луна сейчас</div>
+          <div class="feature-desc">Фаза, знак, лунный день</div>
+        </div>
+        <div class="feature-tile">
+          <div class="feature-icon">🌟</div>
+          <div class="feature-name">Моя карта</div>
+          <div class="feature-desc">Солнце, Луна, Асцендент</div>
+        </div>
+        <div class="feature-tile">
+          <div class="feature-icon">💞</div>
+          <div class="feature-name">Совместимость</div>
+          <div class="feature-desc">Анализ пары по знакам</div>
+        </div>
+      </div>
+
+      <div class="trust-row">
+        <span>✓ Бесплатно</span>
+        <span>✓ Без регистрации</span>
+        <span>✓ Реальный расчёт</span>
+      </div>
+
+      <button class="cta-btn" id="cta-btn">🌙 Открыть в Telegram</button>
+      <div class="cta-hint-text" id="hint">или нажми на луну чтобы посмотреть здесь</div>
     </div>
-    <div id="sticker-wrap">
-      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-      <div class="moon-emoji">🌙</div>
-    </div>
-    <div id="hint">нажми на луну</div>
   </div>
 
   <!-- Экран карточек -->
@@ -802,6 +855,15 @@
   // ── Events ────────────────────────────────────────────────────────────────
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
   document.getElementById('back-btn')?.addEventListener('click',showMoon);
+
+  // CTA кнопка: в Telegram — входим в приложение, в браузере — открываем бот
+  document.getElementById('cta-btn')?.addEventListener('click',()=>{
+    if(tg?.initData){
+      explode(); // уже в Telegram — запускаем анимацию и входим в приложение
+    } else {
+      window.open('https://t.me/Selenyx_mybot?start=from_webapp','_blank');
+    }
+  });
 
   document.querySelectorAll('.card').forEach(card=>{
     card.addEventListener('click',async()=>{
