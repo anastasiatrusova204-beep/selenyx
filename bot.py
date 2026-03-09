@@ -31,6 +31,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
+    MenuButtonWebApp,
     Message,
     ReplyKeyboardMarkup,
     WebAppInfo,
@@ -2879,6 +2880,16 @@ async def main() -> None:
         BotCommand(command="start",     description="Начать / вернуться в главное меню"),
         BotCommand(command="help",      description="Что умеет бот"),
     ])
+
+    # Кнопка меню → Mini App (если URL задан)
+    if WEBAPP_URL:
+        await bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="🌙 Selenyx",
+                web_app=WebAppInfo(url=WEBAPP_URL),
+            )
+        )
+        logger.info(f"Menu button → {WEBAPP_URL}")
 
     await bot.set_my_description(
         "🌙 Selenyx — твой ежедневный космический навигатор.\n\n"
