@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <!-- Запрет масштабирования — стандарт для мобильных приложений -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>Selenyx</title>
+
+  <!-- Google Fonts: Cormorant Garamond для заголовков + DM Sans для текста -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500&display=swap">
+
+  <!-- Основные стили приложения -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Telegram Mini App SDK — обязателен для работы initData, Back Button и т.д. -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ЭКРАН 0: ЗАГРУЗКА (показывается пока грузятся данные)
+       ═══════════════════════════════════════════════════════ -->
+  <div id="screen-loading" class="screen screen-active">
+    <div class="loading-moon">🌙</div>
+    <div class="loading-text">Selenyx</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ЭКРАН 1: ЛУНА — анимированный вход, тап → взрыв частиц
+       ═══════════════════════════════════════════════════════ -->
+  <div id="screen-moon-entry" class="screen">
+    <!-- Холст для анимации частиц -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Луна в центре экрана -->
+    <div id="moon-orb" class="moon-orb">
+      <div class="moon-glow"></div>
+      <div class="moon-emoji">🌙</div>
+      <div class="moon-hint">нажми</div>
+    </div>
+
+    <!-- Название приложения -->
+    <div class="app-title">Selenyx</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ЭКРАН 2: ОНБОРДИНГ — выбор знака (если знак не задан)
+       ═══════════════════════════════════════════════════════ -->
+  <div id="screen-onboarding" class="screen">
+    <div class="onboarding-content">
+      <h1 class="onboarding-title">Выбери свой знак</h1>
+      <p class="onboarding-subtitle">Луна подстроится под тебя</p>
+
+      <!-- Сетка знаков зодиака — 3 колонки × 4 строки -->
+      <div class="zodiac-grid" id="zodiac-grid">
+        <!-- Заполняется из js/app.js через ZODIAC_LIST -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ЭКРАН 3: ОСНОВНОЕ ПРИЛОЖЕНИЕ (SPA с 4 вкладками)
+       ═══════════════════════════════════════════════════════ -->
+  <div id="screen-app" class="screen">
+
+    <!-- Содержимое вкладок — прокручиваемая область -->
+    <div class="tab-contents">
+
+      <!-- ─── Вкладка: ✨ Мой день ─── -->
+      <div id="tab-today" class="tab-content tab-active" role="tabpanel">
+        <!-- Заполняется из js/screens.js → renderToday() -->
+        <div class="tab-loading">Загрузка…</div>
+      </div>
+
+      <!-- ─── Вкладка: 🌙 Луна ─── -->
+      <div id="tab-moon" class="tab-content" role="tabpanel">
+        <!-- Заполняется из js/screens.js → renderMoon() -->
+        <div class="tab-loading">Загрузка…</div>
+      </div>
+
+      <!-- ─── Вкладка: 🌟 Моя карта ─── -->
+      <div id="tab-natal" class="tab-content" role="tabpanel">
+        <!-- Заполняется из js/screens.js → renderNatal() -->
+        <div class="tab-loading">Загрузка…</div>
+      </div>
+
+      <!-- ─── Вкладка: 💞 Совместимость ─── -->
+      <div id="tab-compat" class="tab-content" role="tabpanel">
+        <!-- Заполняется из js/screens.js → renderCompat() -->
+        <div class="tab-loading">Загрузка…</div>
+      </div>
+
+    </div><!-- /tab-contents -->
+
+    <!-- Нижняя навигация — фиксированный таб-бар -->
+    <!-- safe-area-inset-bottom добавлен в CSS для iPhone X+ -->
+    <nav class="tab-bar" role="tablist" aria-label="Разделы">
+      <button class="tab-item tab-item-active" role="tab" data-tab="today" aria-selected="true" aria-controls="tab-today" touch-action="manipulation">
+        <span class="tab-icon" aria-hidden="true">✨</span>
+        <span class="tab-label">Мой день</span>
+      </button>
+      <button class="tab-item" role="tab" data-tab="moon" aria-selected="false" aria-controls="tab-moon" touch-action="manipulation">
+        <span class="tab-icon" aria-hidden="true">🌙</span>
+        <span class="tab-label">Луна</span>
+      </button>
+      <button class="tab-item" role="tab" data-tab="natal" aria-selected="false" aria-controls="tab-natal" touch-action="manipulation">
+        <span class="tab-icon" aria-hidden="true">🌟</span>
+        <span class="tab-label">Карта</span>
+      </button>
+      <button class="tab-item" role="tab" data-tab="compat" aria-selected="false" aria-controls="tab-compat" touch-action="manipulation">
+        <span class="tab-icon" aria-hidden="true">💞</span>
+        <span class="tab-label">Совмест.</span>
+      </button>
+    </nav>
+
+  </div><!-- /screen-app -->
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOAST-уведомления (ошибки, успех, подсказки)
+       ═══════════════════════════════════════════════════════ -->
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+  <!-- JS-модули: порядок важен (api → screens → app) -->
+  <script src="js/api.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

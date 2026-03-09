@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "name": "selenyx-tgapp",
+  "buildCommand": "",
+  "outputDirectory": "tg-app"
+}
