@@ -2075,25 +2075,7 @@ async def cb_domain_numerology(callback: CallbackQuery) -> None:
         f"каждое описывает общий ритм дня для всех.\n"
         f"{day['day_number_text']}"
     )
-
-    if birth_date:
-        life_path = get_life_path_number(birth_date)
-        text += (
-            f"\n\n<b>Твоё число судьбы: {life_path}</b>\n"
-            f"{NUMEROLOGY_LIFE_PATH.get(life_path, '')}"
-        )
-        markup = InlineKeyboardMarkup(inline_keyboard=[
-            *domain_detail_keyboard().inline_keyboard,
-            [InlineKeyboardButton(text="🔮 Мой личный год →", callback_data="cb_personal_year")],
-        ])
-    else:
-        text += (
-            f"\n\n<i>Введи дату рождения в разделе 🌟 Моя карта — "
-            f"и я покажу твоё число судьбы и личный год.</i>"
-        )
-        markup = domain_detail_keyboard()
-
-    await callback.message.edit_text(text, reply_markup=markup)
+    await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
     await callback.answer()
 
 
