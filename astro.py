@@ -56,13 +56,20 @@ def get_personal_year_number(life_path: int, year: int) -> int:
     return total
 
 
+_SIGN_TO_CODE: dict = {
+    "aries": "Ari", "taurus": "Tau", "gemini": "Gem", "cancer": "Can",
+    "leo": "Leo", "virgo": "Vir", "libra": "Lib", "scorpio": "Sco",
+    "sagittarius": "Sag", "capricorn": "Cap", "aquarius": "Aqu", "pisces": "Pis",
+}
+
+
 def get_compatibility(sign1: str, sign2: str) -> dict:
     """Возвращает данные о совместимости двух знаков."""
-    s1 = sign1.capitalize()
-    s2 = sign2.capitalize()
-    if s1 == s2:
+    k1 = _SIGN_TO_CODE.get(sign1.lower(), sign1)
+    k2 = _SIGN_TO_CODE.get(sign2.lower(), sign2)
+    if k1 == k2:
         return _COMPAT_TABLE["same"]
-    elems = tuple(sorted([_SIGN_ELEMENT[s1], _SIGN_ELEMENT[s2]]))
+    elems = tuple(sorted([_SIGN_ELEMENT[k1], _SIGN_ELEMENT[k2]]))
     return _COMPAT_TABLE.get(elems, _COMPAT_TABLE["same"])
 
 def get_moon_data() -> dict:
@@ -269,11 +276,12 @@ def get_zodiac_extras(zodiac_key: str, phase_name: str) -> dict:
     return ZODIAC_PHASE_EXTRAS.get(zodiac_key, {}).get(phase_name, {})
 
 
-def get_day_color() -> dict:
-    """Цвет дня: основной по планете дня + акцент по знаку Луны."""
+def get_day_color(moon_data: dict = None) -> dict:
+    """Цвет дня: основной по планете дня + акцент по знаку Луны.
+    Принимает готовый moon_data чтобы не вызывать kerykeion повторно."""
     now = datetime.now(tz=MOSCOW_TZ)
     color, reason = _WEEKDAY_COLORS[now.weekday()]
-    moon = get_moon_data()
+    moon = moon_data or get_moon_data()
     hint = _MOON_SIGN_COLOR_HINT.get(moon["sign_nom"], "")
     return {"color": color, "reason": reason, "hint": hint, "sign_nom": moon["sign_nom"]}
 

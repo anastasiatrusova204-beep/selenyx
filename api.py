@@ -7,7 +7,9 @@ import hmac
 import json
 import logging
 import os
+import re
 import urllib.parse
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -29,9 +31,11 @@ from data import (
 from db import (
     get_user, save_user_sign, save_birth_data,
     save_notify_time, save_user_tier, init_db,
+    ensure_user_exists, start_trial, get_trial_days_left,
 )
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 _railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
     f"https://{_railway_domain}/webapp" if _railway_domain else ""
@@ -39,6 +43,32 @@ WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
 WEBAPP_DIR = Path(__file__).resolve().parent / "webapp"
 
 logger = logging.getLogger(__name__)
+
+
+# ─── Кэш астро-расчётов ───────────────────────────────────────────────────────
+# kerykeion — CPU-интенсивные вычисления. Луна меняется раз в 2-3 дня,
+# поэтому пересчёт раз в час более чем достаточен.
+
+_astro_cache: dict = {}
+
+
+def _cache_key() -> str:
+    return datetime.now(MOSCOW_TZ).strftime("%Y-%m-%d-%H")
+
+
+def _get_cached_energy() -> dict:
+    key = _cache_key()
+    if key not in _astro_cache:
+        _astro_cache.clear()          # убираем устаревший час
+        _astro_cache[key] = get_daily_energy()
+    return _astro_cache[key]
+
+
+def _get_cached_moon() -> dict:
+    key = f"moon_{_cache_key()}"
+    if key not in _astro_cache:
+        _astro_cache[key] = get_moon_data()
+    return _astro_cache[key]
 
 
 # ─── Auth ────────────────────────────────────────────────────────────────────
@@ -85,8 +115,10 @@ async def auth_middleware(request: web.Request, handler):
         )
         user = verify_init_data(init_data, BOT_TOKEN)
         if not user:
-            # Демо-режим: браузер без Telegram — используем тестового пользователя
-            user = {"id": 999999999, "first_name": "Демо"}
+            if DEMO_MODE:
+                user = {"id": 999999999, "first_name": "Демо"}
+            else:
+                return web.Response(status=401)
         request["tg_user"] = user
     return await handler(request)
 
@@ -119,8 +151,8 @@ def _build_today_payload(user: dict, moon: dict) -> dict:
     prediction = get_zodiac_tip(zodiac_sign, phase) if zodiac_sign else ""
     extras = get_zodiac_extras(zodiac_sign, phase) if zodiac_sign else {}
 
-    # Цвет дня
-    color = get_day_color()
+    # Цвет дня — передаём moon чтобы не вызывать kerykeion повторно
+    color = get_day_color(moon)
 
     return {
         "moon": {
@@ -167,32 +199,45 @@ async def handle_health(request: web.Request) -> web.Response:
 # ─── API Handlers ─────────────────────────────────────────────────────────────
 
 
+async def api_register(request: web.Request) -> web.Response:
+    """Регистрирует пользователя через Telegram и запускает 7-дневный пробный доступ."""
+    tg = request["tg_user"]
+    user = await get_user(tg["id"])
+    is_new = not user
+    await ensure_user_exists(tg["id"], tg.get("first_name", ""))
+    await start_trial(tg["id"])
+    days_left = await get_trial_days_left(tg["id"])
+    return _json({"ok": True, "is_new": is_new, "trial_days_left": days_left})
+
+
 async def api_me(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     user = await get_user(tg["id"])
     if not user:
         return _json({"registered": False, "name": tg.get("first_name", "")})
+    days_left = await get_trial_days_left(tg["id"])
     return _json({
-        "registered":  True,
-        "name":        user.get("first_name") or tg.get("first_name", ""),
-        "sign":        user.get("zodiac_sign"),
-        "streak":      user.get("streak", 0),
-        "notify_time": user.get("notify_time"),
-        "has_birth":   bool(user.get("birth_date")),
-        "tier":        user.get("tier", "free"),
+        "registered":       True,
+        "name":             user.get("first_name") or tg.get("first_name", ""),
+        "sign":             user.get("zodiac_sign"),
+        "streak":           user.get("streak", 0),
+        "notify_time":      user.get("notify_time"),
+        "has_birth":        bool(user.get("birth_date")),
+        "tier":             user.get("tier", "free"),
+        "trial_days_left":  days_left,
     })
 
 
 async def api_today(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     user = await get_user(tg["id"])
-    moon = get_daily_energy()
+    moon = _get_cached_energy()
     payload = _build_today_payload(user or {}, moon)
     return _json(payload)
 
 
 async def api_moon(request: web.Request) -> web.Response:
-    moon = get_moon_data()
+    moon = _get_cached_moon()
     return _json({
         "phase_emoji":        moon["phase_emoji"],
         "phase_name":         moon["phase_name"],
@@ -207,7 +252,7 @@ async def api_moon(request: web.Request) -> web.Response:
         "day_number_text":    moon["day_number_text"],
         "aspects":            moon["aspects"],
         "retrogrades":        moon["retrogrades"],
-        "color":              get_day_color(),
+        "color":              get_day_color(moon),
     })
 
 
@@ -233,6 +278,10 @@ async def api_natal_get(request: web.Request) -> web.Response:
     })
 
 
+_DATE_RE = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")
+_TIME_RE = re.compile(r"^\d{2}:\d{2}$")
+
+
 async def api_natal_post(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     try:
@@ -241,8 +290,16 @@ async def api_natal_post(request: web.Request) -> web.Response:
         birth_time = body.get("birth_time", "").strip() or None
         if not birth_date:
             return _json({"error": "birth_date required"}, status=400)
-        # Проверяем что дата парсится
+        if not _DATE_RE.match(birth_date):
+            return _json({"error": "Формат даты: ДД.ММ.ГГГГ"}, status=400)
+        try:
+            datetime.strptime(birth_date, "%d.%m.%Y")
+        except ValueError:
+            return _json({"error": "Некорректная дата"}, status=400)
+        if birth_time and not _TIME_RE.match(birth_time):
+            return _json({"error": "Формат времени: ЧЧ:ММ"}, status=400)
         get_natal_chart(birth_date, birth_time)
+        await ensure_user_exists(tg["id"], tg.get("first_name", ""))
         await save_birth_data(tg["id"], birth_date, birth_time)
         return _json({"ok": True})
     except Exception as e:
@@ -256,6 +313,14 @@ async def api_compat(request: web.Request) -> web.Response:
         return _json({"error": "sign param required"}, status=400)
     user = await get_user(tg["id"])
     sign1 = (user or {}).get("zodiac_sign", "")
+    if not sign1:
+        return _json({
+            "user_sign":   "",
+            "target_sign": sign2,
+            "rating":      "🌙",
+            "title":       "Выбери свой знак",
+            "text":        "Чтобы увидеть совместимость, сначала укажи свой знак зодиака — нажми «Сменить знак» в меню бота.",
+        })
     result = get_compatibility(sign1, sign2)
     return _json({
         "user_sign":   sign1,
@@ -271,6 +336,7 @@ async def api_notify(request: web.Request) -> web.Response:
     try:
         body = await request.json()
         time_val = body.get("time")  # "08:00" или null
+        await ensure_user_exists(tg["id"], tg.get("first_name", ""))
         await save_notify_time(tg["id"], time_val)
         return _json({"ok": True})
     except Exception as e:
@@ -295,6 +361,18 @@ async def api_sign(request: web.Request) -> web.Response:
 # ─── Server ────────────────────────────────────────────────────────────────────
 
 
+async def _keepalive(port: int) -> None:
+    """Пингует /health каждые 10 минут чтобы Railway не усыплял сервис."""
+    url = f"http://localhost:{port}/health"
+    while True:
+        await asyncio.sleep(600)
+        try:
+            async with _aiohttp.ClientSession() as s:
+                await s.get(url, timeout=_aiohttp.ClientTimeout(total=5))
+        except Exception:
+            pass
+
+
 async def start_api_server() -> None:
     """Запускает aiohttp-сервер: статика + REST API для Mini App."""
     port = int(os.getenv("PORT", "8080"))
@@ -304,6 +382,7 @@ async def start_api_server() -> None:
     app.router.add_get("/",                    serve_webapp)
     app.router.add_get("/health",              handle_health)
     app.router.add_get("/api/me",              api_me)
+    app.router.add_post("/api/register",       api_register)
     app.router.add_get("/api/today",           api_today)
     app.router.add_get("/api/moon",            api_moon)
     app.router.add_get("/api/moon/calendar",   api_calendar)
@@ -318,12 +397,8 @@ async def start_api_server() -> None:
     await web.TCPSite(runner, "0.0.0.0", port).start()
     logger.info(f"API-сервер запущен на порту {port}")
 
-    # Keep-alive: пингуем себя каждые 10 минут чтобы Railway не усыплял сервис
-    health_url = f"http://localhost:{port}/health"
-    while True:
-        await asyncio.sleep(600)
-        try:
-            async with _aiohttp.ClientSession() as s:
-                await s.get(health_url, timeout=_aiohttp.ClientTimeout(total=5))
-        except Exception:
-            pass
+    # Keep-alive — отдельная задача, не блокирует эту корутину
+    asyncio.create_task(_keepalive(port))
+
+    # Паркуемся: ждём завершения event loop (CancelledError при Ctrl+C)
+    await asyncio.Event().wait()

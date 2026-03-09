@@ -80,6 +80,7 @@ class UserState(StatesGroup):
     changing_sign    = State()   # смена знака: ждём новый выбор
     entering_birth_date = State()  # натальная карта: ждём дату
     entering_birth_time = State()  # натальная карта: ждём время
+    leaving_feedback    = State()  # отзыв: ждём текст
 
 
 
@@ -87,13 +88,18 @@ class UserState(StatesGroup):
 
 
 def main_menu() -> ReplyKeyboardMarkup:
-    webapp_row = (
-        [KeyboardButton(text="🌙 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL))]
-        if WEBAPP_URL else []
-    )
+    """Упрощённое меню: кнопка Selenyx уже есть в шапке чата Telegram."""
+    if WEBAPP_URL:
+        return ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="🔔 Уведомления"), KeyboardButton(text="ℹ️ О боте")],
+            ],
+            resize_keyboard=True,
+            persistent=True,
+        )
+    # Fallback — если Mini App недоступен (локальный запуск без WEBAPP_URL)
     return ReplyKeyboardMarkup(
         keyboard=[
-            *([webapp_row] if webapp_row else []),
             [KeyboardButton(text="✨ Мой день")],
             [KeyboardButton(text="📅 Календарь"), KeyboardButton(text="🔔 Уведомления")],
             [KeyboardButton(text="🌟 Моя карта"), KeyboardButton(text="💞 Совместимость")],
@@ -286,36 +292,59 @@ async def handle_start(message: Message, state: FSMContext) -> None:
     user = await get_user(message.from_user.id)
 
     if user and user.get("zodiac_sign"):
+        # ── Возвращающийся пользователь ──
         sign_label = ZODIAC_LABELS.get(user["zodiac_sign"], user["zodiac_sign"])
         await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
         moon = get_moon_data()
         now = datetime.now(tz=MOSCOW_TZ)
         date_str = f"{now.day} {MONTHS_RU[now.month - 1]}, {WEEKDAYS_RU[now.weekday()]}"
-        await message.answer(
-            f"🌙 <b>С возвращением, {name}!</b>\n\n"
-            f"· <b>Дата:</b> {date_str}\n"
-            f"· <b>Фаза:</b> {moon['phase_emoji']} {moon['phase_name']}\n"
-            f"· <b>Луна в</b> {moon['sign_prep']} · {moon['lunar_day']} лунный день\n"
-            f"· <b>Твой знак:</b> {sign_label}",
-            reply_markup=main_menu(),
-        )
-        await message.answer(
-            "Смотрим сегодняшний день?",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text="✨ Мой день →", callback_data="cb_energy"),
-            ]]),
-        )
+        if WEBAPP_URL:
+            await message.answer(
+                f"🌙 <b>С возвращением, {name}!</b>\n\n"
+                f"· {date_str}\n"
+                f"· {moon['phase_emoji']} {moon['phase_name']}, Луна в {moon['sign_prep']}\n"
+                f"· Твой знак: {sign_label}",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(text="🌙 Открыть Selenyx →", web_app=WebAppInfo(url=WEBAPP_URL)),
+                ]]),
+            )
+        else:
+            await message.answer(
+                f"🌙 <b>С возвращением, {name}!</b>\n\n"
+                f"· {date_str}\n"
+                f"· {moon['phase_emoji']} {moon['phase_name']}, Луна в {moon['sign_prep']}\n"
+                f"· Твой знак: {sign_label}",
+                reply_markup=main_menu(),
+            )
     else:
-        await message.answer(
-            f"🌙 <b>Привет, {name}! Я — Selenyx.</b>\n\n"
-            "Каждый день смотрю на реальное положение Луны и говорю простым языком:\n"
-            "· какая энергия сегодня\n"
-            "· на что направить силы\n"
-            "· чего лучше избегать\n\n"
-            "Расчёты астрономические — не шаблонные тексты по дате.\n"
-            "Не предсказываю будущее — помогаю понять сегодняшний день.",
-            reply_markup=start_cta_keyboard(),
-        )
+        # ── Новый пользователь — онбординг ──
+        if WEBAPP_URL:
+            await message.answer(
+                f"🌙 <b>Привет, {name}! Я — Selenyx.</b>\n\n"
+                "Твой ежедневный навигатор по ритмам Луны.\n\n"
+                "· ✨ Энергия дня по 4 сферам жизни\n"
+                "· 🌙 Фаза и знак Луны прямо сейчас\n"
+                "· 🌟 Натальная карта по дате рождения\n"
+                "· 💞 Совместимость по знакам зодиака\n\n"
+                "<b>Тестовый доступ — 7 дней бесплатно.</b>\n\n"
+                "Нажми кнопку ниже, чтобы начать:",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(
+                        text="🌙 Начать бесплатно →",
+                        web_app=WebAppInfo(url=WEBAPP_URL),
+                    ),
+                ]]),
+            )
+        else:
+            await message.answer(
+                f"🌙 <b>Привет, {name}! Я — Selenyx.</b>\n\n"
+                "Каждый день смотрю на реальное положение Луны и говорю простым языком:\n"
+                "· какая энергия сегодня\n"
+                "· на что направить силы\n"
+                "· чего лучше избегать\n\n"
+                "Расчёты астрономические — не шаблонные тексты по дате.",
+                reply_markup=start_cta_keyboard(),
+            )
 
 
 @router.callback_query(F.data == "cb_begin")
@@ -374,18 +403,38 @@ async def handle_zodiac_choice(callback: CallbackQuery, state: FSMContext) -> No
     await callback.answer()
 
 
+# ─── /app ─────────────────────────────────────────────────────────────────────
+
+
+@router.message(Command("app"))
+async def handle_app(message: Message) -> None:
+    if WEBAPP_URL:
+        await message.answer(
+            "🌙 Открыть Selenyx:",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="🌙 Открыть Selenyx →", web_app=WebAppInfo(url=WEBAPP_URL)),
+            ]]),
+        )
+    else:
+        await message.answer("Mini App недоступен.", reply_markup=main_menu())
+
+
 # ─── /help ────────────────────────────────────────────────────────────────────
 
 
 @router.message(Command("help"))
 async def handle_help(message: Message) -> None:
+    app_line = "· /app — открыть приложение\n" if WEBAPP_URL else ""
     await message.answer(
         "🌙 <b>Что умеет Selenyx:</b>\n\n"
-        "· <b>✨ Мой день</b> — энергия дня, лунный контекст и личное предсказание\n"
-        "· <b>✏️ Сменить знак</b> — выбрать другой знак зодиака\n"
-        "· <b>ℹ️ О боте</b> — что такое Selenyx\n\n"
+        "· Энергия дня по 4 сферам жизни\n"
+        "· Фаза Луны, знак, лунный день\n"
+        "· Натальная карта и совместимость\n"
+        "· Ежедневные уведомления\n\n"
         "<b>Команды:</b>\n"
+        f"{app_line}"
         "· /start — начать заново\n"
+        "· /feedback — написать отзыв\n"
         "· /help — это сообщение"
     )
 
@@ -925,7 +974,7 @@ def _about_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(text="❓ Частые вопросы", callback_data="cb_faq"),
             InlineKeyboardButton(text="📖 Словарь",        callback_data="cb_glossary"),
         ],
-        [InlineKeyboardButton(text="💬 Вопросы и предложения", url="https://t.me/Selenyx_mybot")],
+        [InlineKeyboardButton(text="📝 Написать отзыв", callback_data="cb_feedback")],
     ])
 
 
@@ -1108,6 +1157,67 @@ async def cb_about_back(callback: CallbackQuery) -> None:
         reply_markup=_about_keyboard(),
     )
     await callback.answer()
+
+
+# ─── Отзывы ──────────────────────────────────────────────────────────────────
+
+
+@router.callback_query(F.data == "cb_feedback")
+async def cb_feedback(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(UserState.leaving_feedback)
+    await callback.message.answer(
+        "📝 <b>Напиши свой отзыв</b>\n\n"
+        "Что понравилось? Что можно улучшить? Чего не хватает?\n"
+        "Любое сообщение — отправь его прямо сюда, я всё прочту.",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="❌ Отмена")]],
+            resize_keyboard=True,
+            one_time_keyboard=True,
+        ),
+    )
+    await callback.answer()
+
+
+@router.message(Command("feedback"))
+async def cmd_feedback(message: Message, state: FSMContext) -> None:
+    await state.set_state(UserState.leaving_feedback)
+    await message.answer(
+        "📝 <b>Напиши свой отзыв</b>\n\n"
+        "Что понравилось? Что можно улучшить? Чего не хватает?\n"
+        "Любое сообщение — отправь его прямо сюда, я всё прочту.",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="❌ Отмена")]],
+            resize_keyboard=True,
+            one_time_keyboard=True,
+        ),
+    )
+
+
+@router.message(UserState.leaving_feedback)
+async def handle_feedback(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    if message.text == "❌ Отмена":
+        await message.answer("Хорошо, возвращаемся в меню.", reply_markup=main_menu())
+        return
+
+    user = message.from_user
+    user_info = f"@{user.username}" if user.username else f"id:{user.id}"
+    feedback_text = (
+        f"📝 <b>Отзыв от пользователя</b>\n"
+        f"Имя: {user.first_name} ({user_info})\n\n"
+        f"{message.text}"
+    )
+    for admin_id in ADMIN_IDS:
+        try:
+            await message.bot.send_message(admin_id, feedback_text)
+        except Exception:
+            pass
+
+    await message.answer(
+        "Спасибо! Твой отзыв получен 🙏\n\n"
+        "Это помогает делать бот лучше.",
+        reply_markup=main_menu(),
+    )
 
 
 # ─── Натальная карта ─────────────────────────────────────────────────────────
@@ -1535,10 +1645,14 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
 
-    await bot.set_my_commands([
-        BotCommand(command="start",     description="Начать / вернуться в главное меню"),
-        BotCommand(command="help",      description="Что умеет бот"),
-    ])
+    cmds = [
+        BotCommand(command="start",    description="Начать / вернуться в главное меню"),
+        BotCommand(command="help",     description="Что умеет бот"),
+        BotCommand(command="feedback", description="Написать отзыв или предложение"),
+    ]
+    if WEBAPP_URL:
+        cmds.insert(1, BotCommand(command="app", description="Открыть приложение Selenyx"))
+    await bot.set_my_commands(cmds)
 
     # Кнопка меню → Mini App (если URL задан)
     if WEBAPP_URL:
@@ -1567,10 +1681,20 @@ async def main() -> None:
     if WEBAPP_URL:
         logger.info(f"Mini App URL: {WEBAPP_URL}")
 
-    # Запускаем HTTP-сервер (для Mini App) и бота параллельно
+    async def _guarded(name: str, coro):
+        """Изолирует корутину: при падении логирует, не отменяет соседнюю."""
+        try:
+            await coro
+        except asyncio.CancelledError:
+            raise  # нормальное завершение при Ctrl+C
+        except Exception as e:
+            logger.critical(f"[{name}] завершился с ошибкой: {e}", exc_info=True)
+
+    # return_exceptions=True: падение одной корутины не отменяет вторую
     await asyncio.gather(
-        start_api_server(),
-        dp.start_polling(bot, drop_pending_updates=True),
+        _guarded("API", start_api_server()),
+        _guarded("Bot", dp.start_polling(bot, drop_pending_updates=True)),
+        return_exceptions=True,
     )
 
 

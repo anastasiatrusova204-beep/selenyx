@@ -133,14 +133,19 @@
     .tab-item {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 4px;
-      touch-action: manipulation; cursor: pointer;
+      touch-action: manipulation; cursor: pointer; position: relative;
       color: var(--hint); transition: color 0.2s, opacity 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
     .tab-item:active { opacity: 0.6; }
     .tab-item.active { color: var(--btn); }
+    .tab-item.active::after {
+      content: '';
+      position: absolute; top: 0; left: 20%; right: 20%; height: 2px;
+      background: var(--btn); border-radius: 0 0 3px 3px;
+    }
     .tab-icon { font-size: 22px; line-height: 1; }
-    .tab-label { font-size: 11px; letter-spacing: 0.3px; }
+    .tab-label { font-size: 11px; letter-spacing: 0.3px; font-weight: 500; }
 
     /* ─── Onboarding ─── */
     #onboarding {
@@ -336,6 +341,17 @@
     .stars-btn:active { opacity: 0.8; transform: scale(0.96); }
     .gate-note { font-size: 12px; color: var(--hint); }
 
+    /* ─── Share compat ─── */
+    .share-compat-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; margin-top: 12px; padding: 13px;
+      background: rgba(124,77,255,0.08); border: 1px solid rgba(124,77,255,0.2);
+      border-radius: var(--radius-sm); color: var(--hint); font-size: 14px;
+      touch-action: manipulation; transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .share-compat-btn:active { background: rgba(124,77,255,0.2); border-color: rgba(124,77,255,0.4); color: var(--text); }
+    @media (hover: hover) { .share-compat-btn:hover { border-color: rgba(124,77,255,0.4); color: var(--text); } }
+
     .skeleton {
       background: linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
       background-size: 300%; animation: shimmer 1.5s infinite;
@@ -359,10 +375,30 @@
     .feature-name { font-size: 15px; font-weight: 500; color: var(--text); }
     .feature-desc { font-size: 13px; color: var(--hint); margin-top: 2px; line-height: 1.45; }
     .trust-row { display: flex; gap: 14px; margin-bottom: 28px; font-size: 12px; color: var(--hint); flex-wrap: wrap; justify-content: center; }
-    .cta-btn { background: var(--btn); color: #fff; border-radius: var(--radius-sm); padding: 16px 32px; font-size: 16px; font-weight: 500; width: 100%; max-width: 280px; transition: opacity 0.2s, transform 0.15s; margin-bottom: 16px; touch-action: manipulation; }
+    .trial-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,213,79,0.08); border: 1px solid rgba(255,213,79,0.35);
+      border-radius: 20px; padding: 7px 16px; font-size: 12px; color: var(--gold);
+      letter-spacing: 0.4px; margin-bottom: 14px;
+    }
+    .trial-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0;
+      animation: dot-pulse 2s ease-in-out infinite;
+    }
+    @keyframes dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+    .cta-btn {
+      background: linear-gradient(135deg, #7c4dff 0%, #9c6fff 100%);
+      color: #fff; border-radius: var(--radius-sm); padding: 18px 32px;
+      font-size: 16px; font-weight: 500; width: 100%; max-width: 300px;
+      transition: opacity 0.2s, transform 0.15s; margin-bottom: 10px;
+      touch-action: manipulation; letter-spacing: 0.3px;
+      box-shadow: 0 4px 28px rgba(124,77,255,0.4);
+    }
     .cta-btn:active { opacity: 0.8; transform: scale(0.97); }
-    .cta-hint-text { font-size: 13px; color: var(--hint); text-align: center; cursor: pointer; touch-action: manipulation; opacity: 0.7; }
-    /* Fix 7: CTA в браузере — вторичная ссылка на Telegram */
+    .cta-btn:disabled { opacity: 0.55; transform: none; }
+    .cta-hint-text { font-size: 12px; color: var(--hint); text-align: center; opacity: 0.6; }
+    /* CTA в браузере — вторичная ссылка на Telegram */
     .cta-tg-link { font-size: 12px; color: var(--hint); text-align: center; margin-top: 8px; opacity: 0.6; }
     .cta-tg-link a { color: inherit; text-decoration: underline; }
 
@@ -452,13 +488,13 @@
         </div>
       </div>
 
-      <div class="trust-row">
-        <span>✓ Бесплатно</span>
-        <span>✓ Без регистрации</span>
-        <span>✓ Реальный расчёт</span>
+      <div class="trial-badge">
+        <span class="trial-dot"></span>
+        Тестовый доступ · 7 дней бесплатно
       </div>
 
-      <button class="cta-btn" id="cta-btn">🌙 Начать</button>
+      <button class="cta-btn" id="cta-btn">Начать бесплатно</button>
+      <div class="cta-hint-text">Автоматическая регистрация через Telegram</div>
       <div class="cta-tg-link" id="tg-link" style="display:none">
         <a href="https://t.me/Selenyx_mybot" target="_blank">Открыть в Telegram</a>
       </div>
@@ -502,8 +538,9 @@
 
   <!-- Шапка приложения (показывается поверх вкладок) -->
   <div id="app-header">
-    <button class="app-header-back" id="app-back-btn">🏠 На главную</button>
+    <button class="app-header-back" id="app-back-btn">← назад</button>
     <div class="app-header-title">SELENYX</div>
+    <div id="trial-counter" style="justify-self:end;font-size:11px;color:var(--gold);display:none;padding-right:2px"></div>
   </div>
 
   <script>
@@ -596,6 +633,7 @@
     document.getElementById('app-header').classList.remove('visible');
     document.getElementById('onboarding').classList.remove('active');
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
+    tg?.BackButton?.hide();
   }
 
   // ── Loop ─────────────────────────────────────────────────────────────────
@@ -613,6 +651,7 @@
           showApp('today');
         } else {
           document.getElementById('onboarding').classList.add('active');
+          tg?.BackButton?.show();
         }
       }
     }
@@ -632,6 +671,7 @@
     document.getElementById('app').classList.add('active');
     document.getElementById('app-header').classList.add('visible');
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
+    tg?.BackButton?.show();
     currentTab=''; // сброс чтобы switchTab не пропустил первую вкладку
     switchTab(tab);
   }
@@ -662,7 +702,10 @@
         <span>Луна в ${m.sign_nom} ${m.degree}° &nbsp;·&nbsp; ${m.lunar_day} лунный день</span>${sb}
       </div>
       <div class="phase-intro">${pe.intro}</div>
-      <div class="section"><div class="domain-pills">${pills}</div><div>${doms}</div></div>
+      <div class="section">
+        <div style="font-size:13px;color:var(--hint);margin-bottom:10px">Выбери сферу — получи подсказку на сегодня:</div>
+        <div class="domain-pills">${pills}</div><div>${doms}</div>
+      </div>
       ${pred}`;
 
     document.querySelectorAll('#tab-today .pill').forEach(p=>{
@@ -748,9 +791,9 @@
         <p style="color:var(--hint);font-size:14px;margin-bottom:20px">Введи дату рождения — рассчитаю положение Солнца, Луны и Асцендента</p>
         <div class="natal-form">
           <div class="input-group"><label class="input-label">Дата рождения</label>
-            <input class="input-field" id="inp-date" type="text" placeholder="ДД.ММ.ГГГГ" inputmode="numeric" spellcheck="false"></div>
+            <input class="input-field" id="inp-date" type="text" placeholder="ДД.ММ.ГГГГ" inputmode="text" maxlength="10" autocomplete="bday" spellcheck="false"></div>
           <div class="input-group"><label class="input-label">Время рождения (необязательно)</label>
-            <input class="input-field" id="inp-time" type="text" placeholder="ЧЧ:ММ" inputmode="numeric" spellcheck="false">
+            <input class="input-field" id="inp-time" type="text" placeholder="ЧЧ:ММ" inputmode="text" maxlength="5" spellcheck="false">
             <div class="input-hint">Нужно для расчёта Асцендента</div></div>
           <button class="btn-primary" id="btn-calc">Рассчитать →</button>
           <div id="calc-err" style="display:none" class="error-msg"></div>
@@ -790,6 +833,7 @@
       <div class="compat-rating">${result.rating}</div>
       <div class="compat-title">${result.title}</div>
       <div class="compat-text">${result.text}</div></div>
+      <button class="share-compat-btn" id="share-compat-btn">📤 Поделиться с другом</button>
       <div class="premium-gate"><div class="gate-blur">Ключевые точки напряжения · Сексуальная совместимость · Лучшие и трудные периоды</div>
       <div class="gate-overlay"><div class="gate-icon">🔒</div>
         <div class="gate-label">Детальный анализ</div>
@@ -810,6 +854,20 @@
         catch{ document.getElementById('compat-res').innerHTML='<div class="error-msg">Ошибка</div>'; }
       });
     });
+    if(result){
+      document.getElementById('share-compat-btn')?.addEventListener('click',()=>{
+        const partnerInfo=ZODIAC.find(z=>z.k===compatSign);
+        const shareText=[
+          myInfo?`${myInfo.e} ${myInfo.n}`:'🌙','+',
+          partnerInfo?`${partnerInfo.e} ${partnerInfo.n}`:'?',
+          '—',result.rating,result.title,
+          '\n\n🌙 Проверь совместимость в Selenyx: @Selenyx_mybot',
+        ].join(' ');
+        const link=`https://t.me/share/url?url=${encodeURIComponent('https://t.me/Selenyx_mybot')}&text=${encodeURIComponent(shareText)}`;
+        if(tg?.openTelegramLink){ tg.openTelegramLink(link); } else { window.open(link,'_blank'); }
+        tg?.HapticFeedback?.impactOccurred('light');
+      });
+    }
   }
 
   async function loadTab(id){
@@ -826,14 +884,22 @@
     const date=document.getElementById('inp-date')?.value?.trim()||'';
     const time=document.getElementById('inp-time')?.value?.trim()||'';
     const err=document.getElementById('calc-err');
-    if(!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(date)){err.textContent='Введи дату в формате ДД.ММ.ГГГГ';err.style.display='block';return;}
+    if(!/^\d{2}\.\d{2}\.\d{4}$/.test(date)){err.textContent='Введи дату в формате ДД.ММ.ГГГГ (например: 15.03.1990)';err.style.display='block';return;}
     err.style.display='none';
-    document.getElementById('btn-calc').textContent='Считаю…';
+    const btn=document.getElementById('btn-calc');
+    btn.textContent='Считаю…'; btn.disabled=true;
     try{
-      await api('/api/natal',{method:'POST',body:JSON.stringify({birth_date:date,birth_time:time||null})});
+      const r=await fetch('/api/natal',{method:'POST',
+        headers:{'X-Telegram-Init-Data':tg?.initData||'','Content-Type':'application/json'},
+        body:JSON.stringify({birth_date:date,birth_time:time||null})});
+      if(!r.ok){
+        const data=await r.json().catch(()=>({}));
+        err.textContent=data.error||'Не удалось рассчитать карту';
+        err.style.display='block'; btn.textContent='Рассчитать →'; btn.disabled=false; return;
+      }
       natalData=null; tabLoaded.natal=false; await loadTab('natal');
       tg?.HapticFeedback?.notificationOccurred('success');
-    } catch{ err.textContent='Не удалось. Проверь формат даты.'; err.style.display='block'; document.getElementById('btn-calc').textContent='Рассчитать →'; }
+    } catch{ err.textContent='Ошибка соединения. Попробуй ещё раз.'; err.style.display='block'; btn.textContent='Рассчитать →'; btn.disabled=false; }
   }
 
   function buyFeature(f){
@@ -861,20 +927,45 @@
     document.getElementById('onboarding').classList.add('active');
   }
 
+  function updateTrialDisplay(){
+    const el=document.getElementById('trial-counter');
+    if(!el||!me) return;
+    const d=me.trial_days_left;
+    if(d==null||d<0){ el.style.display='none'; return; }
+    el.textContent=d===0?'посл. день ⭐':`ещё ${d} дн ⭐`;
+    el.style.display='block';
+  }
+
   async function init(){
     initStars();
     requestAnimationFrame(loop);
     setTimeout(()=>document.getElementById('loading').classList.add('gone'),500);
     try{ me=await api('/api/me'); } catch{ me={registered:false}; }
+    updateTrialDisplay();
   }
 
   // ── Events ────────────────────────────────────────────────────────────────
+  // Системная кнопка «Назад» Telegram — всегда возвращает к лендингу
+  tg?.BackButton?.onClick(showMoon);
+
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
   document.getElementById('app-back-btn')?.addEventListener('click',showMoon);
   document.getElementById('onb-back-btn')?.addEventListener('click',showMoon);
 
-  // CTA всегда входит в приложение (Fix 7)
-  document.getElementById('cta-btn')?.addEventListener('click', explode);
+  // CTA: регистрация через Telegram → анимация → приложение
+  document.getElementById('cta-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('cta-btn');
+    btn.textContent = 'Регистрация…';
+    btn.disabled = true;
+    try {
+      await api('/api/register', {method: 'POST', body: '{}'});
+      me = await api('/api/me');
+      updateTrialDisplay();
+    } catch(e) { /* non-blocking — продолжаем в любом случае */ }
+    btn.textContent = 'Начать бесплатно';
+    btn.disabled = false;
+    explode();
+  });
   // Показываем вторичную ссылку на Telegram только в браузере (не в Telegram)
   if(!tg?.initData){
     const tgLink=document.getElementById('tg-link');
