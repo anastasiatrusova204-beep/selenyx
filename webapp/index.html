@@ -398,6 +398,26 @@
     .cta-btn { background: var(--btn); color: #fff; border-radius: 14px; padding: 16px 32px; font-size: 16px; font-weight: 500; width: 100%; max-width: 280px; transition: opacity 0.2s, transform 0.15s; margin-bottom: 16px; touch-action: manipulation; }
     .cta-btn:active { opacity: 0.8; transform: scale(0.97); }
     .cta-hint-text { font-size: 13px; color: var(--hint); text-align: center; cursor: pointer; touch-action: manipulation; animation: blink 2.5s ease-in-out infinite; }
+
+    /* ─── App Header ─── */
+    #app-header {
+      position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 51;
+      display: none; align-items: center; justify-content: space-between; padding: 0 16px;
+      background: rgba(10,10,26,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #app.active ~ #app-header,
+    #app-header.visible { display: flex; }
+    .app-header-back {
+      display: flex; align-items: center; gap: 6px; color: var(--hint);
+      font-size: 14px; cursor: pointer; touch-action: manipulation; padding: 6px 0;
+    }
+    .app-header-back:active { opacity: 0.6; }
+    .app-header-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700;
+      letter-spacing: 2px; color: var(--text);
+    }
+    .app-header-spacer { width: 60px; }
   </style>
 </head>
 <body>
@@ -495,6 +515,13 @@
     </nav>
   </div>
 
+  <!-- Шапка приложения (показывается поверх вкладок) -->
+  <div id="app-header">
+    <button class="app-header-back" id="app-back-btn">← назад</button>
+    <div class="app-header-title">SELENYX</div>
+    <div class="app-header-spacer"></div>
+  </div>
+
   <script>
   const tg = window.Telegram?.WebApp;
   tg?.ready(); tg?.expand();
@@ -583,6 +610,8 @@
     document.getElementById('cards-screen').classList.remove('active');
     document.getElementById('moon-screen').classList.add('active');
     document.getElementById('back-btn').style.display='none';
+    document.getElementById('app').classList.remove('active');
+    document.getElementById('app-header').classList.remove('visible');
     document.querySelectorAll('.card').forEach(c=>{c.classList.remove('visible');c.style.opacity='0';c.style.transform='';});
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
   }
@@ -621,6 +650,7 @@
     document.getElementById('app').classList.add('active');
     document.getElementById('cards-screen').classList.remove('active');
     document.getElementById('back-btn').style.display='none';
+    document.getElementById('app-header').classList.add('visible');
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
     switchTab(tab);
   }
@@ -851,6 +881,7 @@
   // ── Events ────────────────────────────────────────────────────────────────
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
   document.getElementById('back-btn')?.addEventListener('click',showMoon);
+  document.getElementById('app-back-btn')?.addEventListener('click',showMoon);
 
   // CTA кнопка: в Telegram — входим в приложение, в браузере — открываем бот
   document.getElementById('cta-btn')?.addEventListener('click',()=>{
