@@ -11,10 +11,12 @@ import os
 import re
 import urllib.parse
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Optional
 from zoneinfo import ZoneInfo
 
 import aiosqlite
+from aiohttp import web as aiohttp_web
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ChatAction, ParseMode
@@ -31,6 +33,7 @@ from aiogram.types import (
     KeyboardButton,
     Message,
     ReplyKeyboardMarkup,
+    WebAppInfo,
 )
 from dotenv import load_dotenv
 from kerykeion import AstrologicalSubject
@@ -59,6 +62,13 @@ ADMIN_IDS: list[int] = [
 
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN не задан в .env файле")
+
+# WEBAPP_URL: берётся из env или строится из Railway-домена автоматически
+_railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
+WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
+    f"https://{_railway_domain}/webapp" if _railway_domain else ""
+)
+WEBAPP_DIR = Path(__file__).parent / "webapp"
 
 # ─── Timezone & Locale ────────────────────────────────────────────────────────
 
@@ -1261,8 +1271,13 @@ async def save_birth_data(user_id: int, birth_date: str, birth_time: Optional[st
 
 
 def main_menu() -> ReplyKeyboardMarkup:
+    webapp_row = (
+        [KeyboardButton(text="🌙 Открыть приложение", web_app=WebAppInfo(url=WEBAPP_URL))]
+        if WEBAPP_URL else []
+    )
     return ReplyKeyboardMarkup(
         keyboard=[
+            *([webapp_row] if webapp_row else []),
             [KeyboardButton(text="✨ Мой день")],
             [KeyboardButton(text="📅 Календарь"), KeyboardButton(text="🔔 Уведомления")],
             [KeyboardButton(text="🌟 Моя карта"), KeyboardButton(text="💞 Совместимость")],
@@ -2759,6 +2774,77 @@ async def handle_broadcast(message: Message) -> None:
     )
 
 
+# ─── Mini App (Web App) ───────────────────────────────────────────────────────
+
+
+@router.message(F.web_app_data)
+async def handle_webapp_data(message: Message) -> None:
+    """Получает action от Mini App и выполняет соответствующее действие."""
+    raw    = message.web_app_data.data or ""
+    action = raw.split(":")[-1] if ":" in raw else raw
+    streak = await update_streak(message.from_user.id)
+
+    if action == "my_day":
+        text, markup = _my_day_text(streak)
+        await message.answer(text, reply_markup=markup)
+        if streak > 0 and streak % 7 == 0:
+            user = await get_user(message.from_user.id)
+            name = (user.get("first_name") or "друг") if user else "друг"
+            await message.answer(_weekly_summary_text(streak, name))
+
+    elif action == "moon":
+        moon = get_moon_data()
+        await message.answer(
+            f"🌙 <b>Луна сейчас</b>\n\n"
+            f"· Фаза: <b>{moon['phase_name']}</b> {moon['phase_emoji']}\n"
+            f"· Луна в <b>{moon['sign_nom']}</b> {moon['degree']}°\n"
+            f"· {moon['lunar_day']} лунный день",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="✨ Мой день →", callback_data="cb_energy"),
+            ]]),
+        )
+
+    elif action == "natal":
+        user = await get_user(message.from_user.id)
+        if user and user.get("birth_date"):
+            chart = get_natal_chart(user["birth_date"], user.get("birth_time"))
+            sign  = SIGNS_RU_NOM.get(chart["sun_sign"].capitalize(), chart["sun_sign"])
+            await message.answer(
+                f"🌟 <b>Твоя натальная карта</b>\n\n"
+                f"☀️ Солнце в <b>{sign}</b>\n"
+                f"🌙 Луна в <b>{SIGNS_RU_NOM.get(chart['moon_sign'].capitalize(), chart['moon_sign'])}</b>\n"
+                + (f"↑ Асцендент: <b>{SIGNS_RU_NOM.get(chart['asc_sign'].capitalize(), chart['asc_sign'])}</b>"
+                   if chart.get("asc_sign") else "↑ Асцендент: введи время рождения"),
+            )
+        else:
+            await message.answer(
+                "🌟 <b>Моя карта</b>\n\nСначала введи дату рождения:",
+                reply_markup=main_menu(),
+            )
+
+    elif action == "compat":
+        user    = await get_user(message.from_user.id)
+        raw_sgn = user.get("zodiac_sign") if user else None
+        my_sign = raw_sgn.capitalize() if raw_sgn else None
+        if my_sign:
+            my_name = SIGNS_RU_NOM.get(my_sign, my_sign)
+            emoji   = _SIGN_EMOJI.get(my_sign, "")
+            await message.answer(
+                f"💞 <b>Совместимость</b>\n\n"
+                f"Твой знак: {emoji} <b>{my_name}</b>\n\n"
+                f"Выбери знак, с которым хочешь проверить совместимость:",
+                reply_markup=compat_pick_keyboard(),
+            )
+        else:
+            await message.answer(
+                "Сначала выбери свой знак зодиака — нажми ✏️ Сменить знак.",
+                reply_markup=main_menu(),
+            )
+
+    else:
+        await message.answer("Привет! Используй меню ниже.", reply_markup=main_menu())
+
+
 # ─── Catch-all ────────────────────────────────────────────────────────────────
 
 
@@ -2808,8 +2894,45 @@ async def main() -> None:
     )
 
     logger.info("Selenyx запущен. Нажми Ctrl+C для остановки.")
+    if WEBAPP_URL:
+        logger.info(f"Mini App URL: {WEBAPP_URL}")
 
-    await dp.start_polling(bot, drop_pending_updates=True)
+    # Запускаем HTTP-сервер (для Mini App) и бота параллельно
+    await asyncio.gather(
+        _start_webserver(),
+        dp.start_polling(bot, drop_pending_updates=True),
+    )
+
+
+async def _start_webserver() -> None:
+    """Отдаёт webapp/index.html по HTTP на PORT (Railway)."""
+    port = int(os.getenv("PORT", "8080"))
+
+    async def handle_webapp(request: aiohttp_web.Request) -> aiohttp_web.Response:
+        index = WEBAPP_DIR / "index.html"
+        if index.exists():
+            return aiohttp_web.Response(
+                body=index.read_bytes(),
+                content_type="text/html",
+                charset="utf-8",
+            )
+        return aiohttp_web.Response(text="Mini App not found", status=404)
+
+    async def handle_health(request: aiohttp_web.Request) -> aiohttp_web.Response:
+        return aiohttp_web.Response(text="ok")
+
+    app = aiohttp_web.Application()
+    app.router.add_get("/webapp", handle_webapp)
+    app.router.add_get("/",       handle_webapp)
+    app.router.add_get("/health", handle_health)
+
+    runner = aiohttp_web.AppRunner(app)
+    await runner.setup()
+    await aiohttp_web.TCPSite(runner, "0.0.0.0", port).start()
+    logger.info(f"HTTP сервер запущен на порту {port}")
+
+    # Держим сервер живым (polling держит loop — этот корутин просто ждёт)
+    await asyncio.Event().wait()
 
 
 if __name__ == "__main__":
