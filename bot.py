@@ -9,6 +9,7 @@ import asyncio
 import logging
 import os
 import re
+import urllib.parse
 from datetime import datetime, timedelta
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -1836,12 +1837,41 @@ def _my_day_text(streak: int = 0) -> tuple[str, InlineKeyboardMarkup]:
     return text, domain_tabs_keyboard()
 
 
+def _weekly_summary_text(streak: int, name: str) -> str:
+    weeks = streak // 7
+    if weeks == 1:
+        milestone = "Первая неделя"
+        note = "Ты привыкаешь жить в ритме Луны — это уже результат."
+    elif weeks == 2:
+        milestone = "Две недели"
+        note = "Двухнедельный ритм — именно столько нужно для новой привычки."
+    elif weeks == 4:
+        milestone = "Целый месяц"
+        note = "Ты прошла полный лунный цикл вместе с ботом. Это редкость."
+    else:
+        milestone = f"{weeks} недель"
+        note = "Ритм стал частью дня — это и есть настоящая практика."
+    return (
+        f"🏆 <b>{milestone} с Selenyx!</b>\n\n"
+        f"{name}, ты открываешь бот {streak} дней подряд.\n\n"
+        f"{note}\n\n"
+        f"· 🌑→🌕 Луна прошла {streak // 29 if streak >= 29 else 0} полных цикла\n"
+        f"· 🔥 Текущий стрик: {streak} дней\n\n"
+        f"<i>Следующий итог — через 7 дней.</i>"
+    )
+
+
 @router.message(F.text == "✨ Мой день")
 async def menu_my_day(message: Message) -> None:
     await message.bot.send_chat_action(message.chat.id, ChatAction.TYPING)
     streak = await update_streak(message.from_user.id)
     text, markup = _my_day_text(streak)
     await message.answer(text, reply_markup=markup)
+    # Итог недели при кратном 7 стрике
+    if streak > 0 and streak % 7 == 0:
+        user = await get_user(message.from_user.id)
+        name = (user.get("first_name") or "друг") if user else "друг"
+        await message.answer(_weekly_summary_text(streak, name))
 
 
 @router.callback_query(F.data == "cb_energy")
@@ -2531,11 +2561,23 @@ async def cb_compat_sign(callback: CallbackQuery) -> None:
         f"<b>{compat['title']}</b>\n\n"
         f"{compat['text']}"
     )
+    # Текст для пересылки (без HTML-тегов)
+    share_text = (
+        f"💞 {my_emoji} {my_name} + {their_emoji} {their_name}\n\n"
+        f"{compat['rating']} {compat['title']}\n\n"
+        f"{compat['text']}\n\n"
+        f"Проверь свою совместимость → @Selenyx_mybot"
+    )
+    share_url = "https://t.me/share/url?" + urllib.parse.urlencode({
+        "url": "https://t.me/Selenyx_mybot",
+        "text": share_text,
+    })
     await callback.message.edit_text(
         text,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="🔄 Проверить другой знак", callback_data="compat_again"),
-        ]]),
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📤 Поделиться с другом", url=share_url)],
+            [InlineKeyboardButton(text="🔄 Проверить другой знак", callback_data="compat_again")],
+        ]),
     )
     await callback.answer()
 
