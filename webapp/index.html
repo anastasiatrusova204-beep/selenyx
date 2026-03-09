@@ -2,502 +2,825 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#0a0a1a">
   <title>Selenyx</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ── Reset ──────────────────────────────────────────────── */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg:       var(--tg-theme-bg-color,          #0a0a1a);
-      --bg2:      var(--tg-theme-secondary-bg-color, #111128);
-      --text:     var(--tg-theme-text-color,         #e8e8ff);
-      --hint:     var(--tg-theme-hint-color,         #6666aa);
-      --btn:      var(--tg-theme-button-color,       #7c4dff);
-      --moon:     #c8d3e8;
-      --gold:     #ffd54f;
-      --teal:     #64ffda;
-      --purple:   #ce93d8;
-      --radius:   22px;
+      --bg:      #0a0a1a;
+      --bg2:     #111128;
+      --bg3:     #1a1a35;
+      --text:    #e8e8ff;
+      --hint:    #6666aa;
+      --btn:     #7c4dff;
+      --moon:    #c8d3e8;
+      --gold:    #ffd54f;
+      --teal:    #64ffda;
+      --purple:  #ce93d8;
+      --red:     #ef9a9a;
+      --radius:  20px;
+      --tab-h:   68px;
     }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
+    body { font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.55; }
+    h1, h2, h3, .display { font-family: 'Cormorant Garamond', serif; }
+    button { font-family: inherit; border: none; cursor: pointer; touch-action: manipulation; }
+    input  { font-family: inherit; }
 
-    html, body {
-      width: 100%; height: 100%;
-      overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      touch-action: manipulation;
-    }
-
-    /* ── Stars canvas ───────────────────────────────────────── */
-    #stars {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 0;
-    }
-
-    /* ── Particle canvas ────────────────────────────────────── */
-    #canvas {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 10;
-    }
-
-    /* ── Gradient top strip ─────────────────────────────────── */
     .strip {
-      position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200;
-      background: linear-gradient(90deg, var(--purple), var(--teal), var(--gold), var(--purple));
-      background-size: 300% 100%;
-      animation: strip-move 5s linear infinite;
+      position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 100;
+      background: linear-gradient(90deg, var(--btn), var(--teal), var(--gold), var(--purple), var(--btn));
+      background-size: 300%;
+      animation: stripe 4s linear infinite;
     }
-    @keyframes strip-move { to { background-position: 300% 0%; } }
+    @keyframes stripe { to { background-position: 300% 0; } }
 
-    /* ── Loading ────────────────────────────────────────────── */
+    #stars, #canvas { position: fixed; inset: 0; pointer-events: none; }
+    #stars  { z-index: 0; }
+    #canvas { z-index: 10; }
+
     #loading {
-      position: fixed; inset: 0;
+      position: fixed; inset: 0; z-index: 200;
       display: flex; align-items: center; justify-content: center;
-      background: var(--bg); z-index: 300;
-      transition: opacity 0.5s ease;
+      background: var(--bg); transition: opacity 0.5s;
     }
-    #loading.out { opacity: 0; pointer-events: none; }
+    #loading.gone { opacity: 0; pointer-events: none; }
     .spinner {
       width: 36px; height: 36px;
-      border: 2px solid rgba(200,211,232,0.08);
-      border-top-color: var(--moon);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-top-color: var(--btn);
       border-radius: 50%;
-      animation: spin 0.9s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Main onboarding screen ─────────────────────────────── */
-    #main-screen {
-      position: fixed; inset: 0; z-index: 5;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 28px;
-      transition: opacity 0.5s ease;
+    .screen {
+      position: fixed; inset: 0; z-index: 20;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.4s;
     }
-    #main-screen.out { opacity: 0; pointer-events: none; }
+    .screen.active { opacity: 1; pointer-events: auto; }
 
-    /* Brand */
-    .brand { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .brand { text-align: center; margin-bottom: 32px; }
     .brand-name {
-      font-size: 26px; font-weight: 700;
-      letter-spacing: 5px; text-transform: uppercase;
-      background: linear-gradient(135deg, var(--moon) 0%, var(--purple) 60%, var(--teal) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px; font-weight: 700; letter-spacing: 4px; color: var(--text);
     }
-    .brand-sub { font-size: 12px; color: var(--hint); letter-spacing: 1.5px; }
+    .brand-sub { color: var(--hint); font-size: 13px; letter-spacing: 2px; margin-top: 4px; }
 
-    /* Sticker */
     #sticker-wrap {
-      position: relative;
-      cursor: pointer; user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      position: relative; width: 140px; height: 140px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; touch-action: manipulation;
     }
-    #sticker {
-      font-size: 96px; display: block; line-height: 1;
-      filter: drop-shadow(0 0 28px rgba(200,211,232,0.5));
-      animation: moon-float 3.8s ease-in-out infinite,
-                 moon-glow  3.8s ease-in-out infinite;
-      transition: transform 0.15s ease, opacity 0.3s ease;
+    .moon-emoji {
+      font-size: 72px; line-height: 1;
+      animation: moon-float 3.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(124,77,255,0.6));
+      z-index: 2; position: relative; transition: transform 0.2s;
     }
-    #sticker-wrap:active #sticker { transform: scale(0.9); }
-
-    /* Concentric rings */
-    .ring {
-      position: absolute; border-radius: 50%;
-      border: 1px solid rgba(200,211,232,0.12);
-      pointer-events: none;
-    }
-    .ring-1 { inset: -14px; animation: ring-pulse 3.8s ease-in-out infinite; }
-    .ring-2 { inset: -28px; animation: ring-pulse 3.8s ease-in-out infinite 0.6s; }
-    .ring-3 { inset: -46px; animation: ring-pulse 3.8s ease-in-out infinite 1.2s; border-color: rgba(200,211,232,0.05); }
-
+    #sticker-wrap:active .moon-emoji { transform: scale(0.92); }
     @keyframes moon-float {
       0%,100% { transform: translateY(0); }
       50%      { transform: translateY(-10px); }
     }
-    @keyframes moon-glow {
-      0%,100% { filter: drop-shadow(0 0 22px rgba(200,211,232,0.35)); }
-      50%      { filter: drop-shadow(0 0 44px rgba(200,211,232,0.7)); }
+    .ring {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(124,77,255,0.25);
+      animation: ring-pulse 3.8s ease-out infinite;
     }
+    .ring:nth-child(2) { width: 110px; height: 110px; animation-delay: 0s; }
+    .ring:nth-child(3) { width: 150px; height: 150px; animation-delay: 0.6s; }
+    .ring:nth-child(4) { width: 190px; height: 190px; animation-delay: 1.2s; }
     @keyframes ring-pulse {
-      0%,100% { transform: scale(1);    opacity: 0.7; }
-      50%      { transform: scale(1.07); opacity: 0.2; }
+      0%   { opacity: 0.6; transform: scale(0.95); }
+      100% { opacity: 0;   transform: scale(1.05); }
     }
-
-    /* Hint */
     #hint {
-      font-size: 12px; color: var(--hint);
-      letter-spacing: 2.5px; text-transform: uppercase;
-      animation: hint-blink 2.5s ease-in-out infinite;
+      margin-top: 28px; font-size: 13px; color: var(--hint); letter-spacing: 1px;
+      animation: blink 2.5s ease-in-out infinite;
     }
-    @keyframes hint-blink {
-      0%,100% { opacity: 0.4; } 50% { opacity: 1; }
-    }
-
-    /* ── Cards screen ───────────────────────────────────────── */
-    #cards-screen {
-      position: fixed; inset: 0; z-index: 5;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 18px; padding: 20px;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-    #cards-screen.visible { opacity: 1; pointer-events: auto; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .cards-title {
-      font-size: 14px; color: var(--hint);
-      letter-spacing: 1px;
-      animation: fade-up 0.5s ease both;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 600; letter-spacing: 1px;
+      color: var(--hint); margin-bottom: 24px; text-align: center;
     }
-
     .cards-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px; width: 100%; max-width: 340px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; width: 100%; max-width: 320px; padding: 0 20px;
     }
-
     .card {
-      background: var(--bg2);
-      border: 1px solid rgba(200,211,232,0.08);
-      border-radius: var(--radius);
-      padding: 22px 14px 18px;
-      display: flex; flex-direction: column;
-      align-items: center; gap: 10px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transform: scale(0.75) translateY(30px);
-      opacity: 0;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
-      will-change: transform, opacity;
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius); padding: 24px 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      cursor: pointer; touch-action: manipulation;
+      transition: transform 0.15s, border-color 0.15s;
+      opacity: 0; transform: scale(0.8) translateY(20px);
     }
-    .card.appear {
-      animation: card-spring 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
+    .card.visible { animation: card-spring 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     @keyframes card-spring {
-      to { transform: scale(1) translateY(0); opacity: 1; }
+      from { opacity: 0; transform: scale(0.8) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
-    .card:active {
-      transform: scale(0.93) !important;
-      background: rgba(124,77,255,0.12) !important;
-      border-color: rgba(124,77,255,0.3) !important;
-    }
-    @media (hover: hover) {
-      .card:hover {
-        border-color: rgba(200,211,232,0.2);
-        background: rgba(124,77,255,0.06);
-      }
+    .card:active { transform: scale(0.93); border-color: rgba(124,77,255,0.5); }
+    .card-icon { font-size: 32px; }
+    .card-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px; font-weight: 600; color: var(--text); text-align: center;
     }
 
-    .card-emoji  { font-size: 38px; line-height: 1; }
-    .card-label  { font-size: 13px; font-weight: 600; text-align: center; color: var(--text); }
-    .card-sub    { font-size: 11px; color: var(--hint); text-align: center; line-height: 1.4; }
-
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Back button ────────────────────────────────────────── */
     #back-btn {
-      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-      font-size: 12px; color: var(--hint);
-      letter-spacing: 1px; text-transform: uppercase;
-      cursor: pointer; z-index: 20;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
+      position: fixed; bottom: calc(16px + env(safe-area-inset-bottom));
+      left: 50%; transform: translateX(-50%);
+      background: transparent; color: var(--hint); font-size: 13px;
+      padding: 8px 20px; letter-spacing: 1px;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
+      transition: opacity 0.2s; display: none;
+    }
+
+    /* ─── App ─── */
+    #app {
+      position: fixed; inset: 0; z-index: 30;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none; transition: opacity 0.4s;
+    }
+    #app.active { opacity: 1; pointer-events: auto; }
+
+    .tab-content {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 56px 0 calc(var(--tab-h) + env(safe-area-inset-bottom));
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-panel { display: none; padding: 0 20px 20px; }
+    .tab-panel.active { display: block; }
+
+    .tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: calc(var(--tab-h) + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: var(--bg2); border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; z-index: 50;
+    }
+    .tab-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      touch-action: manipulation; cursor: pointer;
+      color: var(--hint); transition: color 0.2s, opacity 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
-    #back-btn.visible { opacity: 1; pointer-events: auto; }
-    #back-btn:active { color: var(--text); }
+    .tab-item:active { opacity: 0.6; }
+    .tab-item.active { color: var(--btn); }
+    .tab-icon { font-size: 22px; line-height: 1; }
+    .tab-label { font-size: 10px; letter-spacing: 0.5px; }
+
+    /* ─── Onboarding ─── */
+    #onboarding {
+      position: fixed; inset: 0; z-index: 40; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px; gap: 20px; opacity: 0; pointer-events: none; transition: opacity 0.4s;
+    }
+    #onboarding.active { opacity: 1; pointer-events: auto; }
+    .onb-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 700; text-align: center;
+    }
+    .onb-sub { color: var(--hint); text-align: center; font-size: 14px; }
+    .sign-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; width: 100%; max-width: 320px; }
+    .sign-btn {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 14px 8px; color: var(--text);
+      font-size: 13px; text-align: center; touch-action: manipulation; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .sign-btn:active { border-color: var(--btn); background: rgba(124,77,255,0.15); }
+    .sign-btn .sign-emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+
+    /* ─── Content ─── */
+    .section { margin-bottom: 16px; }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 600; margin-bottom: 10px; color: var(--text);
+    }
+    .info-card {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius); padding: 18px; margin-bottom: 12px;
+    }
+    .moon-badge {
+      background: var(--bg3); border: 1px solid rgba(124,77,255,0.25);
+      border-radius: 40px; padding: 10px 18px;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 14px;
+    }
+    .moon-badge .phase-icon { font-size: 24px; }
+    .streak-badge {
+      display: inline-block; background: rgba(255,87,34,0.15);
+      border: 1px solid rgba(255,87,34,0.3); border-radius: 20px;
+      padding: 3px 12px; font-size: 12px; color: #ff7043; margin-left: 8px;
+    }
+    .phase-intro { color: var(--text); margin-bottom: 16px; line-height: 1.65; }
+
+    .domain-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .pill {
+      background: var(--bg3); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 7px 14px; font-size: 13px;
+      cursor: pointer; touch-action: manipulation; transition: all 0.2s; color: var(--hint);
+    }
+    .pill.active { background: rgba(124,77,255,0.2); border-color: var(--btn); color: var(--text); }
+    .pill:active { opacity: 0.7; }
+    .domain-content { display: none; }
+    .domain-content.active { display: block; }
+    .domain-tip {
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px; color: var(--text);
+    }
+    .domain-tip::before { content: '· '; color: var(--hint); }
+    .domain-tip:last-child { border-bottom: none; }
+    .domain-context { margin-top: 12px; font-size: 13px; color: var(--hint); font-style: italic; }
+
+    .prediction-wrap {
+      background: var(--bg2); border: 1px solid rgba(255,213,79,0.15);
+      border-radius: var(--radius); padding: 18px; margin-top: 12px;
+    }
+    .prediction-label { font-size: 13px; color: var(--gold); margin-bottom: 10px; }
+    .prediction-text {
+      filter: blur(6px); user-select: none; cursor: pointer; touch-action: manipulation;
+      transition: filter 0.4s; font-size: 14px; line-height: 1.65;
+    }
+    .prediction-text.revealed { filter: blur(0); cursor: default; }
+    .prediction-hint { font-size: 12px; color: var(--hint); margin-top: 8px; text-align: center; }
+    .prediction-hint.hidden { display: none; }
+
+    /* ─── Moon tab ─── */
+    .moon-display { text-align: center; padding: 20px 0 24px; }
+    .moon-phase-big {
+      font-size: 64px; line-height: 1; margin-bottom: 12px;
+      filter: drop-shadow(0 0 20px rgba(124,77,255,0.5));
+    }
+    .moon-phase-name {
+      font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .moon-position { font-size: 14px; color: var(--hint); }
+    .lunar-day-card {
+      background: linear-gradient(135deg, rgba(124,77,255,0.12), rgba(100,255,218,0.06));
+      border: 1px solid rgba(124,77,255,0.2); border-radius: var(--radius); padding: 20px; margin-bottom: 12px;
+    }
+    .ld-symbol {
+      font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700;
+      margin-bottom: 4px; color: var(--purple);
+    }
+    .ld-day { font-size: 12px; color: var(--hint); margin-bottom: 10px; }
+    .ld-energy { font-size: 14px; color: var(--text); margin-bottom: 10px; }
+    .ld-practice { font-size: 13px; color: var(--teal); font-style: italic; }
+    .aspect-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px;
+    }
+    .aspect-item:last-child { border-bottom: none; }
+    .aspect-planet { font-weight: 500; color: var(--purple); min-width: 70px; }
+    .aspect-type { color: var(--hint); min-width: 80px; }
+    .aspect-hint { color: var(--text); flex: 1; }
+    .color-day-card {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    }
+    .color-name { font-size: 16px; font-weight: 500; color: var(--gold); }
+    .color-reason { font-size: 13px; color: var(--hint); margin-top: 4px; }
+    .color-hint { font-size: 13px; color: var(--text); margin-top: 6px; }
+
+    /* ─── Natal ─── */
+    .natal-form { display: flex; flex-direction: column; gap: 14px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-label { font-size: 13px; color: var(--hint); }
+    .input-field {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px; padding: 14px 16px; color: var(--text); font-size: 15px;
+      outline: none; width: 100%; transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--btn); }
+    .input-field::placeholder { color: var(--hint); }
+    .input-hint { font-size: 12px; color: var(--hint); }
+    .btn-primary {
+      background: var(--btn); color: #fff; border-radius: 14px; padding: 16px;
+      font-size: 16px; font-weight: 500; width: 100%; transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
+    .planet-card { border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
+    .planet-card.sun  { background: linear-gradient(135deg,rgba(255,213,79,0.1),rgba(255,143,0,0.06)); border: 1px solid rgba(255,213,79,0.2); }
+    .planet-card.moon { background: linear-gradient(135deg,rgba(124,77,255,0.12),rgba(100,255,218,0.06)); border: 1px solid rgba(124,77,255,0.2); }
+    .planet-card.asc  { background: linear-gradient(135deg,rgba(100,255,218,0.1),rgba(206,147,216,0.06)); border: 1px solid rgba(100,255,218,0.2); }
+    .planet-name {
+      font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; margin-bottom: 6px;
+    }
+    .planet-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+    .btn-text {
+      background: transparent; color: var(--hint); font-size: 13px; padding: 8px;
+      margin-top: 4px; width: 100%; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+    }
+
+    /* ─── Compat ─── */
+    .sign-picker-grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 20px;
+    }
+    .sign-pick-btn {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+      padding: 12px 4px; text-align: center; cursor: pointer; touch-action: manipulation;
+      transition: all 0.2s; color: var(--hint);
+    }
+    .sign-pick-btn.selected { background: rgba(124,77,255,0.2); border-color: var(--btn); color: var(--text); }
+    .sign-pick-btn:active { opacity: 0.7; }
+    .sign-pick-emoji { font-size: 20px; display: block; margin-bottom: 2px; }
+    .sign-pick-name { font-size: 10px; }
+    .compat-result {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius); padding: 20px; margin-top: 8px;
+    }
+    .compat-rating { font-size: 22px; margin-bottom: 6px; }
+    .compat-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
+      margin-bottom: 12px; color: var(--text);
+    }
+    .compat-text { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+    /* ─── Premium gate ─── */
+    .premium-gate { position: relative; border-radius: var(--radius); overflow: hidden; margin-top: 12px; }
+    .gate-blur {
+      padding: 20px; filter: blur(4px); pointer-events: none; user-select: none;
+      font-size: 14px; color: var(--text); line-height: 1.6;
+    }
+    .gate-overlay {
+      position: absolute; inset: 0; background: rgba(10,10,26,0.75); backdrop-filter: blur(2px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 20px;
+    }
+    .gate-icon { font-size: 28px; }
+    .gate-label {
+      font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700;
+      text-align: center; color: var(--text);
+    }
+    .stars-btn {
+      background: linear-gradient(135deg,#ffd54f,#ff8f00); color: #1a1100;
+      border-radius: 14px; padding: 12px 24px; font-size: 15px; font-weight: 500;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .stars-btn:active { opacity: 0.8; transform: scale(0.96); }
+    .gate-note { font-size: 12px; color: var(--hint); }
+
+    .skeleton {
+      background: linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+      background-size: 300%; animation: shimmer 1.5s infinite;
+      border-radius: 10px; height: 60px; margin-bottom: 12px;
+    }
+    @keyframes shimmer { to { background-position: -300% 0; } }
+    .error-msg { color: var(--red); font-size: 14px; padding: 16px; text-align: center; }
   </style>
 </head>
 <body>
-
-  <!-- Loader -->
+  <div class="strip"></div>
+  <canvas id="stars"></canvas>
+  <canvas id="canvas"></canvas>
   <div id="loading"><div class="spinner"></div></div>
 
-  <!-- Top gradient strip -->
-  <div class="strip"></div>
-
-  <!-- Starfield -->
-  <canvas id="stars"></canvas>
-
-  <!-- Particle canvas -->
-  <canvas id="canvas"></canvas>
-
-  <!-- Onboarding screen -->
-  <div id="main-screen">
+  <!-- Экран с Луной -->
+  <div class="screen active" id="moon-screen">
     <div class="brand">
-      <span class="brand-name">Selenyx</span>
-      <span class="brand-sub">космический навигатор</span>
+      <div class="brand-name">SELENYX</div>
+      <div class="brand-sub">космический навигатор</div>
     </div>
-
     <div id="sticker-wrap">
-      <div class="ring ring-3"></div>
-      <div class="ring ring-2"></div>
-      <div class="ring ring-1"></div>
-      <span id="sticker">🌙</span>
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="moon-emoji">🌙</div>
     </div>
-
-    <span id="hint">нажми на луну</span>
+    <div id="hint">нажми на луну</div>
   </div>
 
-  <!-- Cards screen -->
-  <div id="cards-screen">
-    <p class="cards-title">что смотрим сегодня?</p>
+  <!-- Экран карточек -->
+  <div class="screen" id="cards-screen">
+    <div class="cards-title">что смотрим сегодня?</div>
     <div class="cards-grid">
-      <div class="card" data-action="my_day">
-        <span class="card-emoji">✨</span>
-        <span class="card-label">Мой день</span>
-        <span class="card-sub">энергия и прогноз</span>
-      </div>
-      <div class="card" data-action="moon">
-        <span class="card-emoji">🌙</span>
-        <span class="card-label">Луна сейчас</span>
-        <span class="card-sub">фаза и знак</span>
-      </div>
-      <div class="card" data-action="natal">
-        <span class="card-emoji">🌟</span>
-        <span class="card-label">Моя карта</span>
-        <span class="card-sub">натальная карта</span>
-      </div>
-      <div class="card" data-action="compat">
-        <span class="card-emoji">💞</span>
-        <span class="card-label">Совместимость</span>
-        <span class="card-sub">проверить пару</span>
-      </div>
+      <div class="card" data-action="today"><div class="card-icon">✨</div><div class="card-label">Мой день</div></div>
+      <div class="card" data-action="moon"><div class="card-icon">🌙</div><div class="card-label">Луна</div></div>
+      <div class="card" data-action="natal"><div class="card-icon">🌟</div><div class="card-label">Моя карта</div></div>
+      <div class="card" data-action="compat"><div class="card-icon">💞</div><div class="card-label">Совместимость</div></div>
     </div>
+    <button id="back-btn">← вернуться</button>
   </div>
 
-  <!-- Back to moon -->
-  <div id="back-btn">← вернуться</div>
+  <!-- Онбординг -->
+  <div id="onboarding">
+    <div class="onb-title">🌙 Выбери знак Луны</div>
+    <div class="onb-sub">Укажи свой знак зодиака — буду давать персональные советы</div>
+    <div class="sign-grid" id="sign-grid"></div>
+  </div>
 
-<script>
-// ── Telegram init ──────────────────────────────────────────────
-const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); }
+  <!-- Приложение -->
+  <div id="app">
+    <div class="tab-content">
+      <div class="tab-panel active" id="tab-today">
+        <div class="skeleton" style="height:56px;border-radius:28px;margin-top:8px"></div>
+        <div class="skeleton"></div><div class="skeleton" style="height:120px"></div>
+      </div>
+      <div class="tab-panel" id="tab-moon">
+        <div class="skeleton" style="height:160px;margin-top:8px"></div>
+        <div class="skeleton"></div><div class="skeleton"></div>
+      </div>
+      <div class="tab-panel" id="tab-natal">
+        <div class="skeleton" style="height:56px;margin-top:8px"></div>
+        <div class="skeleton" style="height:120px"></div>
+      </div>
+      <div class="tab-panel" id="tab-compat">
+        <div class="skeleton" style="height:200px;margin-top:8px"></div>
+      </div>
+    </div>
+    <nav class="tab-bar">
+      <div class="tab-item active" data-tab="today"><div class="tab-icon">✨</div><div class="tab-label">Мой день</div></div>
+      <div class="tab-item" data-tab="moon"><div class="tab-icon">🌙</div><div class="tab-label">Луна</div></div>
+      <div class="tab-item" data-tab="natal"><div class="tab-icon">🌟</div><div class="tab-label">Карта</div></div>
+      <div class="tab-item" data-tab="compat"><div class="tab-icon">💞</div><div class="tab-label">Совместимость</div></div>
+    </nav>
+  </div>
 
-const haptic = (type = 'light') => tg?.HapticFeedback?.impactOccurred(type);
+  <script>
+  const tg = window.Telegram?.WebApp;
+  tg?.ready(); tg?.expand();
 
-// ── Loading ────────────────────────────────────────────────────
-const $loading = document.getElementById('loading');
-setTimeout(() => $loading.classList.add('out'), 500);
+  const ZODIAC = [
+    {e:'♈',k:'aries',n:'Овен'},{e:'♉',k:'taurus',n:'Телец'},
+    {e:'♊',k:'gemini',n:'Близнецы'},{e:'♋',k:'cancer',n:'Рак'},
+    {e:'♌',k:'leo',n:'Лев'},{e:'♍',k:'virgo',n:'Дева'},
+    {e:'♎',k:'libra',n:'Весы'},{e:'♏',k:'scorpio',n:'Скорпион'},
+    {e:'♐',k:'sagittarius',n:'Стрелец'},{e:'♑',k:'capricorn',n:'Козерог'},
+    {e:'♒',k:'aquarius',n:'Водолей'},{e:'♓',k:'pisces',n:'Рыбы'},
+  ];
+  const DOMAIN_LABELS = {
+    health:'🏥 Здоровье', work:'💼 Работа',
+    love:'❤️ Отношения', psych:'🧠 Психология',
+  };
 
-// ── Starfield ──────────────────────────────────────────────────
-const $stars = document.getElementById('stars');
-const sCtx   = $stars.getContext('2d');
-let starList = [];
-
-function initStars() {
-  $stars.width  = window.innerWidth;
-  $stars.height = window.innerHeight;
-  starList = Array.from({ length: 140 }, () => ({
-    x:     Math.random() * $stars.width,
-    y:     Math.random() * $stars.height,
-    r:     Math.random() * 1.4 + 0.3,
-    phase: Math.random() * Math.PI * 2,
-    speed: Math.random() * 0.008 + 0.002,
-  }));
-}
-
-function drawStars(t) {
-  sCtx.clearRect(0, 0, $stars.width, $stars.height);
-  starList.forEach(s => {
-    const a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.speed * 60 + s.phase));
-    sCtx.beginPath();
-    sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    sCtx.fillStyle = `rgba(200,211,232,${a.toFixed(2)})`;
-    sCtx.fill();
-  });
-}
-
-// ── Particle system ────────────────────────────────────────────
-const $canvas = document.getElementById('canvas');
-const ctx     = $canvas.getContext('2d');
-
-const COLORS = ['#c8d3e8','#ffd54f','#ce93d8','#64ffda','#ffffff','#a5c8ff','#ffb3c6'];
-let particles = [];
-let phase     = 'idle'; // idle | explode | converge
-
-class Particle {
-  constructor(x, y) {
-    this.x = x; this.y = y;
-    const angle = Math.random() * Math.PI * 2;
-    const spd   = 3 + Math.random() * 9;
-    this.vx  = Math.cos(angle) * spd;
-    this.vy  = Math.sin(angle) * spd - 1;
-    this.r   = 1.5 + Math.random() * 3;
-    this.col = COLORS[Math.floor(Math.random() * COLORS.length)];
-    this.a   = 1;
-    this.tx  = x; this.ty = y;
-  }
-
-  stepExplode() {
-    this.vx *= 0.965;
-    this.vy  = this.vy * 0.965 + 0.18;
-    this.x  += this.vx;
-    this.y  += this.vy;
-    this.a   = Math.max(0, this.a - 0.006);
-  }
-
-  stepConverge() {
-    this.x += (this.tx - this.x) * 0.07;
-    this.y += (this.ty - this.y) * 0.07;
-    this.a  = Math.min(1, this.a + 0.04);
-    this.r  = Math.max(0.8, this.r * 0.985);
-  }
-
-  draw() {
-    ctx.globalAlpha = this.a;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.fillStyle = this.col;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-
-function resizeCanvas() {
-  $canvas.width  = window.innerWidth;
-  $canvas.height = window.innerHeight;
-}
-
-function getCardCenters() {
-  return Array.from(document.querySelectorAll('.card')).map(c => {
-    const r = c.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-  });
-}
-
-// ── Explosion ──────────────────────────────────────────────────
-function explode(cx, cy) {
-  phase     = 'explode';
-  particles = Array.from({ length: 100 }, () => new Particle(cx, cy));
-
-  // Start convergence after 850ms
-  setTimeout(() => {
-    if (phase !== 'explode') return;
-    phase = 'converge';
-    const centers = getCardCenters();
-    particles.forEach((p, i) => {
-      const t  = centers[i % centers.length];
-      p.tx = t.x + (Math.random() - 0.5) * 28;
-      p.ty = t.y + (Math.random() - 0.5) * 28;
+  // ── API ──────────────────────────────────────────────────────────────────
+  async function api(path, opts={}) {
+    const r = await fetch(path, {
+      ...opts,
+      headers: {'X-Telegram-Init-Data': tg?.initData||'','Content-Type':'application/json',...opts.headers},
     });
-  }, 850);
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }
 
-  // Show cards while particles converge
-  setTimeout(showCards, 1050);
-}
+  // ── State ────────────────────────────────────────────────────────────────
+  let me=null, todayData=null, moonData=null, natalData=null, compatSign=null;
+  let currentTab='today';
+  let tabLoaded={today:false,moon:false,natal:false,compat:false};
 
-// ── Animation loop ─────────────────────────────────────────────
-function loop(t) {
-  resizeCanvas();
-  ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-  drawStars(t);
+  // ── Stars ────────────────────────────────────────────────────────────────
+  const SC = document.getElementById('stars'), sc = SC.getContext('2d');
+  let stars=[];
+  function initStars(){
+    SC.width=innerWidth; SC.height=innerHeight; stars=[];
+    for(let i=0;i<140;i++) stars.push({x:Math.random()*SC.width,y:Math.random()*SC.height,r:.3+Math.random()*1.4,p:Math.random()*Math.PI*2});
+  }
+  function drawStars(t){
+    sc.clearRect(0,0,SC.width,SC.height);
+    for(const s of stars){
+      const a=.3+.7*Math.abs(Math.sin(t*.0007+s.p));
+      sc.beginPath(); sc.arc(s.x,s.y,s.r,0,Math.PI*2);
+      sc.fillStyle=`rgba(200,200,255,${a})`; sc.fill();
+    }
+  }
 
-  if (phase === 'explode')   particles.forEach(p => { p.stepExplode();   p.draw(); });
-  if (phase === 'converge')  particles.forEach(p => { p.stepConverge();  p.draw(); });
+  // ── Particles ────────────────────────────────────────────────────────────
+  const CV=document.getElementById('canvas'), ctx=CV.getContext('2d');
+  const COLORS=['#c8d3e8','#ffd54f','#ce93d8','#64ffda','#fff','#90caf9','#f48fb1'];
+  let particles=[], phase='idle', animStart=0, targets=[];
 
-  requestAnimationFrame(loop);
-}
+  class P {
+    constructor(x,y,t){
+      this.x=x; this.y=y; this.t=t;
+      this.vx=(Math.random()-.5)*14; this.vy=(Math.random()-.5)*14;
+      this.r=2+Math.random()*3; this.color=COLORS[Math.floor(Math.random()*COLORS.length)];
+      this.alpha=1;
+    }
+    stepExp(){ this.vx*=.97; this.vy*=.97; this.vy+=.18; this.x+=this.vx; this.y+=this.vy; this.alpha=Math.max(0,this.alpha-.003); }
+    stepConv(){ this.x+=(this.t.x-this.x)*.07; this.y+=(this.t.y-this.y)*.07; this.r=Math.max(.8,this.r*.98); this.alpha=Math.min(1,this.alpha+.01); }
+    draw(){
+      ctx.globalAlpha=this.alpha; ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=this.color; ctx.fill(); ctx.globalAlpha=1;
+    }
+  }
 
-// ── Show / hide screens ────────────────────────────────────────
-const $main  = document.getElementById('main-screen');
-const $cards = document.getElementById('cards-screen');
-const $back  = document.getElementById('back-btn');
+  function getTargets(){
+    return [...document.querySelectorAll('.card')].map(c=>{const r=c.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};});
+  }
 
-function showCards() {
-  $main.classList.add('out');
-  $cards.classList.add('visible');
-  $back.classList.add('visible');
-  document.querySelectorAll('.card').forEach((c, i) =>
-    setTimeout(() => c.classList.add('appear'), i * 90)
-  );
-}
+  function explode(){
+    CV.width=innerWidth; CV.height=innerHeight;
+    const cx=innerWidth/2, cy=innerHeight/2;
+    document.getElementById('cards-screen').classList.add('active');
+    document.getElementById('moon-screen').classList.remove('active');
+    document.getElementById('back-btn').style.display='block';
+    targets=getTargets();
+    particles=Array.from({length:100},(_,i)=>new P(cx,cy,targets[i%targets.length]));
+    phase='explode'; animStart=performance.now();
+    tg?.HapticFeedback?.impactOccurred('medium');
+  }
 
-function showMoon() {
-  phase = 'idle';
-  particles = [];
-  $cards.classList.remove('visible');
-  $back.classList.remove('visible');
-  document.querySelectorAll('.card').forEach(c => c.classList.remove('appear'));
-  const $s = document.getElementById('sticker');
-  $s.style.transform = 'scale(0)';
-  $s.style.opacity   = '0';
-  $main.classList.remove('out');
-  setTimeout(() => {
-    $s.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease';
-    $s.style.transform  = '';
-    $s.style.opacity    = '';
-  }, 50);
-}
+  function showMoon(){
+    document.getElementById('cards-screen').classList.remove('active');
+    document.getElementById('moon-screen').classList.add('active');
+    document.getElementById('back-btn').style.display='none';
+    document.querySelectorAll('.card').forEach(c=>{c.classList.remove('visible');c.style.opacity='0';c.style.transform='';});
+    particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
+  }
 
-// ── Sticker click ──────────────────────────────────────────────
-document.getElementById('sticker-wrap').addEventListener('click', () => {
-  if (phase !== 'idle') return;
-  haptic('heavy');
+  // ── Loop ─────────────────────────────────────────────────────────────────
+  function loop(t){
+    requestAnimationFrame(loop);
+    drawStars(t);
+    ctx.clearRect(0,0,CV.width,CV.height);
+    if(phase==='explode'){
+      const el=t-animStart;
+      for(const p of particles) p.stepExp();
+      for(const p of particles) p.draw();
+      if(el>850){
+        phase='converge'; animStart=t;
+        document.querySelectorAll('.card').forEach((c,i)=>setTimeout(()=>c.classList.add('visible'),i*90));
+      }
+    } else if(phase==='converge'){
+      for(const p of particles) p.stepConv();
+      for(const p of particles) p.draw();
+      if(t-animStart>1050) phase='idle';
+    }
+  }
 
-  const $s  = document.getElementById('sticker');
-  $s.style.transition = 'transform 0.18s ease, opacity 0.25s ease';
-  $s.style.transform  = 'scale(0)';
-  $s.style.opacity    = '0';
+  // ── Tabs ─────────────────────────────────────────────────────────────────
+  function switchTab(id){
+    if(id===currentTab) return;
+    currentTab=id;
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===`tab-${id}`));
+    document.querySelectorAll('.tab-item').forEach(i=>i.classList.toggle('active',i.dataset.tab===id));
+    tg?.HapticFeedback?.selectionChanged?.();
+    if(!tabLoaded[id]) loadTab(id);
+  }
 
-  const r  = $s.getBoundingClientRect();
-  const cx = r.left + r.width / 2;
-  const cy = r.top  + r.height / 2;
-  explode(cx, cy);
-});
+  function showApp(tab='today'){
+    document.getElementById('app').classList.add('active');
+    document.getElementById('cards-screen').classList.remove('active');
+    document.getElementById('back-btn').style.display='none';
+    particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
+    switchTab(tab);
+  }
 
-// ── Card click ─────────────────────────────────────────────────
-// sendData работает только при открытии через keyboard-кнопку.
-// При открытии через menu-button используем deep link + close().
-const BOT_USERNAME = 'Selenyx_mybot';
+  // ── Render helpers ────────────────────────────────────────────────────────
+  function dw(n){const m=n%10,c=n%100;if(c>=11&&c<=14)return'дн';if(m===1)return'день';if(m>=2&&m<=4)return'дня';return'дн';}
 
-document.querySelectorAll('.card').forEach(card => {
-  card.addEventListener('click', () => {
-    haptic('light');
-    const action = card.dataset.action;
+  function renderToday(d){
+    const m=d.moon, pe=d.phase_energy, streak=me?.streak||0;
+    const sb=streak>1?`<span class="streak-badge">🔥 ${streak} ${dw(streak)} подряд</span>`:'';
+    const dk=['health','work','love','psych'];
+    const pills=dk.map(k=>`<div class="pill${k==='health'?' active':''}" data-domain="${k}">${DOMAIN_LABELS[k]}</div>`).join('');
+    const doms=dk.map(k=>{
+      const dd=d.domains[k]||{};
+      const tips=(dd.tips||[]).map(t=>`<div class="domain-tip">${t}</div>`).join('');
+      const ctx2=dd.context?`<div class="domain-context">${dd.context}</div>`:'';
+      return `<div class="domain-content${k==='health'?' active':''}" data-dc="${k}">${tips}${ctx2}</div>`;
+    }).join('');
+    const pred=d.prediction?`<div class="prediction-wrap">
+      <div class="prediction-label">🥠 Личное предсказание</div>
+      <div class="prediction-text" id="pred-text">${d.prediction}</div>
+      <div class="prediction-hint" id="pred-hint">нажми чтобы открыть</div>
+    </div>`:'';
 
-    // Visual bounce-back
-    card.style.transform = 'scale(0.91)';
-    setTimeout(() => { card.style.transform = ''; }, 200);
+    document.getElementById('tab-today').innerHTML=`
+      <div class="moon-badge" style="margin-top:8px">
+        <span class="phase-icon">${m.phase_emoji}</span>
+        <span>Луна в ${m.sign_nom} ${m.degree}° &nbsp;·&nbsp; ${m.lunar_day} лунный день</span>${sb}
+      </div>
+      <div class="phase-intro">${pe.intro}</div>
+      <div class="section"><div class="domain-pills">${pills}</div><div>${doms}</div></div>
+      ${pred}`;
 
-    setTimeout(() => {
-      // openTelegramLink работает в любом контексте и закрывает webapp автоматически
-      tg?.openTelegramLink(`https://t.me/${BOT_USERNAME}?start=wa_${action}`);
-    }, 250);
+    document.querySelectorAll('#tab-today .pill').forEach(p=>{
+      p.addEventListener('click',()=>{
+        const k=p.dataset.domain;
+        document.querySelectorAll('#tab-today .pill').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('#tab-today .domain-content').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        document.querySelector(`[data-dc="${k}"]`)?.classList.add('active');
+        tg?.HapticFeedback?.selectionChanged?.();
+      });
+    });
+    document.getElementById('pred-text')?.addEventListener('click',function(){
+      if(!this.classList.contains('revealed')){
+        this.classList.add('revealed');
+        document.getElementById('pred-hint')?.classList.add('hidden');
+        tg?.HapticFeedback?.notificationOccurred('success');
+      }
+    });
+  }
+
+  function renderMoon(d){
+    const asp=(d.aspects||[]).map(a=>`<div class="aspect-item">
+      <span class="aspect-planet">${a.label}</span><span class="aspect-type">${a.aspect}</span>
+      <span class="aspect-hint">${a.hint}</span></div>`).join('')||
+      `<div style="color:var(--hint);font-size:14px;padding:8px 0">Активных аспектов нет</div>`;
+    const retro=(d.retrogrades||[]).length?`<div class="info-card" style="border-color:rgba(239,154,154,.3)">
+      <div style="color:var(--red);font-size:13px;margin-bottom:4px">⚠ Ретроградные планеты</div>
+      <div style="font-size:14px">${d.retrogrades.join(', ')}</div></div>`:'';
+    const c=d.color||{};
+    const col=c.color?`<div class="color-day-card">
+      <div style="font-size:12px;color:var(--hint);margin-bottom:6px">🎨 Цвет дня</div>
+      <div class="color-name">${c.color}</div><div class="color-reason">${c.reason}</div>
+      ${c.hint?`<div class="color-hint">${c.hint}</div>`:''}</div>`:'';
+    const num=d.day_number_text?`<div class="info-card">
+      <div style="font-size:12px;color:var(--hint);margin-bottom:6px">🔢 Число дня: ${d.day_number}</div>
+      <div style="font-size:14px">${d.day_number_text}</div></div>`:'';
+
+    document.getElementById('tab-moon').innerHTML=`
+      <div class="moon-display">
+        <div class="moon-phase-big">${d.phase_emoji}</div>
+        <div class="moon-phase-name">${d.phase_name}</div>
+        <div class="moon-position">Луна в ${d.sign_nom} ${d.degree}°</div>
+      </div>
+      <div class="lunar-day-card">
+        <div class="ld-day">⚡ ${d.lunar_day} лунный день</div>
+        <div class="ld-symbol">${d.lunar_day_symbol}</div>
+        <div class="ld-energy">${d.lunar_day_energy}</div>
+        <div class="ld-practice">💫 ${d.lunar_day_practice}</div>
+      </div>
+      ${retro}
+      <div class="section"><div class="section-title">🪐 Аспекты Луны</div>
+      <div class="info-card">${asp}</div></div>
+      ${col}${num}`;
+  }
+
+  function renderNatal(d){
+    if(!d.has_data){
+      document.getElementById('tab-natal').innerHTML=`
+        <div class="section-title" style="margin-top:12px">🌟 Твоя натальная карта</div>
+        <p style="color:var(--hint);font-size:14px;margin-bottom:20px">Введи дату рождения — рассчитаю положение Солнца, Луны и Асцендента</p>
+        <div class="natal-form">
+          <div class="input-group"><label class="input-label">Дата рождения</label>
+            <input class="input-field" id="inp-date" type="text" placeholder="ДД.ММ.ГГГГ" inputmode="numeric" spellcheck="false"></div>
+          <div class="input-group"><label class="input-label">Время рождения (необязательно)</label>
+            <input class="input-field" id="inp-time" type="text" placeholder="ЧЧ:ММ" inputmode="numeric" spellcheck="false">
+            <div class="input-hint">Нужно для расчёта Асцендента</div></div>
+          <button class="btn-primary" id="btn-calc">Рассчитать →</button>
+          <div id="calc-err" style="display:none" class="error-msg"></div>
+        </div>`;
+      document.getElementById('btn-calc')?.addEventListener('click',submitNatal);
+    } else {
+      const asc=d.asc?`<div class="planet-card asc">
+        <div class="planet-name">⬆️ Асцендент в ${d.asc.sign}</div>
+        <div class="planet-desc">${d.asc.desc}</div></div>`:'';
+      document.getElementById('tab-natal').innerHTML=`
+        <div class="section-title" style="margin-top:12px">🌟 Твоя натальная карта</div>
+        <div class="planet-card sun"><div class="planet-name">☀️ Солнце в ${d.sun.sign}</div><div class="planet-desc">${d.sun.desc}</div></div>
+        <div class="planet-card moon"><div class="planet-name">🌙 Луна в ${d.moon.sign}</div><div class="planet-desc">${d.moon.desc}</div></div>
+        ${asc}
+        <div class="premium-gate">
+          <div class="gate-blur">Персональный прогноз на год · Глубокий разбор знаков · Точки роста и вызовы · Благоприятные периоды</div>
+          <div class="gate-overlay"><div class="gate-icon">🔒</div>
+            <div class="gate-label">Полная интерпретация карты</div>
+            <button class="stars-btn" onclick="buyFeature('natal_full')">⭐ 490 Звёзд</button>
+            <div class="gate-note">~330 ₽ · разовая покупка</div></div>
+        </div>
+        <button class="btn-text" id="btn-reset">↺ Изменить дату рождения</button>`;
+      document.getElementById('btn-reset')?.addEventListener('click',()=>{
+        natalData=null; tabLoaded.natal=false; loadTab('natal');
+      });
+    }
+  }
+
+  function renderCompat(result=null){
+    const picker=ZODIAC.map(s=>`<div class="sign-pick-btn${compatSign===s.k?' selected':''}" data-sign="${s.k}">
+      <span class="sign-pick-emoji">${s.e}</span><span class="sign-pick-name">${s.n}</span></div>`).join('');
+    const res=result?`<div class="compat-result">
+      <div class="compat-rating">${result.rating}</div>
+      <div class="compat-title">${result.title}</div>
+      <div class="compat-text">${result.text}</div></div>
+      <div class="premium-gate"><div class="gate-blur">Ключевые точки напряжения · Сексуальная совместимость · Лучшие и трудные периоды</div>
+      <div class="gate-overlay"><div class="gate-icon">🔒</div>
+        <div class="gate-label">Детальный анализ</div>
+        <button class="stars-btn" onclick="buyFeature('compat_deep')">⭐ 490 Звёзд</button>
+        <div class="gate-note">~330 ₽ · разовая покупка</div></div></div>`:'';
+    document.getElementById('tab-compat').innerHTML=`
+      <div class="section-title" style="margin-top:12px">💞 Совместимость</div>
+      <p style="color:var(--hint);font-size:14px;margin-bottom:16px">Выбери знак партнёра</p>
+      <div class="sign-picker-grid">${picker}</div>
+      <div id="compat-res">${res}</div>`;
+    document.querySelectorAll('.sign-pick-btn').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        compatSign=btn.dataset.sign;
+        tg?.HapticFeedback?.selectionChanged?.();
+        document.getElementById('compat-res').innerHTML='<div class="skeleton" style="height:120px"></div>';
+        try{ renderCompat(await api(`/api/compat?sign=${compatSign}`)); }
+        catch{ document.getElementById('compat-res').innerHTML='<div class="error-msg">Ошибка</div>'; }
+      });
+    });
+  }
+
+  async function loadTab(id){
+    tabLoaded[id]=true;
+    try{
+      if(id==='today'){ if(!todayData) todayData=await api('/api/today'); renderToday(todayData); }
+      else if(id==='moon'){ if(!moonData) moonData=await api('/api/moon'); renderMoon(moonData); }
+      else if(id==='natal'){ if(natalData===null) natalData=await api('/api/natal'); renderNatal(natalData); }
+      else if(id==='compat'){ renderCompat(); }
+    } catch{ document.getElementById(`tab-${id}`).innerHTML='<div class="error-msg">Ошибка. Попробуй ещё раз.</div>'; tabLoaded[id]=false; }
+  }
+
+  async function submitNatal(){
+    const date=document.getElementById('inp-date')?.value?.trim()||'';
+    const time=document.getElementById('inp-time')?.value?.trim()||'';
+    const err=document.getElementById('calc-err');
+    if(!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(date)){err.textContent='Введи дату в формате ДД.ММ.ГГГГ';err.style.display='block';return;}
+    err.style.display='none';
+    document.getElementById('btn-calc').textContent='Считаю…';
+    try{
+      await api('/api/natal',{method:'POST',body:JSON.stringify({birth_date:date,birth_time:time||null})});
+      natalData=null; tabLoaded.natal=false; await loadTab('natal');
+      tg?.HapticFeedback?.notificationOccurred('success');
+    } catch{ err.textContent='Не удалось. Проверь формат даты.'; err.style.display='block'; document.getElementById('btn-calc').textContent='Рассчитать →'; }
+  }
+
+  function buyFeature(f){
+    tg?.HapticFeedback?.notificationOccurred('warning');
+    tg?.showPopup?.({title:'Скоро!',message:'Платёжная система появится в следующем обновлении.',buttons:[{type:'ok'}]});
+  }
+  window.buyFeature=buyFeature;
+
+  function showOnboarding(){
+    document.getElementById('sign-grid').innerHTML=ZODIAC.map(s=>
+      `<button class="sign-btn" data-sign="${s.k}"><span class="sign-emoji">${s.e}</span>${s.n}</button>`
+    ).join('');
+    document.querySelectorAll('.sign-btn').forEach(btn=>{
+      btn.addEventListener('click',async()=>{
+        tg?.HapticFeedback?.impactOccurred('light');
+        try{
+          await api('/api/sign',{method:'POST',body:JSON.stringify({sign:btn.dataset.sign})});
+          me=await api('/api/me');
+          document.getElementById('onboarding').classList.remove('active');
+          todayData=await api('/api/today');
+          showApp('today');
+        } catch{ btn.textContent='Ошибка :('; }
+      });
+    });
+    document.getElementById('onboarding').classList.add('active');
+  }
+
+  async function init(){
+    initStars();
+    requestAnimationFrame(loop);
+    setTimeout(()=>document.getElementById('loading').classList.add('gone'),500);
+    try{ me=await api('/api/me'); } catch{ me={registered:false}; }
+  }
+
+  // ── Events ────────────────────────────────────────────────────────────────
+  document.getElementById('sticker-wrap')?.addEventListener('click',explode);
+  document.getElementById('back-btn')?.addEventListener('click',showMoon);
+
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click',async()=>{
+      const action=card.dataset.action;
+      tg?.HapticFeedback?.impactOccurred('light');
+      card.style.transform='scale(0.92)';
+      setTimeout(()=>{card.style.transform='';},200);
+
+      if(!me?.registered&&!me?.sign){
+        setTimeout(showOnboarding,220); return;
+      }
+      setTimeout(async()=>{
+        if(!todayData&&(action==='today'||!tabLoaded.today))
+          todayData=await api('/api/today').catch(()=>null);
+        showApp(action);
+        if(!tabLoaded[action]) await loadTab(action);
+      },250);
+    });
   });
-});
 
-// ── Back button ────────────────────────────────────────────────
-document.getElementById('back-btn').addEventListener('click', () => {
-  haptic('light');
-  showMoon();
-});
+  document.querySelectorAll('.tab-item').forEach(item=>{
+    item.addEventListener('click',()=>switchTab(item.dataset.tab));
+  });
 
-// ── Parallax on devicemotion (subtle) ─────────────────────────
-if (window.DeviceMotionEvent && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  window.addEventListener('deviceorientation', e => {
-    if (!e.gamma || !e.beta) return;
-    const x = Math.max(-6, Math.min(6, e.gamma * 0.18));
-    const y = Math.max(-6, Math.min(6, e.beta  * 0.12));
-    const $s = document.getElementById('sticker');
-    if ($s) $s.style.transform = `translate(${x}px, ${y}px)`;
-  }, { passive: true });
-}
+  window.addEventListener('resize',()=>{
+    initStars(); CV.width=innerWidth; CV.height=innerHeight;
+  });
 
-// ── Init ───────────────────────────────────────────────────────
-initStars();
-requestAnimationFrame(loop);
+  const sticker=document.querySelector('.moon-emoji');
+  window.addEventListener('deviceorientation',e=>{
+    if(!sticker) return;
+    const x=Math.min(Math.max((e.gamma||0),-30),30);
+    const y=Math.min(Math.max((e.beta||0)-45,-20),20);
+    sticker.style.transform=`translate(${x*.2}px,${y*.2}px)`;
+  });
 
-window.addEventListener('resize', () => { initStars(); resizeCanvas(); });
-</script>
+  init();
+  </script>
 </body>
 </html>
