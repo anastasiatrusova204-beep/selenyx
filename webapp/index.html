@@ -389,11 +389,11 @@
     .landing-brand-sub { color: var(--hint); font-size: 12px; letter-spacing: 2px; margin-bottom: 28px; }
     .landing-headline { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 12px; line-height: 1.25; }
     .landing-sub { font-size: 14px; color: var(--hint); text-align: center; line-height: 1.6; max-width: 280px; margin-bottom: 28px; }
-    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 320px; margin-bottom: 24px; }
-    .feature-tile { background: var(--bg2); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 18px 14px; display: flex; flex-direction: column; gap: 4px; }
-    .feature-icon { font-size: 28px; margin-bottom: 4px; }
-    .feature-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--text); }
-    .feature-desc { font-size: 12px; color: var(--hint); line-height: 1.5; }
+    .feature-list { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 300px; margin-bottom: 28px; }
+    .feature-row { display: flex; align-items: flex-start; gap: 14px; }
+    .feature-icon { font-size: 22px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .feature-name { font-size: 15px; font-weight: 500; color: var(--text); }
+    .feature-desc { font-size: 13px; color: var(--hint); margin-top: 2px; line-height: 1.45; }
     .trust-row { display: flex; gap: 14px; margin-bottom: 28px; font-size: 12px; color: var(--hint); flex-wrap: wrap; justify-content: center; }
     .cta-btn { background: var(--btn); color: #fff; border-radius: 14px; padding: 16px 32px; font-size: 16px; font-weight: 500; width: 100%; max-width: 280px; transition: opacity 0.2s, transform 0.15s; margin-bottom: 16px; touch-action: manipulation; }
     .cta-btn:active { opacity: 0.8; transform: scale(0.97); }
@@ -419,26 +419,22 @@
       <h1 class="landing-headline">Узнай, куда направить<br>силы сегодня</h1>
       <p class="landing-sub">Персональные подсказки на основе реального положения Луны — без консультаций и сложной терминологии</p>
 
-      <div class="feature-grid">
-        <div class="feature-tile">
+      <div class="feature-list">
+        <div class="feature-row">
           <div class="feature-icon">✨</div>
-          <div class="feature-name">Мой день</div>
-          <div class="feature-desc">Энергия по 4 сферам жизни</div>
+          <div><div class="feature-name">Мой день</div><div class="feature-desc">Энергия по 4 сферам жизни — меняется с Луной каждые 2–3 дня</div></div>
         </div>
-        <div class="feature-tile">
+        <div class="feature-row">
           <div class="feature-icon">🌙</div>
-          <div class="feature-name">Луна сейчас</div>
-          <div class="feature-desc">Фаза, знак, лунный день</div>
+          <div><div class="feature-name">Луна сейчас</div><div class="feature-desc">Фаза, знак, точный градус и лунный день</div></div>
         </div>
-        <div class="feature-tile">
+        <div class="feature-row">
           <div class="feature-icon">🌟</div>
-          <div class="feature-name">Моя карта</div>
-          <div class="feature-desc">Солнце, Луна, Асцендент</div>
+          <div><div class="feature-name">Моя карта</div><div class="feature-desc">Солнце, Луна, Асцендент по дате рождения</div></div>
         </div>
-        <div class="feature-tile">
+        <div class="feature-row">
           <div class="feature-icon">💞</div>
-          <div class="feature-name">Совместимость</div>
-          <div class="feature-desc">Анализ пары по знакам</div>
+          <div><div class="feature-name">Совместимость</div><div class="feature-desc">Анализ пары по знакам зодиака</div></div>
         </div>
       </div>
 
