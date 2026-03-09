@@ -365,6 +365,151 @@ def get_personal_year_number(life_path: int, year: int) -> int:
     return total
 
 
+# ─── Совместимость знаков ─────────────────────────────────────────────────────
+
+_SIGN_ELEMENT: dict = {
+    "Ari": "fire", "Leo": "fire", "Sag": "fire",
+    "Tau": "earth", "Vir": "earth", "Cap": "earth",
+    "Gem": "air",  "Lib": "air",  "Aqu": "air",
+    "Can": "water", "Sco": "water", "Pis": "water",
+}
+
+_SIGN_EMOJI: dict = {
+    "Ari": "♈", "Tau": "♉", "Gem": "♊", "Can": "♋",
+    "Leo": "♌", "Vir": "♍", "Lib": "♎", "Sco": "♏",
+    "Sag": "♐", "Cap": "♑", "Aqu": "♒", "Pis": "♓",
+}
+
+# Ключ: (elem1, elem2) — всегда в алфавитном порядке для симметрии
+_COMPAT_TABLE: dict = {
+    "same": {
+        "rating": "💫💫💫",
+        "title": "Зеркальное отражение",
+        "text": (
+            "Союз двух одинаковых знаков — это как смотреть в зеркало. "
+            "Понимание на уровне ДНК, но и недостатки общие. "
+            "Взлёты высокие, конфликты — узнаваемые. "
+            "Работает, если оба готовы расти."
+        ),
+    },
+    ("air", "air"): {
+        "rating": "💫💫💫💫",
+        "title": "Вихрь идей",
+        "text": (
+            "Интеллектуальное единство — редкая ценность. "
+            "Разговоры могут длиться часами, планов всегда больше, чем дел. "
+            "Оба цените свободу — и даёте её друг другу. "
+            "Риск: кому-то придётся стать якорем."
+        ),
+    },
+    ("air", "fire"): {
+        "rating": "💫💫💫💫💫",
+        "title": "Ветер раздувает пламя",
+        "text": (
+            "Одна из самых живых комбинаций. "
+            "Воздух питает огонь идеями — огонь воплощает их в жизнь. "
+            "Разговоры не умолкают, энергия бьёт ключом. "
+            "Скука вам не грозит."
+        ),
+    },
+    ("air", "earth"): {
+        "rating": "💫💫💫",
+        "title": "Идеи против реальности",
+        "text": (
+            "Земля ищет устойчивости — Воздух стремится к переменам. "
+            "Можете дополнять: один мечтает, другой воплощает. "
+            "Но без усилий будет ощущение «говорим на разных языках»."
+        ),
+    },
+    ("air", "water"): {
+        "rating": "💫💫💫",
+        "title": "Мысли и чувства",
+        "text": (
+            "Воздух мыслит — Вода чувствует. "
+            "Поначалу сложно: один хочет обсудить, другой — прожить. "
+            "Если научиться слышать разные языки любви, союз становится очень глубоким."
+        ),
+    },
+    ("earth", "earth"): {
+        "rating": "💫💫💫💫",
+        "title": "Надёжный фундамент",
+        "text": (
+            "Оба цените стабильность, практичность и результат. "
+            "Вместе строите — будь то отношения, карьера или уют. "
+            "Главная опасность — скатиться в рутину. Добавляйте новизну осознанно."
+        ),
+    },
+    ("earth", "fire"): {
+        "rating": "💫💫",
+        "title": "Искра и почва",
+        "text": (
+            "Огонь хочет движения — Земля ищет стабильности. "
+            "Если оба готовы уступать, получается баланс мечты и реальности. "
+            "Требует терпения с обеих сторон, но даёт взаимное развитие."
+        ),
+    },
+    ("earth", "water"): {
+        "rating": "💫💫💫💫💫",
+        "title": "Питательная почва",
+        "text": (
+            "Классическое сочетание. Вода питает Землю, Земля даёт Воде структуру. "
+            "Вместе создаёте что-то настоящее и долгосрочное. "
+            "Один из самых гармоничных союзов."
+        ),
+    },
+    ("fire", "fire"): {
+        "rating": "💫💫💫💫",
+        "title": "Пламя вдвоём",
+        "text": (
+            "Оба живёте ярко, не жалея сил. Вместе зажигаете — но важно не сгореть. "
+            "Конкуренция может быть и топливом, и источником конфликтов. "
+            "Ключ — уважение к амбициям друг друга."
+        ),
+    },
+    ("fire", "water"): {
+        "rating": "💫💫",
+        "title": "Пар и страсть",
+        "text": (
+            "Горячо — в обоих смыслах. "
+            "Вода может гасить огонь или создавать пар, который толкает вперёд. "
+            "Много чувств, много непонимания. "
+            "Если оба работают над собой — союз трансформирует."
+        ),
+    },
+    ("water", "water"): {
+        "rating": "💫💫💫💫",
+        "title": "Океан эмоций",
+        "text": (
+            "Глубина чувств — ваша суперсила и главная уязвимость. "
+            "Понимаете друг друга без слов. "
+            "Но настроения усиливают друг друга — как хорошие, так и тёмные. "
+            "Важен взаимный свет."
+        ),
+    },
+}
+
+
+def get_compatibility(sign1: str, sign2: str) -> dict:
+    """Возвращает данные о совместимости двух знаков."""
+    s1 = sign1.capitalize()
+    s2 = sign2.capitalize()
+    if s1 == s2:
+        return _COMPAT_TABLE["same"]
+    elems = tuple(sorted([_SIGN_ELEMENT[s1], _SIGN_ELEMENT[s2]]))
+    return _COMPAT_TABLE.get(elems, _COMPAT_TABLE["same"])
+
+
+# ─── Ретроградные планеты ─────────────────────────────────────────────────────
+
+_RETRO_HINTS: dict = {
+    "mercury": {"emoji": "☿", "name": "Меркурий", "hint": "Дважды проверяй договорённости, избегай важных переговоров"},
+    "venus":   {"emoji": "♀", "name": "Венера",   "hint": "Не лучшее время для новых отношений и крупных покупок"},
+    "mars":    {"emoji": "♂", "name": "Марс",     "hint": "Избегай конфликтов и необдуманных действий — энергия рассеяна"},
+    "jupiter": {"emoji": "♃", "name": "Юпитер",   "hint": "Осторожнее с расширением планов — результат может разочаровать"},
+    "saturn":  {"emoji": "♄", "name": "Сатурн",   "hint": "Пересмотри структуры и правила — система требует корректировки"},
+}
+
+
 # ─── Цвет дня ─────────────────────────────────────────────────────────────────
 
 # Цвет по дню недели (планета-управитель)
@@ -1119,8 +1264,8 @@ def main_menu() -> ReplyKeyboardMarkup:
         keyboard=[
             [KeyboardButton(text="✨ Мой день")],
             [KeyboardButton(text="📅 Календарь"), KeyboardButton(text="🔔 Уведомления")],
-            [KeyboardButton(text="🌟 Моя карта"), KeyboardButton(text="✏️ Сменить знак")],
-            [KeyboardButton(text="ℹ️ О боте")],
+            [KeyboardButton(text="🌟 Моя карта"), KeyboardButton(text="💞 Совместимость")],
+            [KeyboardButton(text="✏️ Сменить знак"), KeyboardButton(text="ℹ️ О боте")],
         ],
         resize_keyboard=True,
         persistent=True,
@@ -1279,6 +1424,11 @@ def get_moon_data() -> dict:
     aspects = _compute_moon_aspects(subject)
     day_number = get_day_number(now)
 
+    retrogrades = [
+        p for p in ["mercury", "venus", "mars", "jupiter", "saturn"]
+        if getattr(subject, p).retrograde
+    ]
+
     return {
         "sign_key":           sign_key,
         "sign_prep":          SIGNS_RU.get(sign_key, sign_key),
@@ -1295,6 +1445,7 @@ def get_moon_data() -> dict:
         "aspects":            aspects,
         "day_number":         day_number,
         "day_number_text":    NUMEROLOGY_DAY.get(day_number, ""),
+        "retrogrades":        retrogrades,
     }
 
 
@@ -1378,18 +1529,43 @@ _WDAYS_SHORT = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"]
 
 
 def get_monthly_calendar() -> str:
-    """Возвращает готовый текст лунного календаря на 30 дней."""
+    """Лунный календарь: только переходы фаз на 30 дней."""
     now = datetime.now(tz=MOSCOW_TZ)
-    month_name = MONTHS_RU[now.month - 1]
-    lines = [f"📅 <b>Лунный календарь — {month_name} {now.year}</b>\n"]
+
+    # Смысл каждой фазы — одна строка
+    _PHASE_ACTION = {
+        "Новолуние":       "Ставь намерения, начинай с чистого листа",
+        "Растущий серп":   "Делай первые шаги, запускай планы",
+        "Первая четверть": "Преодолевай препятствия, действуй активно",
+        "Растущая Луна":   "Воплощай задуманное, энергия на пике",
+        "Полнолуние":      "Завершай начатое, подводи итоги",
+        "Убывающая Луна":  "Делись, отдавай, отпускай лишнее",
+        "Последняя четверть": "Анализируй, делай выводы",
+        "Убывающий серп":  "Отдыхай, восстанавливайся перед новым циклом",
+    }
+
+    events = []
+    prev_phase = None
     for i in range(30):
         dt = now + timedelta(days=i)
         m  = _moon_for_date(dt)
-        day_str  = f"{dt.day:2d} {_MONTHS_GEN[dt.month - 1]}, {_WDAYS_SHORT[dt.weekday()]}"
-        is_key   = m["phase_name"] in _KEY_PHASES
-        line     = f"{day_str}  {m['phase_emoji']} {m['phase_name']} · {m['sign_nom']}"
-        lines.append(f"<b>{line}</b>" if is_key else line)
-    return "\n".join(lines)
+        if m["phase_name"] != prev_phase:
+            events.append((dt, m))
+            prev_phase = m["phase_name"]
+
+    month_name = MONTHS_RU[now.month - 1]
+    lines = [
+        f"📅 <b>Лунный календарь — {month_name} {now.year}</b>\n",
+        "Когда и какая энергия будет — и что с ней делать:\n",
+    ]
+    for dt, m in events:
+        date_str = f"{dt.day} {_MONTHS_GEN[dt.month - 1]}, {_WDAYS_SHORT[dt.weekday()]}"
+        action   = _PHASE_ACTION.get(m["phase_name"], "")
+        lines.append(
+            f"{m['phase_emoji']} <b>{date_str} — {m['phase_name']}</b> в {m['sign_nom']}\n"
+            f"<i>{action}</i>"
+        )
+    return "\n\n".join(lines)
 
 
 def _compute_moon_aspects(subject) -> list[dict]:
@@ -1493,8 +1669,12 @@ async def handle_start(message: Message, state: FSMContext) -> None:
     else:
         await message.answer(
             f"🌙 <b>Привет, {name}! Я — Selenyx.</b>\n\n"
-            "Каждый день Луна говорит что-то важное — "
-            "ты попал в число тех, кто может это услышать.",
+            "Каждый день смотрю на реальное положение Луны и говорю простым языком:\n"
+            "· какая энергия сегодня\n"
+            "· на что направить силы\n"
+            "· чего лучше избегать\n\n"
+            "Расчёты астрономические — не шаблонные тексты по дате.\n"
+            "Не предсказываю будущее — помогаю понять сегодняшний день.",
             reply_markup=start_cta_keyboard(),
         )
 
@@ -1635,10 +1815,20 @@ def _my_day_text(streak: int = 0) -> tuple[str, InlineKeyboardMarkup]:
     day = get_daily_energy()
     streak_line = f" · 🔥 {streak} дн подряд" if streak > 1 else ""
 
+    retro_block = ""
+    retros = day.get("retrogrades", [])
+    if retros:
+        lines = "\n".join(
+            f"· {_RETRO_HINTS[p]['emoji']} <b>Ретро {_RETRO_HINTS[p]['name']}</b> — {_RETRO_HINTS[p]['hint']}"
+            for p in retros
+        )
+        retro_block = f"\n\n⚠️ <b>Ретроградные планеты:</b>\n{lines}"
+
     text = (
         f"✨ <b>Мой день</b>{streak_line}\n\n"
         f"{day['intro']}\n\n"
-        f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}° · {day['lunar_day']} лунный день\n\n"
+        f"· {day['phase_emoji']} Луна в {day['sign_nom']} {day['degree']}° · {day['lunar_day']} лунный день"
+        f"{retro_block}\n\n"
         f"⚡ <b>Энергия дня:</b>\n{day['lunar_day_energy']}\n\n"
         f"💫 <b>Практика дня:</b>\n{day['lunar_day_practice']}\n\n"
         f"Выбери, что важно сегодня:"
@@ -1858,20 +2048,51 @@ async def cb_domain_numerology(callback: CallbackQuery) -> None:
 
     if birth_date:
         life_path = get_life_path_number(birth_date)
-        personal_year = get_personal_year_number(life_path, now.year)
         text += (
             f"\n\n<b>Твоё число судьбы: {life_path}</b>\n"
-            f"{NUMEROLOGY_LIFE_PATH.get(life_path, '')}\n\n"
-            f"<b>Личный год {now.year}: {personal_year}</b>\n"
-            f"{NUMEROLOGY_PERSONAL_YEAR.get(personal_year, '')}"
+            f"{NUMEROLOGY_LIFE_PATH.get(life_path, '')}"
         )
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+            *domain_detail_keyboard().inline_keyboard,
+            [InlineKeyboardButton(text="🔮 Мой личный год →", callback_data="cb_personal_year")],
+        ])
     else:
         text += (
             f"\n\n<i>Введи дату рождения в разделе 🌟 Моя карта — "
             f"и я покажу твоё число судьбы и личный год.</i>"
         )
+        markup = domain_detail_keyboard()
 
-    await callback.message.edit_text(text, reply_markup=domain_detail_keyboard())
+    await callback.message.edit_text(text, reply_markup=markup)
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_personal_year")
+async def cb_personal_year(callback: CallbackQuery) -> None:
+    now  = datetime.now(tz=MOSCOW_TZ)
+    user = await get_user(callback.from_user.id)
+    birth_date = user.get("birth_date") if user else None
+    if not birth_date:
+        await callback.answer("Сначала введи дату рождения в 🌟 Моя карта", show_alert=True)
+        return
+
+    life_path     = get_life_path_number(birth_date)
+    personal_year = get_personal_year_number(life_path, now.year)
+    year_text     = NUMEROLOGY_PERSONAL_YEAR.get(personal_year, "")
+
+    text = (
+        f"🔮 <b>Личный год {now.year}</b>\n\n"
+        f"Число личного года — {personal_year}\n\n"
+        f"{year_text}\n\n"
+        f"<i>Число личного года = число судьбы + цифры текущего года.\n"
+        f"Меняется каждый год — это твой личный цикл на {now.year}.</i>"
+    )
+    await callback.message.edit_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="← Назад", callback_data="cb_domain_numerology"),
+        ]]),
+    )
     await callback.answer()
 
 
@@ -1886,10 +2107,16 @@ async def cb_prediction(callback: CallbackQuery) -> None:
     zodiac_tip  = get_zodiac_tip(zodiac_sign, day["phase_name"]) if zodiac_sign else ""
 
     if zodiac_tip:
-        original = callback.message.html_text
+        sign_name = SIGNS_RU_NOM.get(zodiac_sign.capitalize(), "") if zodiac_sign else ""
         await callback.message.edit_text(
-            original + f"\n\n🥠 <b>Предсказание дня — только для тебя:</b>\n👇 Нажми на текст, чтобы открыть:\n<tg-spoiler>{zodiac_tip}</tg-spoiler>\n\n📅 Следующее обновление — завтра",
-            reply_markup=prediction_shown_keyboard(),
+            f"🥠 <b>Предсказание дня — только для тебя</b>\n\n"
+            f"· {day['phase_emoji']} {day['phase_name']} · {sign_name}\n\n"
+            f"👇 Нажми на текст, чтобы открыть:\n"
+            f"<tg-spoiler>{zodiac_tip}</tg-spoiler>\n\n"
+            f"<i>Обновляется каждый день</i>",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="← Назад", callback_data="cb_energy_back"),
+            ]]),
         )
     else:
         await callback.message.answer(
@@ -1912,6 +2139,133 @@ async def menu_change_sign(message: Message) -> None:
     await message.answer("Выбери свой знак зодиака:", reply_markup=zodiac_keyboard())
 
 
+_FAQ_TEXT = (
+    "❓ <b>Частые вопросы</b>\n\n"
+    "<b>Что такое «энергия дня»?</b>\n"
+    "Метафора настроения дня: бывают дни для старта, бывают — для завершения или отдыха. "
+    "Бот смотрит на фазу Луны и её знак — и говорит, какой «характер» у сегодня. "
+    "Не предсказание, а подсказка.\n\n"
+    "<b>Откуда данные о Луне?</b>\n"
+    "Из Swiss Ephemeris — той же системы, что используют профессиональные астрологи. "
+    "Данные реальные, астрономические. Каждый расчёт делается в момент обращения.\n\n"
+    "<b>Зачем нужен мой знак зодиака?</b>\n"
+    "Чтобы добавлять персональный совет. У Скорпиона и Близнецов разная реакция "
+    "на одну и ту же лунную фазу. Без знака — прогноз общий для всех.\n\n"
+    "<b>Что значит «ретроград»?</b>\n"
+    "Планета как будто движется назад — оптическая иллюзия. "
+    "В ретроград Меркурия советуют перепроверять договорённости и не покупать технику.\n\n"
+    "<b>Бот предсказывает будущее?</b>\n"
+    "Нет. Selenyx — навигатор, а не оракул. Он показывает «погоду» дня — "
+    "что с ней делать, решаешь ты.\n\n"
+    "<b>Что такое число дня?</b>\n"
+    "Нумерология складывает цифры сегодняшней даты в одно число (1–9). "
+    "Каждое описывает ритм дня: 1 — начинать, 4 — строить, 9 — завершать."
+)
+
+_GLOSSARY: dict = {
+    "phase": {
+        "title": "🌑 Фаза Луны",
+        "text": (
+            "Луна движется вокруг Земли и выглядит по-разному в зависимости "
+            "от положения относительно Солнца. Полный цикл — ~29,5 дней, внутри 8 фаз.\n\n"
+            "Каждая фаза задаёт «атмосферу»:\n"
+            "· 🌑 Новолуние — начала, намерения\n"
+            "· 🌔 Растущая — действие, воплощение\n"
+            "· 🌕 Полнолуние — пик, завершение\n"
+            "· 🌘 Убывающая — отдых, анализ"
+        ),
+    },
+    "lunar_day": {
+        "title": "🌙 Лунный день",
+        "text": (
+            "Лунный день — не то же самое, что календарный. "
+            "Он начинается с восходом Луны и длится ~24–25 часов.\n\n"
+            "Всего 29–30 лунных дней в цикле. Каждый имеет свой символ и характер:\n"
+            "· 1-й — намерения и новое начало\n"
+            "· 15-й (полнолуние) — пик, кульминация\n"
+            "· 29-й — завершение, тишина перед новым циклом"
+        ),
+    },
+    "moon_sign": {
+        "title": "♈ Луна в знаке",
+        "text": (
+            "Луна движется по зодиаку быстрее Солнца — меняет знак каждые 2–3 дня. "
+            "«Луна в Деве» значит, что сегодня она в секторе неба, "
+            "который астрология относит к Деве.\n\n"
+            "Каждый знак добавляет свой «характер»:\n"
+            "· Овен — скорость, импульс\n"
+            "· Телец — спокойствие, чувственность\n"
+            "· Рак — эмоции, забота\n"
+            "· Скорпион — глубина, трансформация"
+        ),
+    },
+    "retro": {
+        "title": "☿ Ретроград",
+        "text": (
+            "Планета как будто движется назад — это оптическая иллюзия "
+            "из-за разной скорости орбит. На деле планета не разворачивается.\n\n"
+            "Самый известный — ретроград Меркурия (3–4 раза в год, по 3 недели). "
+            "В это время советуют:\n"
+            "· перепроверять договорённости и документы\n"
+            "· не покупать технику\n"
+            "· не начинать важных переговоров\n"
+            "· возвращаться к старым делам и контактам"
+        ),
+    },
+    "natal": {
+        "title": "🌟 Натальная карта",
+        "text": (
+            "«Астрологический паспорт» человека — карта неба в момент рождения.\n\n"
+            "Три ключевых элемента:\n"
+            "· <b>Солнце</b> — твоя суть, основной характер\n"
+            "· <b>Луна</b> — эмоции, реакции, интуиция\n"
+            "· <b>Асцендент</b> — как тебя воспринимают другие\n\n"
+            "Бот рассчитывает все три в разделе 🌟 Моя карта — "
+            "нужна только дата рождения."
+        ),
+    },
+    "asc": {
+        "title": "↑ Асцендент",
+        "text": (
+            "Знак зодиака, который восходил на горизонте в момент твоего рождения. "
+            "Меняется каждые 2 часа — поэтому для точного расчёта нужно время рождения.\n\n"
+            "Асцендент влияет на внешность, поведение в обществе и первое впечатление. "
+            "Часто именно он «считывается» людьми сильнее, чем знак Солнца.\n\n"
+            "Рассчитывается в разделе 🌟 Моя карта, если ввести время рождения."
+        ),
+    },
+}
+
+
+def _about_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✏️ Сменить знак", callback_data="cb_show_zodiac")],
+        [
+            InlineKeyboardButton(text="❓ Частые вопросы", callback_data="cb_faq"),
+            InlineKeyboardButton(text="📖 Словарь",        callback_data="cb_glossary"),
+        ],
+        [InlineKeyboardButton(text="💬 Вопросы и предложения", url="https://t.me/Selenyx_mybot")],
+    ])
+
+
+def _glossary_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="🌑 Фаза Луны",    callback_data="glos:phase"),
+            InlineKeyboardButton(text="🌙 Лунный день",  callback_data="glos:lunar_day"),
+        ],
+        [
+            InlineKeyboardButton(text="♈ Луна в знаке", callback_data="glos:moon_sign"),
+            InlineKeyboardButton(text="☿ Ретроград",     callback_data="glos:retro"),
+        ],
+        [
+            InlineKeyboardButton(text="🌟 Натальная карта", callback_data="glos:natal"),
+            InlineKeyboardButton(text="↑ Асцендент",        callback_data="glos:asc"),
+        ],
+        [InlineKeyboardButton(text="← Назад", callback_data="cb_about_back")],
+    ])
+
+
 @router.message(F.text == "ℹ️ О боте")
 async def menu_about(message: Message) -> None:
     await message.answer(
@@ -1930,11 +2284,8 @@ async def menu_about(message: Message) -> None:
         "Расчёты на основе Swiss Ephemeris — той же системы, "
         "что используют профессиональные астрологи.\n\n"
         "Selenyx не предсказывает будущее.\n"
-        "Он помогает лучше понять сегодняшний день.\n\n"
-        "💬 Вопросы и предложения: @Selenyx_mybot",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="✏️ Сменить знак", callback_data="cb_show_zodiac"),
-        ]]),
+        "Он помогает лучше понять сегодняшний день.",
+        reply_markup=_about_keyboard(),
     )
 
 
@@ -1942,6 +2293,66 @@ async def menu_about(message: Message) -> None:
 async def cb_show_zodiac(callback: CallbackQuery, state: FSMContext) -> None:
     await state.set_state(UserState.choosing_sign)
     await callback.message.answer("Выбери свой знак зодиака:", reply_markup=zodiac_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_faq")
+async def cb_faq(callback: CallbackQuery) -> None:
+    await callback.message.edit_text(
+        _FAQ_TEXT,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="← Назад", callback_data="cb_about_back"),
+        ]]),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_glossary")
+async def cb_glossary(callback: CallbackQuery) -> None:
+    await callback.message.edit_text(
+        "📖 <b>Словарь</b>\n\nВыбери термин — получи простое объяснение:",
+        reply_markup=_glossary_keyboard(),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("glos:"))
+async def cb_glossary_term(callback: CallbackQuery) -> None:
+    key  = callback.data[5:]
+    term = _GLOSSARY.get(key)
+    if not term:
+        await callback.answer()
+        return
+    await callback.message.edit_text(
+        f"{term['title']}\n\n{term['text']}",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="← К словарю", callback_data="cb_glossary"),
+        ]]),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cb_about_back")
+async def cb_about_back(callback: CallbackQuery) -> None:
+    await callback.message.edit_text(
+        "🌙 <b>Selenyx</b> — ежедневный навигатор по ритмам дня.\n\n"
+        "Луна меняет положение каждые 2–3 дня — и это реально влияет на уровень энергии, "
+        "эмоциональный фон и готовность принимать решения. Не магия — биоритмика, "
+        "подтверждённая исследованиями.\n\n"
+        "Каждый раз, когда ты открываешь бота, он делает астрономический расчёт прямо сейчас "
+        "и показывает реальное положение Луны в эту минуту. "
+        "Это не шаблонные тексты по знаку и дате — "
+        "это живые данные: фаза, градус, лунный день.\n\n"
+        "На их основе Selenyx показывает:\n"
+        "· какая сейчас лунная энергия и что с ней делать\n"
+        "· как Луна в текущем знаке влияет на здоровье, работу, отношения и психологию\n"
+        "· персональный прогноз — специально для твоего знака зодиака\n\n"
+        "Расчёты на основе Swiss Ephemeris — той же системы, "
+        "что используют профессиональные астрологи.\n\n"
+        "Selenyx не предсказывает будущее.\n"
+        "Он помогает лучше понять сегодняшний день.",
+        reply_markup=_about_keyboard(),
+    )
     await callback.answer()
 
 
@@ -2053,6 +2464,94 @@ async def cb_natal_reset(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.message.answer(
         "Введи новую дату рождения в формате:\n"
         "<b>ДД.ММ.ГГГГ</b> — например: <code>15.05.1990</code>"
+    )
+    await callback.answer()
+
+
+# ─── Совместимость ────────────────────────────────────────────────────────────
+
+
+def compat_pick_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура выбора второго знака для совместимости."""
+    signs = [
+        ("Ari", "♈ Овен"),   ("Tau", "♉ Телец"),  ("Gem", "♊ Близнецы"),
+        ("Can", "♋ Рак"),    ("Leo", "♌ Лев"),     ("Vir", "♍ Дева"),
+        ("Lib", "♎ Весы"),   ("Sco", "♏ Скорпион"), ("Sag", "♐ Стрелец"),
+        ("Cap", "♑ Козерог"), ("Aqu", "♒ Водолей"), ("Pis", "♓ Рыбы"),
+    ]
+    rows = []
+    for i in range(0, 12, 3):
+        rows.append([
+            InlineKeyboardButton(text=label, callback_data=f"compat:{key}")
+            for key, label in signs[i:i+3]
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+@router.message(F.text == "💞 Совместимость")
+async def menu_compat(message: Message) -> None:
+    user = await get_user(message.from_user.id)
+    raw_sign = user.get("zodiac_sign") if user else None
+    my_sign = raw_sign.capitalize() if raw_sign else None
+    if not my_sign:
+        await message.answer(
+            "Сначала выбери свой знак зодиака — нажми ✏️ Сменить знак.",
+            reply_markup=main_menu(),
+        )
+        return
+    my_name = SIGNS_RU_NOM.get(my_sign, my_sign)
+    emoji   = _SIGN_EMOJI.get(my_sign, "")
+    await message.answer(
+        f"💞 <b>Совместимость</b>\n\n"
+        f"Твой знак: {emoji} <b>{my_name}</b>\n\n"
+        f"Выбери знак, с которым хочешь проверить совместимость:",
+        reply_markup=compat_pick_keyboard(),
+    )
+
+
+@router.callback_query(F.data.startswith("compat:"))
+async def cb_compat_sign(callback: CallbackQuery) -> None:
+    their_sign = callback.data[7:]
+    user = await get_user(callback.from_user.id)
+    raw_sign = user.get("zodiac_sign") if user else None
+    my_sign = raw_sign.capitalize() if raw_sign else None
+    if not my_sign or their_sign not in SIGNS_RU_NOM:
+        await callback.answer("Знак не найден", show_alert=True)
+        return
+
+    compat = get_compatibility(my_sign, their_sign)
+    my_emoji    = _SIGN_EMOJI.get(my_sign, "")
+    their_emoji = _SIGN_EMOJI.get(their_sign, "")
+    my_name     = SIGNS_RU_NOM.get(my_sign, my_sign)
+    their_name  = SIGNS_RU_NOM.get(their_sign, their_sign)
+
+    text = (
+        f"💞 {my_emoji} <b>{my_name}</b> + {their_emoji} <b>{their_name}</b>\n\n"
+        f"{compat['rating']}\n"
+        f"<b>{compat['title']}</b>\n\n"
+        f"{compat['text']}"
+    )
+    await callback.message.edit_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="🔄 Проверить другой знак", callback_data="compat_again"),
+        ]]),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "compat_again")
+async def cb_compat_again(callback: CallbackQuery) -> None:
+    user = await get_user(callback.from_user.id)
+    raw_sign = user.get("zodiac_sign") if user else None
+    my_sign = raw_sign.capitalize() if raw_sign else None
+    my_name = SIGNS_RU_NOM.get(my_sign, my_sign) if my_sign else "?"
+    emoji   = _SIGN_EMOJI.get(my_sign, "") if my_sign else ""
+    await callback.message.edit_text(
+        f"💞 <b>Совместимость</b>\n\n"
+        f"Твой знак: {emoji} <b>{my_name}</b>\n\n"
+        f"Выбери знак, с которым хочешь проверить совместимость:",
+        reply_markup=compat_pick_keyboard(),
     )
     await callback.answer()
 
@@ -2200,6 +2699,19 @@ async def main() -> None:
         BotCommand(command="start",     description="Начать / вернуться в главное меню"),
         BotCommand(command="help",      description="Что умеет бот"),
     ])
+
+    await bot.set_my_description(
+        "🌙 Selenyx — твой ежедневный космический навигатор.\n\n"
+        "Каждый день бот смотрит на реальное положение Луны и говорит простым языком:\n"
+        "· Какая энергия сегодня\n"
+        "· На что направить силы\n"
+        "· Чего лучше избегать\n\n"
+        "Не нужно разбираться в астрологии. Просто открой — и начни день с фокусом.\n\n"
+        "Жми /start — первый прогноз готов за 30 секунд."
+    )
+    await bot.set_my_short_description(
+        "Энергия дня и фаза Луны — просто, без астрологических знаний"
+    )
 
     logger.info("Selenyx запущен. Нажми Ctrl+C для остановки.")
 
