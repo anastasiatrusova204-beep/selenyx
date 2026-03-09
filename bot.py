@@ -2930,16 +2930,16 @@ async def _start_webserver() -> None:
     """Отдаёт webapp/index.html по HTTP на PORT (Railway)."""
     port = int(os.getenv("PORT", "8080"))
 
+    # Читаем HTML один раз при старте — не блокируем event loop при каждом запросе
+    index = WEBAPP_DIR / "index.html"
+    _html_bytes: bytes = index.read_bytes() if index.exists() else b"Mini App not found"
+
     async def handle_webapp(request: aiohttp_web.Request) -> aiohttp_web.Response:
-        index = WEBAPP_DIR / "index.html"
-        logger.info(f"Webapp request: path={index}, exists={index.exists()}")
-        if index.exists():
-            return aiohttp_web.Response(
-                body=index.read_bytes(),
-                content_type="text/html",
-                charset="utf-8",
-            )
-        return aiohttp_web.Response(text=f"Mini App not found at {index}", status=404)
+        return aiohttp_web.Response(
+            body=_html_bytes,
+            content_type="text/html",
+            charset="utf-8",
+        )
 
     async def handle_health(request: aiohttp_web.Request) -> aiohttp_web.Response:
         return aiohttp_web.Response(text="ok")
@@ -2954,8 +2954,16 @@ async def _start_webserver() -> None:
     await aiohttp_web.TCPSite(runner, "0.0.0.0", port).start()
     logger.info(f"HTTP сервер запущен на порту {port}")
 
-    # Держим сервер живым (polling держит loop — этот корутин просто ждёт)
-    await asyncio.Event().wait()
+    # Keep-alive: пингуем себя каждые 10 минут чтобы Railway не усыплял сервис
+    import aiohttp as _aiohttp
+    health_url = f"http://localhost:{port}/health"
+    while True:
+        await asyncio.sleep(600)
+        try:
+            async with _aiohttp.ClientSession() as s:
+                await s.get(health_url, timeout=_aiohttp.ClientTimeout(total=5))
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
