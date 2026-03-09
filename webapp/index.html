@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a1a">
+  <title>Selenyx</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    /* ── Reset ──────────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       var(--tg-theme-bg-color,          #0a0a1a);
+      --bg2:      var(--tg-theme-secondary-bg-color, #111128);
+      --text:     var(--tg-theme-text-color,         #e8e8ff);
+      --hint:     var(--tg-theme-hint-color,         #6666aa);
+      --btn:      var(--tg-theme-button-color,       #7c4dff);
+      --moon:     #c8d3e8;
+      --gold:     #ffd54f;
+      --teal:     #64ffda;
+      --purple:   #ce93d8;
+      --radius:   22px;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      touch-action: manipulation;
+    }
+
+    /* ── Stars canvas ───────────────────────────────────────── */
+    #stars {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Particle canvas ────────────────────────────────────── */
+    #canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 10;
+    }
+
+    /* ── Gradient top strip ─────────────────────────────────── */
+    .strip {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200;
+      background: linear-gradient(90deg, var(--purple), var(--teal), var(--gold), var(--purple));
+      background-size: 300% 100%;
+      animation: strip-move 5s linear infinite;
+    }
+    @keyframes strip-move { to { background-position: 300% 0%; } }
+
+    /* ── Loading ────────────────────────────────────────────── */
+    #loading {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg); z-index: 300;
+      transition: opacity 0.5s ease;
+    }
+    #loading.out { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2px solid rgba(200,211,232,0.08);
+      border-top-color: var(--moon);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Main onboarding screen ─────────────────────────────── */
+    #main-screen {
+      position: fixed; inset: 0; z-index: 5;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 28px;
+      transition: opacity 0.5s ease;
+    }
+    #main-screen.out { opacity: 0; pointer-events: none; }
+
+    /* Brand */
+    .brand { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .brand-name {
+      font-size: 26px; font-weight: 700;
+      letter-spacing: 5px; text-transform: uppercase;
+      background: linear-gradient(135deg, var(--moon) 0%, var(--purple) 60%, var(--teal) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .brand-sub { font-size: 12px; color: var(--hint); letter-spacing: 1.5px; }
+
+    /* Sticker */
+    #sticker-wrap {
+      position: relative;
+      cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #sticker {
+      font-size: 96px; display: block; line-height: 1;
+      filter: drop-shadow(0 0 28px rgba(200,211,232,0.5));
+      animation: moon-float 3.8s ease-in-out infinite,
+                 moon-glow  3.8s ease-in-out infinite;
+      transition: transform 0.15s ease, opacity 0.3s ease;
+    }
+    #sticker-wrap:active #sticker { transform: scale(0.9); }
+
+    /* Concentric rings */
+    .ring {
+      position: absolute; border-radius: 50%;
+      border: 1px solid rgba(200,211,232,0.12);
+      pointer-events: none;
+    }
+    .ring-1 { inset: -14px; animation: ring-pulse 3.8s ease-in-out infinite; }
+    .ring-2 { inset: -28px; animation: ring-pulse 3.8s ease-in-out infinite 0.6s; }
+    .ring-3 { inset: -46px; animation: ring-pulse 3.8s ease-in-out infinite 1.2s; border-color: rgba(200,211,232,0.05); }
+
+    @keyframes moon-float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+    @keyframes moon-glow {
+      0%,100% { filter: drop-shadow(0 0 22px rgba(200,211,232,0.35)); }
+      50%      { filter: drop-shadow(0 0 44px rgba(200,211,232,0.7)); }
+    }
+    @keyframes ring-pulse {
+      0%,100% { transform: scale(1);    opacity: 0.7; }
+      50%      { transform: scale(1.07); opacity: 0.2; }
+    }
+
+    /* Hint */
+    #hint {
+      font-size: 12px; color: var(--hint);
+      letter-spacing: 2.5px; text-transform: uppercase;
+      animation: hint-blink 2.5s ease-in-out infinite;
+    }
+    @keyframes hint-blink {
+      0%,100% { opacity: 0.4; } 50% { opacity: 1; }
+    }
+
+    /* ── Cards screen ───────────────────────────────────────── */
+    #cards-screen {
+      position: fixed; inset: 0; z-index: 5;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 18px; padding: 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    #cards-screen.visible { opacity: 1; pointer-events: auto; }
+
+    .cards-title {
+      font-size: 14px; color: var(--hint);
+      letter-spacing: 1px;
+      animation: fade-up 0.5s ease both;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px; width: 100%; max-width: 340px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid rgba(200,211,232,0.08);
+      border-radius: var(--radius);
+      padding: 22px 14px 18px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transform: scale(0.75) translateY(30px);
+      opacity: 0;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      will-change: transform, opacity;
+    }
+    .card.appear {
+      animation: card-spring 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes card-spring {
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .card:active {
+      transform: scale(0.93) !important;
+      background: rgba(124,77,255,0.12) !important;
+      border-color: rgba(124,77,255,0.3) !important;
+    }
+    @media (hover: hover) {
+      .card:hover {
+        border-color: rgba(200,211,232,0.2);
+        background: rgba(124,77,255,0.06);
+      }
+    }
+
+    .card-emoji  { font-size: 38px; line-height: 1; }
+    .card-label  { font-size: 13px; font-weight: 600; text-align: center; color: var(--text); }
+    .card-sub    { font-size: 11px; color: var(--hint); text-align: center; line-height: 1.4; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Back button ────────────────────────────────────────── */
+    #back-btn {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      font-size: 12px; color: var(--hint);
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; z-index: 20;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #back-btn.visible { opacity: 1; pointer-events: auto; }
+    #back-btn:active { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loading"><div class="spinner"></div></div>
+
+  <!-- Top gradient strip -->
+  <div class="strip"></div>
+
+  <!-- Starfield -->
+  <canvas id="stars"></canvas>
+
+  <!-- Particle canvas -->
+  <canvas id="canvas"></canvas>
+
+  <!-- Onboarding screen -->
+  <div id="main-screen">
+    <div class="brand">
+      <span class="brand-name">Selenyx</span>
+      <span class="brand-sub">космический навигатор</span>
+    </div>
+
+    <div id="sticker-wrap">
+      <div class="ring ring-3"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-1"></div>
+      <span id="sticker">🌙</span>
+    </div>
+
+    <span id="hint">нажми на луну</span>
+  </div>
+
+  <!-- Cards screen -->
+  <div id="cards-screen">
+    <p class="cards-title">что смотрим сегодня?</p>
+    <div class="cards-grid">
+      <div class="card" data-action="my_day">
+        <span class="card-emoji">✨</span>
+        <span class="card-label">Мой день</span>
+        <span class="card-sub">энергия и прогноз</span>
+      </div>
+      <div class="card" data-action="moon">
+        <span class="card-emoji">🌙</span>
+        <span class="card-label">Луна сейчас</span>
+        <span class="card-sub">фаза и знак</span>
+      </div>
+      <div class="card" data-action="natal">
+        <span class="card-emoji">🌟</span>
+        <span class="card-label">Моя карта</span>
+        <span class="card-sub">натальная карта</span>
+      </div>
+      <div class="card" data-action="compat">
+        <span class="card-emoji">💞</span>
+        <span class="card-label">Совместимость</span>
+        <span class="card-sub">проверить пару</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to moon -->
+  <div id="back-btn">← вернуться</div>
+
+<script>
+// ── Telegram init ──────────────────────────────────────────────
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+const haptic = (type = 'light') => tg?.HapticFeedback?.impactOccurred(type);
+
+// ── Loading ────────────────────────────────────────────────────
+const $loading = document.getElementById('loading');
+setTimeout(() => $loading.classList.add('out'), 500);
+
+// ── Starfield ──────────────────────────────────────────────────
+const $stars = document.getElementById('stars');
+const sCtx   = $stars.getContext('2d');
+let starList = [];
+
+function initStars() {
+  $stars.width  = window.innerWidth;
+  $stars.height = window.innerHeight;
+  starList = Array.from({ length: 140 }, () => ({
+    x:     Math.random() * $stars.width,
+    y:     Math.random() * $stars.height,
+    r:     Math.random() * 1.4 + 0.3,
+    phase: Math.random() * Math.PI * 2,
+    speed: Math.random() * 0.008 + 0.002,
+  }));
+}
+
+function drawStars(t) {
+  sCtx.clearRect(0, 0, $stars.width, $stars.height);
+  starList.forEach(s => {
+    const a = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.speed * 60 + s.phase));
+    sCtx.beginPath();
+    sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    sCtx.fillStyle = `rgba(200,211,232,${a.toFixed(2)})`;
+    sCtx.fill();
+  });
+}
+
+// ── Particle system ────────────────────────────────────────────
+const $canvas = document.getElementById('canvas');
+const ctx     = $canvas.getContext('2d');
+
+const COLORS = ['#c8d3e8','#ffd54f','#ce93d8','#64ffda','#ffffff','#a5c8ff','#ffb3c6'];
+let particles = [];
+let phase     = 'idle'; // idle | explode | converge
+
+class Particle {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    const angle = Math.random() * Math.PI * 2;
+    const spd   = 3 + Math.random() * 9;
+    this.vx  = Math.cos(angle) * spd;
+    this.vy  = Math.sin(angle) * spd - 1;
+    this.r   = 1.5 + Math.random() * 3;
+    this.col = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.a   = 1;
+    this.tx  = x; this.ty = y;
+  }
+
+  stepExplode() {
+    this.vx *= 0.965;
+    this.vy  = this.vy * 0.965 + 0.18;
+    this.x  += this.vx;
+    this.y  += this.vy;
+    this.a   = Math.max(0, this.a - 0.006);
+  }
+
+  stepConverge() {
+    this.x += (this.tx - this.x) * 0.07;
+    this.y += (this.ty - this.y) * 0.07;
+    this.a  = Math.min(1, this.a + 0.04);
+    this.r  = Math.max(0.8, this.r * 0.985);
+  }
+
+  draw() {
+    ctx.globalAlpha = this.a;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.col;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function resizeCanvas() {
+  $canvas.width  = window.innerWidth;
+  $canvas.height = window.innerHeight;
+}
+
+function getCardCenters() {
+  return Array.from(document.querySelectorAll('.card')).map(c => {
+    const r = c.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  });
+}
+
+// ── Explosion ──────────────────────────────────────────────────
+function explode(cx, cy) {
+  phase     = 'explode';
+  particles = Array.from({ length: 100 }, () => new Particle(cx, cy));
+
+  // Start convergence after 850ms
+  setTimeout(() => {
+    if (phase !== 'explode') return;
+    phase = 'converge';
+    const centers = getCardCenters();
+    particles.forEach((p, i) => {
+      const t  = centers[i % centers.length];
+      p.tx = t.x + (Math.random() - 0.5) * 28;
+      p.ty = t.y + (Math.random() - 0.5) * 28;
+    });
+  }, 850);
+
+  // Show cards while particles converge
+  setTimeout(showCards, 1050);
+}
+
+// ── Animation loop ─────────────────────────────────────────────
+function loop(t) {
+  resizeCanvas();
+  ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+  drawStars(t);
+
+  if (phase === 'explode')   particles.forEach(p => { p.stepExplode();   p.draw(); });
+  if (phase === 'converge')  particles.forEach(p => { p.stepConverge();  p.draw(); });
+
+  requestAnimationFrame(loop);
+}
+
+// ── Show / hide screens ────────────────────────────────────────
+const $main  = document.getElementById('main-screen');
+const $cards = document.getElementById('cards-screen');
+const $back  = document.getElementById('back-btn');
+
+function showCards() {
+  $main.classList.add('out');
+  $cards.classList.add('visible');
+  $back.classList.add('visible');
+  document.querySelectorAll('.card').forEach((c, i) =>
+    setTimeout(() => c.classList.add('appear'), i * 90)
+  );
+}
+
+function showMoon() {
+  phase = 'idle';
+  particles = [];
+  $cards.classList.remove('visible');
+  $back.classList.remove('visible');
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('appear'));
+  const $s = document.getElementById('sticker');
+  $s.style.transform = 'scale(0)';
+  $s.style.opacity   = '0';
+  $main.classList.remove('out');
+  setTimeout(() => {
+    $s.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease';
+    $s.style.transform  = '';
+    $s.style.opacity    = '';
+  }, 50);
+}
+
+// ── Sticker click ──────────────────────────────────────────────
+document.getElementById('sticker-wrap').addEventListener('click', () => {
+  if (phase !== 'idle') return;
+  haptic('heavy');
+
+  const $s  = document.getElementById('sticker');
+  $s.style.transition = 'transform 0.18s ease, opacity 0.25s ease';
+  $s.style.transform  = 'scale(0)';
+  $s.style.opacity    = '0';
+
+  const r  = $s.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top  + r.height / 2;
+  explode(cx, cy);
+});
+
+// ── Card click ─────────────────────────────────────────────────
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('click', () => {
+    haptic('light');
+    const action = card.dataset.action;
+
+    // Visual bounce-back
+    card.style.transform = 'scale(0.91)';
+    setTimeout(() => { card.style.transform = ''; }, 200);
+
+    // Send to bot and close
+    setTimeout(() => {
+      if (tg?.sendData) {
+        tg.sendData(`action:${action}`);
+      }
+      // tg.close() is called automatically after sendData in most cases
+    }, 250);
+  });
+});
+
+// ── Back button ────────────────────────────────────────────────
+document.getElementById('back-btn').addEventListener('click', () => {
+  haptic('light');
+  showMoon();
+});
+
+// ── Parallax on devicemotion (subtle) ─────────────────────────
+if (window.DeviceMotionEvent && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  window.addEventListener('deviceorientation', e => {
+    if (!e.gamma || !e.beta) return;
+    const x = Math.max(-6, Math.min(6, e.gamma * 0.18));
+    const y = Math.max(-6, Math.min(6, e.beta  * 0.12));
+    const $s = document.getElementById('sticker');
+    if ($s) $s.style.transform = `translate(${x}px, ${y}px)`;
+  }, { passive: true });
+}
+
+// ── Init ───────────────────────────────────────────────────────
+initStars();
+requestAnimationFrame(loop);
+
+window.addEventListener('resize', () => { initStars(); resizeCanvas(); });
+</script>
+</body>
+</html>
