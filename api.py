@@ -36,8 +36,7 @@ _railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
     f"https://{_railway_domain}/webapp" if _railway_domain else ""
 )
-WEBAPP_DIR  = Path(__file__).resolve().parent / "webapp"
-TGAPP_DIR   = Path(__file__).resolve().parent / "tg-app"
+WEBAPP_DIR = Path(__file__).resolve().parent / "webapp"
 
 logger = logging.getLogger(__name__)
 
@@ -78,25 +77,7 @@ def verify_init_data(init_data: str, bot_token: str) -> Optional[dict]:
 
 @web.middleware
 async def auth_middleware(request: web.Request, handler):
-    """Для /api/* — требует валидный X-Telegram-Init-Data или initData в query.
-    Также добавляет CORS-заголовки для запросов с Vercel и других доменов."""
-
-    # CORS: разрешаем запросы с любого origin.
-    # Безопасность обеспечивается HMAC-проверкой initData — не origin'ом.
-    origin = request.headers.get("Origin", "*")
-
-    # Preflight-запрос от браузера (OPTIONS) — отвечаем сразу без проверки auth
-    if request.method == "OPTIONS":
-        return web.Response(
-            status=204,
-            headers={
-                "Access-Control-Allow-Origin":  origin,
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "X-Telegram-Init-Data, Content-Type",
-                "Access-Control-Max-Age":       "3600",
-            },
-        )
-
+    """Для /api/* — требует валидный X-Telegram-Init-Data или initData в query."""
     if request.path.startswith("/api/"):
         init_data = (
             request.headers.get("X-Telegram-Init-Data", "")
@@ -104,14 +85,9 @@ async def auth_middleware(request: web.Request, handler):
         )
         user = verify_init_data(init_data, BOT_TOKEN)
         if not user:
-            resp = web.json_response({"error": "Unauthorized"}, status=401)
-            resp.headers["Access-Control-Allow-Origin"] = origin
-            return resp
+            return web.json_response({"error": "Unauthorized"}, status=401)
         request["tg_user"] = user
-
-    response = await handler(request)
-    response.headers["Access-Control-Allow-Origin"] = origin
-    return response
+    return await handler(request)
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -183,38 +159,8 @@ async def serve_webapp(request: web.Request) -> web.Response:
     return web.Response(body=html, content_type="text/html", charset="utf-8")
 
 
-async def serve_tgapp(request: web.Request) -> web.Response:
-    """Отдаёт tg-app/index.html — новая версия Mini App."""
-    index = TGAPP_DIR / "index.html"
-    html = index.read_bytes() if index.exists() else b"tg-app not found"
-    return web.Response(body=html, content_type="text/html", charset="utf-8")
-
-
-async def serve_tgapp_static(request: web.Request) -> web.Response:
-    """Отдаёт статические файлы tg-app (css/, js/)."""
-    # Извлекаем путь после /tgapp/
-    sub = request.match_info.get("path", "")
-    file_path = TGAPP_DIR / sub
-    # Защита от path traversal
-    try:
-        file_path.resolve().relative_to(TGAPP_DIR.resolve())
-    except ValueError:
-        raise web.HTTPForbidden()
-    if not file_path.exists() or not file_path.is_file():
-        raise web.HTTPNotFound()
-    # Определяем content-type по расширению
-    ext = file_path.suffix.lower()
-    ctype = {".css": "text/css", ".js": "application/javascript"}.get(ext, "application/octet-stream")
-    return web.Response(body=file_path.read_bytes(), content_type=ctype)
-
-
 async def handle_health(request: web.Request) -> web.Response:
     return web.Response(text="ok")
-
-
-async def handle_options(request: web.Request) -> web.Response:
-    """Ответ на CORS preflight (OPTIONS). Middleware добавит Access-Control заголовки."""
-    return web.Response(status=204)
 
 
 # ─── API Handlers ─────────────────────────────────────────────────────────────
@@ -355,8 +301,6 @@ async def start_api_server() -> None:
     app = web.Application(middlewares=[auth_middleware])
     app.router.add_get("/webapp",              serve_webapp)
     app.router.add_get("/",                    serve_webapp)
-    app.router.add_get("/tgapp",               serve_tgapp)
-    app.router.add_get("/tgapp/{path:.+}",     serve_tgapp_static)
     app.router.add_get("/health",              handle_health)
     app.router.add_get("/api/me",              api_me)
     app.router.add_get("/api/today",           api_today)
@@ -367,8 +311,6 @@ async def start_api_server() -> None:
     app.router.add_get("/api/compat",          api_compat)
     app.router.add_post("/api/notify",         api_notify)
     app.router.add_post("/api/sign",           api_sign)
-    # CORS preflight — браузер отправляет OPTIONS перед реальным запросом
-    app.router.add_route("OPTIONS", "/api/{path:.+}", handle_options)
 
     runner = web.AppRunner(app)
     await runner.setup()
