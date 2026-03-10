@@ -136,6 +136,49 @@ Fortune cookie — персональное предсказание под tg-s
 
 ---
 
+## ✅ UX-сессия (март 2026) — Mini App архитектура v2
+
+Реализовано в рамках подготовки к закрытому тесту:
+
+**Fortune Cookie — full-screen экран**
+- Предсказание дня открывается в отдельном оверлее (#fortune-screen)
+- Анимация: cookie-rock → cookie-break → pred-appear (CSS keyframes)
+- BackButton Telegram закрывает fortune screen и возвращает в приложение
+
+**Карусель онбординга (первый визит)**
+- 6 слайдов: Welcome + 4 вкладки (Мой день / Луна / Карта / Совместимость) + CTA «7 дней бесплатно»
+- Свайп-навигация + точки-индикаторы
+- `registerAndExplode()` — регистрирует через POST /api/register + запускает анимацию взрыва
+
+**Кнопка «назад» удалена**
+- Header: только счётчик триала + иконка словаря (выровнены вправо)
+- Приложение самодостаточно — нет навигации к лендингу
+- BackButton только для fortune screen
+
+**Scroll-reveal анимации**
+- `.reveal` + `.reveal.visible` — opacity + translateY + scale
+- IntersectionObserver с двойным rAF (обход race condition с paint)
+- `--reveal-delay` CSS var, stagger 70ms, макс. 420ms
+- applyReveal() вызывается при каждом loadTab()
+
+**Tile-row 2×2 в Мой день и Луна**
+- CSS grid: 1fr 1fr, gap 10px
+- Фаза + Луна в знаке — компактные карточки над доменным контентом
+
+**Trial countdown на лендинге**
+- `trial_ends` ISO timestamp из /api/me
+- setInterval 1s: обратный отсчёт дни-часы-минуты-секунды
+- Cormorant Garamond font, tabular-nums
+
+**Команда /resetme**
+- Пользователь сам удаляет свои данные (самосервис, без прав админа)
+- Используется для тестирования первого визита
+
+**ADMIN_IDS в Railway**
+- Переменная ADMIN_IDS=958560798 установлена через railway variables set
+
+---
+
 ## Шаг 7 — Закрытый тест с реальными людьми
 **Результат:** 5–10 живых пользователей попробовали бот и дали обратную связь.
 
