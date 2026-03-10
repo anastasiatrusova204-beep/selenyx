@@ -117,7 +117,7 @@
 
     .tab-content {
       flex: 1; overflow-y: auto; overflow-x: hidden;
-      padding: 12px 0 calc(var(--tab-h) + env(safe-area-inset-bottom) + 20px);
+      padding: 48px 0 calc(var(--tab-h) + env(safe-area-inset-bottom) + 20px);
       -webkit-overflow-scrolling: touch;
     }
     .tab-panel { display: none; padding: 0 20px 20px; }
@@ -636,27 +636,18 @@
     /* ─── App Header ─── */
     #app-header {
       position: fixed; top: 0; left: 0; right: 0; height: 40px; z-index: 51;
-      display: none; align-items: center; justify-content: space-between;
-      padding: 0 12px; background: transparent;
+      display: none; align-items: center; justify-content: flex-end;
+      padding: 0 14px; gap: 10px; background: transparent;
     }
     #app.active ~ #app-header,
     #app-header.visible { display: flex; }
-    .app-header-right {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .app-header-back {
-      background: var(--bg2); color: var(--gold); font-size: 13px; font-weight: 500;
-      padding: 5px 12px; border: 1px solid rgba(255,213,79,0.25); border-radius: 20px;
-      touch-action: manipulation; letter-spacing: 0.2px;
-    }
-    .app-header-back:active { opacity: 0.7; }
     .app-header-help {
-      background: transparent; color: var(--hint); font-size: 18px; line-height: 1;
-      padding: 4px; touch-action: manipulation; border-radius: 6px;
-      transition: color 0.2s;
+      background: rgba(255,255,255,0.07); color: var(--hint); font-size: 17px; line-height: 1;
+      padding: 5px 7px; touch-action: manipulation; border-radius: 8px;
+      transition: color 0.2s, background 0.2s; border: 1px solid rgba(255,255,255,0.08);
     }
     .app-header-help:active { color: var(--text); opacity: 0.7; }
-    @media (hover: hover) { .app-header-help:hover { color: var(--text); } }
+    @media (hover: hover) { .app-header-help:hover { color: var(--text); background: rgba(255,255,255,0.1); } }
 
     /* ─── Glossary overlay ─── */
     #glossary-overlay {
@@ -819,13 +810,10 @@
     </nav>
   </div>
 
-  <!-- Утилитарная шапка (назад + trial + словарь) -->
+  <!-- Утилитарная шапка (trial + словарь) -->
   <div id="app-header">
-    <button class="app-header-back" id="app-back-btn" aria-label="Назад">‹ назад</button>
-    <div class="app-header-right">
-      <div id="trial-counter" style="font-size:11px;color:var(--gold);display:none"></div>
-      <button class="app-header-help" id="glossary-open-btn" aria-label="Словарь терминов">📖</button>
-    </div>
+    <div id="trial-counter" style="font-size:11px;color:var(--gold);display:none"></div>
+    <button class="app-header-help" id="glossary-open-btn" aria-label="Словарь терминов">📖</button>
   </div>
 
   <!-- Словарь терминов -->
@@ -978,7 +966,7 @@
     document.getElementById('app').classList.add('active');
     document.getElementById('app-header').classList.add('visible');
     particles=[]; phase='idle'; ctx.clearRect(0,0,CV.width,CV.height);
-    tg?.BackButton?.show();
+    tg?.BackButton?.hide();
     currentTab=''; // сброс чтобы switchTab не пропустил первую вкладку
     switchTab(tab);
   }
@@ -1456,16 +1444,14 @@
   document.getElementById('fortune-close-btn')?.addEventListener('click',closeFortune);
 
   // ── Events ────────────────────────────────────────────────────────────────
-  // Системная кнопка «Назад» Telegram — закрыть fortune если открыт, иначе на лендинг
+  // Системная кнопка «Назад» Telegram — только для закрытия fortune screen
   tg?.BackButton?.onClick(()=>{
     const fs=document.getElementById('fortune-screen');
-    if(fs?.classList.contains('active')){ closeFortune(); return; }
-    showMoon();
+    if(fs?.classList.contains('active')){ closeFortune(); }
   });
 
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
   document.getElementById('onb-back-btn')?.addEventListener('click',showMoon);
-  document.getElementById('app-back-btn')?.addEventListener('click',showMoon);
 
   // Словарь
   document.getElementById('glossary-open-btn')?.addEventListener('click',openGlossary);
