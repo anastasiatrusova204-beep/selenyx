@@ -126,24 +126,35 @@
     .tab-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
       height: calc(var(--tab-h) + env(safe-area-inset-bottom));
-      padding-bottom: env(safe-area-inset-bottom);
-      background: var(--bg2); border-top: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+      background: var(--bg2);
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
       display: flex; z-index: 50;
+      overflow: visible;
+      align-items: flex-end;
     }
     .tab-item {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 4px;
       touch-action: manipulation; cursor: pointer; position: relative;
-      color: var(--hint); transition: color 0.2s, opacity 0.15s;
+      color: var(--hint);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), color 0.2s;
       -webkit-tap-highlight-color: transparent;
+      padding-bottom: 2px;
     }
-    .tab-item:active { opacity: 0.6; }
-    .tab-item.active { color: var(--btn); }
-    .tab-item.active::after {
+    .tab-item:active { opacity: 0.7; }
+    .tab-item.active { color: #fff; transform: translateY(-16px); }
+    .tab-item.active::before {
       content: '';
-      position: absolute; top: 0; left: 20%; right: 20%; height: 2px;
-      background: var(--btn); border-radius: 0 0 3px 3px;
+      position: absolute;
+      inset: -8px -16px -8px -16px;
+      border-radius: 50%;
+      background: var(--btn);
+      box-shadow: 0 4px 20px rgba(124,77,255,0.6);
+      z-index: -1;
     }
+    .tab-item.active::after { display: none; }
     .tab-icon { font-size: 22px; line-height: 1; }
     .tab-label { font-size: 11px; letter-spacing: 0.3px; font-weight: 500; }
 
@@ -444,6 +455,14 @@
     .cta-tg-link { font-size: 12px; color: var(--hint); text-align: center; margin-top: 8px; opacity: 0.6; }
     .cta-tg-link a { color: inherit; text-decoration: underline; }
 
+    /* ─── Zodiac Wheel ─── */
+    .zodiac-wheel-wrap { display:flex; justify-content:center; margin:8px 0 16px; filter:drop-shadow(0 0 20px rgba(124,77,255,0.3)); }
+    /* ─── Planet Cards ─── */
+    .planet-cards-scroll { display:flex; gap:10px; overflow-x:auto; padding:4px 0 10px; scrollbar-width:none; -webkit-overflow-scrolling:touch; margin-bottom:8px; }
+    .planet-cards-scroll::-webkit-scrollbar { display:none; }
+    .planet-card { flex-shrink:0; width:88px; border-radius:16px; padding:14px 10px; display:flex; flex-direction:column; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.1); }
+    .planet-card-emoji { font-size:26px; line-height:1; }
+    .planet-card-name { font-size:12px; font-weight:500; color:var(--text); }
     /* ─── Prediction reveal ─── */
     .prediction-text { font-size: 14px; line-height: 1.65; }
     .prediction-text.hidden { display: none; }
@@ -935,6 +954,71 @@
     'оппозиция':  {sym:'☍', label:'противостояние',color:'#ef9a9a'},
   };
 
+  function buildZodiacWheel(moonSignName){
+    const signs=[
+      {sym:'♈',name:'Овен'},{sym:'♉',name:'Телец'},{sym:'♊',name:'Близнецы'},
+      {sym:'♋',name:'Рак'},{sym:'♌',name:'Лев'},{sym:'♍',name:'Дева'},
+      {sym:'♎',name:'Весы'},{sym:'♏',name:'Скорпион'},{sym:'♐',name:'Стрелец'},
+      {sym:'♑',name:'Козерог'},{sym:'♒',name:'Водолей'},{sym:'♓',name:'Рыбы'}
+    ];
+    const cx=140,cy=140,R=130,r=75,labelR=108,symR=90;
+    const activeIdx=signs.findIndex(s=>moonSignName&&moonSignName.includes(s.name));
+    let sectors='',labels='',symbols='';
+    signs.forEach((s,i)=>{
+      const a1=(i*30-90)*Math.PI/180, a2=((i+1)*30-90)*Math.PI/180;
+      const x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+      const x2=cx+R*Math.cos(a2),y2=cy+R*Math.sin(a2);
+      const xi1=cx+r*Math.cos(a1),yi1=cy+r*Math.sin(a1);
+      const xi2=cx+r*Math.cos(a2),yi2=cy+r*Math.sin(a2);
+      const isActive=i===activeIdx;
+      const fill=isActive?'rgba(255,213,79,0.18)':'rgba(124,77,255,0.07)';
+      const stroke=isActive?'#ffd54f':'rgba(124,77,255,0.3)';
+      sectors+=`<path d="M${xi1},${yi1} L${x1},${y1} A${R},${R} 0 0,1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 0,0 ${xi1},${yi1}" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
+      const aMid=(i*30+15-90)*Math.PI/180;
+      const sx=cx+symR*Math.cos(aMid),sy=cy+symR*Math.sin(aMid);
+      symbols+=`<text x="${sx}" y="${sy}" text-anchor="middle" dominant-baseline="central" font-size="13" fill="${isActive?'#ffd54f':'#9090cc'}" font-weight="${isActive?'700':'400'}">${s.sym}</text>`;
+      const lx=cx+labelR*Math.cos(aMid),ly=cy+labelR*Math.sin(aMid);
+      labels+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="7.5" fill="${isActive?'#ffd54f':'rgba(200,200,255,0.5)'}" font-weight="${isActive?'600':'400'}">${s.name}</text>`;
+    });
+    return `<div class="zodiac-wheel-wrap"><svg viewBox="0 0 280 280" width="280" height="280">
+      <circle cx="140" cy="140" r="73" fill="rgba(10,10,26,0.9)" stroke="rgba(124,77,255,0.25)" stroke-width="1"/>
+      ${sectors}${symbols}${labels}
+      <circle cx="140" cy="140" r="36" fill="rgba(124,77,255,0.15)" stroke="rgba(124,77,255,0.4)" stroke-width="1"/>
+      <text x="140" y="140" text-anchor="middle" dominant-baseline="central" font-size="28">🌙</text>
+    </svg></div>`;
+  }
+
+  const PLANET_STYLE={
+    'Меркурий':{emoji:'☿',grad:'linear-gradient(135deg,#3a3a5c,#6060a0)'},
+    'Венера':  {emoji:'♀',grad:'linear-gradient(135deg,#5c3a20,#c09040)'},
+    'Марс':    {emoji:'♂',grad:'linear-gradient(135deg,#5c1a1a,#c04040)'},
+    'Юпитер':  {emoji:'♃',grad:'linear-gradient(135deg,#3a2810,#a07030)'},
+    'Сатурн':  {emoji:'♄',grad:'linear-gradient(135deg,#2a2a1a,#806040)'},
+  };
+  function buildPlanetCards(aspects,retrogrades){
+    const retroNames=new Set((retrogrades||[]).map(r=>r.name||r));
+    const seen=new Set(), planets=[];
+    (aspects||[]).forEach(a=>{
+      if(!seen.has(a.label)&&PLANET_STYLE[a.label]){seen.add(a.label);planets.push(a.label);}
+    });
+    (retrogrades||[]).forEach(r=>{
+      const n=r.name||r;
+      if(!seen.has(n)&&PLANET_STYLE[n]){seen.add(n);planets.push(n);}
+    });
+    if(!planets.length) return '';
+    const cards=planets.map(name=>{
+      const ps=PLANET_STYLE[name];
+      const isRetro=retroNames.has(name);
+      const status=isRetro
+        ?`<span style="color:#ef9a9a;font-size:10px">↺ Ретроградный</span>`
+        :`<span style="color:#81c784;font-size:10px">→ Прямой</span>`;
+      return `<div class="planet-card" style="background:${ps.grad}">
+        <div class="planet-card-emoji">${ps.emoji}</div>
+        <div class="planet-card-name">${name}</div>${status}</div>`;
+    }).join('');
+    return `<div class="planet-cards-scroll">${cards}</div>`;
+  }
+
   function renderMoon(d){
     const asp=(d.aspects||[]).map(a=>{
       const ad=ASPECT_DISPLAY[a.aspect]||{sym:'·',label:a.aspect,color:'var(--hint)'};
@@ -966,7 +1050,8 @@
       <div class="num-day-big">${d.day_number}</div>
       <div style="font-size:14px;line-height:1.55">${d.day_number_text}</div></div>`:'';
 
-    document.getElementById('tab-moon').innerHTML=`
+    document.getElementById('tab-moon').innerHTML=
+      buildZodiacWheel(d.sign_nom)+`
       <div class="moon-display">
         <div class="moon-phase-big">${d.phase_emoji}</div>
         <div class="moon-phase-name">${d.phase_name}</div>
@@ -978,7 +1063,7 @@
         <div class="ld-energy">${d.lunar_day_energy}</div>
         <div class="ld-practice">💫 ${d.lunar_day_practice}</div>
       </div>
-      ${retro}
+      ${buildPlanetCards(d.aspects,d.retrogrades)}
       <div class="section">
         <div class="section-title">🪐 Аспекты Луны</div>
         <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Как Луна взаимодействует с планетами прямо сейчас</div>
