@@ -206,9 +206,15 @@
       cursor: pointer; touch-action: manipulation; transition: background 0.2s, border-color 0.2s, color 0.2s; color: var(--hint);
     }
     .pill.active { background: rgba(124,77,255,0.2); border-color: var(--btn); color: var(--text); }
+    .pill.active::after { content: ' ▾'; font-size: 10px; opacity: 0.6; }
     .pill:active { opacity: 0.7; }
     .domain-content { display: none; }
-    .domain-content.active { display: block; }
+    .domain-content.active {
+      display: block;
+      border-left: 2px solid rgba(124,77,255,0.35);
+      padding-left: 12px;
+      margin-top: 2px;
+    }
     .domain-tip {
       padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
       font-size: 14px; color: var(--text);
@@ -452,33 +458,20 @@
       .tab-item:hover    { color: var(--text); }
       .sign-btn:hover    { border-color: rgba(124,77,255,0.4); background: rgba(124,77,255,0.08); }
       .sign-pick-btn:hover { border-color: rgba(124,77,255,0.4); }
-      .app-header-back:hover { border-color: rgba(255,213,79,0.5); }
+
       .onb-back:hover    { border-color: rgba(255,213,79,0.5); }
     }
 
     /* ─── App Header ─── */
     #app-header {
-      position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 51;
-      display: none; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 12px;
-      background: rgba(10,10,26,0.85); backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: fixed; top: 0; right: 0; height: 40px; z-index: 51;
+      display: none; align-items: center; padding: 0 12px;
+      background: transparent;
     }
     #app.active ~ #app-header,
-    #app-header.visible { display: grid; }
-    .app-header-back {
-      justify-self: start; display: flex; align-items: center; gap: 4px;
-      background: var(--bg2); color: var(--gold); font-size: 13px; font-weight: 500;
-      padding: 6px 14px; border: 1px solid rgba(255,213,79,0.25); border-radius: 20px;
-      cursor: pointer; touch-action: manipulation; letter-spacing: 0.2px;
-    }
-    .app-header-back:active { opacity: 0.7; }
-    .app-header-title {
-      justify-self: center;
-      font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700;
-      letter-spacing: 2px; color: var(--text);
-    }
+    #app-header.visible { display: flex; }
     .app-header-right {
-      justify-self: end; display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
     .app-header-help {
       background: transparent; color: var(--hint); font-size: 18px; line-height: 1;
@@ -624,14 +617,10 @@
     </nav>
   </div>
 
-  <!-- Шапка приложения (показывается поверх вкладок) -->
+  <!-- Утилитарная шапка (только trial + словарь) -->
   <div id="app-header">
-    <button class="app-header-back" id="app-back-btn">‹ назад</button>
-    <div class="app-header-title">SELENYX</div>
-    <div class="app-header-right">
-      <div id="trial-counter" style="font-size:11px;color:var(--gold);display:none"></div>
-      <button class="app-header-help" id="glossary-open-btn" aria-label="Словарь терминов">📖</button>
-    </div>
+    <div id="trial-counter" style="font-size:11px;color:var(--gold);display:none"></div>
+    <button class="app-header-help" id="glossary-open-btn" aria-label="Словарь терминов">📖</button>
   </div>
 
   <!-- Словарь терминов -->
@@ -805,7 +794,7 @@
     const signRow = mySignInfo
       ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:6px">
            <span style="font-size:16px;color:var(--text);font-weight:500">${mySignInfo.e} ${mySignInfo.n}</span>
-           <button id="btn-change-sign" style="background:transparent;font-size:14px;color:var(--hint);padding:6px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:10px;touch-action:manipulation">✏️ сменить</button>
+           <button id="btn-change-sign" style="background:transparent;font-size:12px;color:var(--hint);padding:4px 6px;border:none;text-decoration:underline;text-underline-offset:3px;touch-action:manipulation">✏️ сменить</button>
          </div>`
       : `<div style="margin-top:10px;margin-bottom:6px">
            <button id="btn-change-sign" style="background:transparent;font-size:14px;color:var(--btn);padding:8px 14px;border:1px solid rgba(124,77,255,0.3);border-radius:10px;touch-action:manipulation">✏️ Выбрать свой знак</button>
@@ -818,8 +807,7 @@
         <span>Луна в ${m.sign_nom} ${m.degree}° &nbsp;·&nbsp; ${m.lunar_day} лунный день</span>${sb}
       </div>
       <div class="phase-intro">${pe.intro}</div>
-      <div class="section">
-        <div style="font-size:13px;color:var(--hint);margin-bottom:10px">Выбери сферу — получи подсказку на сегодня:</div>
+      <div class="info-card" style="padding:14px 16px;margin-top:4px">
         <div class="domain-pills">${pills}</div><div>${doms}</div>
       </div>
       ${pred}`;
@@ -1149,7 +1137,6 @@
   tg?.BackButton?.onClick(showMoon);
 
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
-  document.getElementById('app-back-btn')?.addEventListener('click',showMoon);
   document.getElementById('onb-back-btn')?.addEventListener('click',showMoon);
 
   // Словарь
