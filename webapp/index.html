@@ -221,10 +221,7 @@
       background: var(--bg2); border: 1px solid rgba(255,213,79,0.15);
       border-radius: var(--radius); padding: 18px; margin-top: 12px;
     }
-    .prediction-label { font-size: 13px; color: var(--gold); margin-bottom: 10px; }
-    .prediction-text { font-size: 14px; line-height: 1.65; touch-action: manipulation; }
-    .prediction-hint { font-size: 12px; color: var(--hint); margin-top: 8px; text-align: center; }
-    .prediction-hint.hidden { display: none; }
+    .prediction-text { font-size: 14px; line-height: 1.65; }
 
     /* ─── Moon tab ─── */
     .moon-display { text-align: center; padding: 20px 0 24px; }
@@ -791,10 +788,9 @@
       return `<div class="domain-content${k==='health'?' active':''}" data-dc="${k}">${tips}${ctx2}</div>`;
     }).join('');
     const pred=d.prediction?`<div class="prediction-wrap">
-      <div class="prediction-label">🥠 Личное предсказание</div>
       <div class="prediction-seal" id="pred-seal">
-        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Открыть предсказание">
-          <span class="seal-sparkle">✨</span> Открыть предсказание
+        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Личное предсказание">
+          <span class="seal-sparkle">🥠</span> Личное предсказание
         </button>
       </div>
       <div class="prediction-text hidden" id="pred-text">${d.prediction}</div>
