@@ -44,10 +44,14 @@
 ```
 
 **Сценарий «Утренний ритуал»** (основной, 70% трафика):
-Уведомление 8:00 → открыть бот → «✨ Мой день» → выбрать вкладку → прочитать → поделиться скрином.
+Уведомление 8:00 → deep-link → Mini App → сплэш → Луна → тап → вкладка «Мой день» → пилюли доменов → предсказание → закрыть.
 
 **Сценарий «Ситуативная проверка»** (30% трафика):
-Перед встречей / важным решением → `/today` или кнопка → мгновенный ответ → закрыть бот.
+Открыть Mini App → выбрать вкладку → мгновенный ответ → закрыть.
+
+> **Архитектурное решение (реализовано):** Mini App — основной UI.
+> Бот остаётся для уведомлений, /start, онбординга и admin-команд.
+> Весь контентный UX живёт в webapp/index.html.
 
 ---
 
@@ -387,32 +391,63 @@ Selenyx — ежедневный навигатор по лунным ритма
 
 ## 6. Техническая архитектура
 
-### Стек
+### Стек (актуальный — март 2026)
 
 | Компонент | Инструмент | Версия |
 |---|---|---|
-| Python | CPython | 3.9.6 |
+| Python | CPython | 3.9.6 (локально) / 3.11 (Railway Docker) |
 | Фреймворк бота | aiogram | 3.13.1 |
-| Астро-расчёты | kerykeion | 4.26.3 |
+| Астро-расчёты | kerykeion | 4.26.3 (Swiss Ephemeris, AGPL) |
 | База данных | aiosqlite / SQLite | 0.20.0 |
-| Планировщик (Шаг 8) | APScheduler | 3.x |
-| Хостинг | Railway | — |
-| Часовой пояс | zoneinfo | stdlib |
+| REST API | aiohttp | — |
+| Планировщик | APScheduler | 3.10.4 |
+| Хостинг | Railway | Dockerfile билд |
+| Часовой пояс | zoneinfo | stdlib (Europe/Moscow) |
+
+### Файловая структура (реальная)
+
+```
+bot.py      — хендлеры бота + APScheduler + main()
+data.py     — контентные константы (~1044 строк)
+astro.py    — астро-расчёты (kerykeion)
+db.py       — SQLite: таблицы users + event_log
+api.py      — aiohttp REST API + HMAC-auth + DEMO_MODE
+webapp/index.html — SPA (все 4 вкладки)
+```
 
 ### Схема базы данных
 
 ```sql
+-- Пользователи
 CREATE TABLE users (
-    user_id     INTEGER PRIMARY KEY,  -- Telegram user_id
-    username    TEXT,
+    user_id     INTEGER PRIMARY KEY,
     first_name  TEXT,
-    zodiac_sign TEXT,                 -- 'aries', 'taurus', ...
-    notify_time TEXT,                 -- '08:00' (Шаг 8)
-    notify_tz   TEXT DEFAULT 'Europe/Moscow',
-    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+    zodiac_sign TEXT,          -- 'aries', 'taurus', ...
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_visit  TEXT,
+    streak      INTEGER DEFAULT 0,
+    notify_time TEXT,          -- '08:00'
+    birth_date  TEXT,          -- 'ДД.ММ.ГГГГ'
+    birth_time  TEXT,          -- 'ЧЧ:ММ' (необязательно)
+    tier        TEXT DEFAULT 'free',
+    trial_start TEXT
+);
+
+-- Аналитика воронки
+CREATE TABLE event_log (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id  INTEGER,
+    event    TEXT NOT NULL,  -- 'app_open', 'today_view', 'compat_check', ...
+    data     TEXT,           -- дополнительные данные (знак, время и т.д.)
+    ts       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+> **Важно:** SQLite работает в WAL-режиме — параллельные чтения не блокируют запись.
+> Достаточно до ~10 000 пользователей. При росте → PostgreSQL.
+
+> **Лицензия kerykeion:** Swiss Ephemeris (AGPL). При коммерческом использовании
+> требуется либо открытый код проекта, либо коммерческая лицензия (~$250–1000).
 
 ### Интеграции
 

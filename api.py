@@ -32,6 +32,7 @@ from db import (
     get_user, save_user_sign, save_birth_data,
     save_notify_time, save_user_tier, init_db,
     ensure_user_exists, start_trial, get_trial_days_left,
+    log_event, get_stats,
 )
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
@@ -213,6 +214,7 @@ async def api_register(request: web.Request) -> web.Response:
 async def api_me(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     user = await get_user(tg["id"])
+    await log_event(tg["id"], "app_open")
     if not user:
         return _json({"registered": False, "name": tg.get("first_name", "")})
     days_left = await get_trial_days_left(tg["id"])
@@ -231,12 +233,15 @@ async def api_me(request: web.Request) -> web.Response:
 async def api_today(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     user = await get_user(tg["id"])
+    await log_event(tg["id"], "today_view")
     moon = _get_cached_energy()
     payload = _build_today_payload(user or {}, moon)
     return _json(payload)
 
 
 async def api_moon(request: web.Request) -> web.Response:
+    tg = request["tg_user"]
+    await log_event(tg["id"], "moon_view")
     moon = _get_cached_moon()
     return _json({
         "phase_emoji":        moon["phase_emoji"],
@@ -264,6 +269,7 @@ async def api_calendar(request: web.Request) -> web.Response:
 
 async def api_natal_get(request: web.Request) -> web.Response:
     tg = request["tg_user"]
+    await log_event(tg["id"], "natal_view")
     user = await get_user(tg["id"])
     if not user or not user.get("birth_date"):
         return _json({"has_data": False})
@@ -301,6 +307,7 @@ async def api_natal_post(request: web.Request) -> web.Response:
         get_natal_chart(birth_date, birth_time)
         await ensure_user_exists(tg["id"], tg.get("first_name", ""))
         await save_birth_data(tg["id"], birth_date, birth_time)
+        await log_event(tg["id"], "natal_submit")
         return _json({"ok": True})
     except Exception as e:
         return _json({"error": str(e)}, status=400)
@@ -310,7 +317,9 @@ async def api_compat(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     sign2 = request.rel_url.query.get("sign", "").lower()
     if not sign2:
+        await log_event(tg["id"], "compat_view")
         return _json({"error": "sign param required"}, status=400)
+    await log_event(tg["id"], "compat_check", sign2)
     user = await get_user(tg["id"])
     sign1 = (user or {}).get("zodiac_sign", "")
     if not sign1:
@@ -338,6 +347,7 @@ async def api_notify(request: web.Request) -> web.Response:
         time_val = body.get("time")  # "08:00" или null
         await ensure_user_exists(tg["id"], tg.get("first_name", ""))
         await save_notify_time(tg["id"], time_val)
+        await log_event(tg["id"], "notify_set", time_val)
         return _json({"ok": True})
     except Exception as e:
         return _json({"error": str(e)}, status=400)
@@ -353,9 +363,24 @@ async def api_sign(request: web.Request) -> web.Response:
             return _json({"error": "invalid sign"}, status=400)
         name = tg.get("first_name", "")
         await save_user_sign(tg["id"], name, sign)
+        await log_event(tg["id"], "sign_set", sign)
         return _json({"ok": True})
     except Exception as e:
         return _json({"error": str(e)}, status=400)
+
+
+ADMIN_IDS = set(
+    int(x) for x in os.getenv("ADMIN_IDS", "").split(",") if x.strip().isdigit()
+)
+
+
+async def api_admin_stats(request: web.Request) -> web.Response:
+    """Простая статистика воронки — только для ADMIN_IDS."""
+    tg = request["tg_user"]
+    if ADMIN_IDS and tg["id"] not in ADMIN_IDS:
+        return web.Response(status=403)
+    stats = await get_stats()
+    return _json(stats)
 
 
 # ─── Server ────────────────────────────────────────────────────────────────────
@@ -391,6 +416,7 @@ async def start_api_server() -> None:
     app.router.add_get("/api/compat",          api_compat)
     app.router.add_post("/api/notify",         api_notify)
     app.router.add_post("/api/sign",           api_sign)
+    app.router.add_get("/api/admin/stats",     api_admin_stats)
 
     runner = web.AppRunner(app)
     await runner.setup()

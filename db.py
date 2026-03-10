@@ -52,6 +52,22 @@ async def init_db() -> None:
     await _db.execute(
         "CREATE INDEX IF NOT EXISTS idx_users_notify ON users(notify_time)"
     )
+    # Таблица событий для аналитики воронки
+    await _db.execute("""
+        CREATE TABLE IF NOT EXISTS event_log (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id    INTEGER,
+            event      TEXT NOT NULL,
+            data       TEXT,
+            ts         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    await _db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_events_user ON event_log(user_id)"
+    )
+    await _db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_events_ts ON event_log(ts)"
+    )
     await _db.commit()
 
 
@@ -171,3 +187,49 @@ async def get_trial_days_left(user_id: int) -> int:
         return max(0, 7 - elapsed)
     except Exception:
         return -1
+
+
+async def log_event(user_id: int, event: str, data: Optional[str] = None) -> None:
+    """Записывает событие в event_log для аналитики воронки.
+
+    Ключевые события:
+      app_open       — открытие Mini App
+      today_view     — просмотр вкладки «Мой день»
+      domain_tap     — тап на пилюлю домена (data = 'health'|'work'|'love'|'psych')
+      prediction_open — открытие личного предсказания
+      moon_view      — просмотр вкладки «Луна»
+      natal_view     — просмотр вкладки «Карта»
+      natal_submit   — ввод даты рождения
+      compat_view    — просмотр вкладки «Совместимость»
+      compat_check   — проверка совместимости (data = знак партнёра)
+      sign_set       — выбор/смена знака
+      notify_set     — настройка уведомлений
+    """
+    try:
+        await _db.execute(
+            "INSERT INTO event_log (user_id, event, data) VALUES (?, ?, ?)",
+            (user_id, event, data),
+        )
+        await _db.commit()
+    except Exception as e:
+        logger.warning(f"log_event failed: {e}")
+
+
+async def get_stats() -> dict:
+    """Возвращает базовую статистику для /api/admin/stats."""
+    stats: dict = {}
+    queries = {
+        "total_users":    "SELECT COUNT(*) FROM users",
+        "with_sign":      "SELECT COUNT(*) FROM users WHERE zodiac_sign IS NOT NULL",
+        "with_notify":    "SELECT COUNT(*) FROM users WHERE notify_time IS NOT NULL",
+        "with_birth":     "SELECT COUNT(*) FROM users WHERE birth_date IS NOT NULL",
+        "active_7d":      "SELECT COUNT(DISTINCT user_id) FROM event_log WHERE ts >= datetime('now', '-7 days')",
+        "active_1d":      "SELECT COUNT(DISTINCT user_id) FROM event_log WHERE ts >= datetime('now', '-1 day')",
+        "today_views_7d": "SELECT COUNT(*) FROM event_log WHERE event='today_view' AND ts >= datetime('now', '-7 days')",
+        "pred_opens_7d":  "SELECT COUNT(*) FROM event_log WHERE event='prediction_open' AND ts >= datetime('now', '-7 days')",
+    }
+    for key, sql in queries.items():
+        async with _db.execute(sql) as cur:
+            row = await cur.fetchone()
+            stats[key] = row[0] if row else 0
+    return stats

@@ -23,6 +23,32 @@ sleep 8 && cat bot.log
 RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway up --service selenyx-bot
 ```
 
+## Откат на Railway (если деплой сломал что-то)
+1. Открыть https://railway.com/project/f53049ff-7cb8-43a4-bffd-d6dc455ec19a
+2. Сервис selenyx-bot → Deployments → найти последний рабочий → «Redeploy»
+3. Или через CLI: `~/bin/railway rollback --service selenyx-bot` (откатывает на предыдущий деплой)
+
+## DEMO_MODE — тестирование Mini App в браузере
+Mini App в браузере вне Telegram не проходит HMAC-аутентификацию → 401.
+Чтобы открыть Mini App в браузере без Telegram:
+```bash
+# Добавить переменную на Railway (временно):
+RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway variables set DEMO_MODE=true --service selenyx-bot
+# После тестирования — отключить:
+RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway variables set DEMO_MODE=false --service selenyx-bot
+```
+В DEMO_MODE user = {id: 999999999, first_name: "Демо"} — реальных данных нет.
+
+## Как посмотреть аналитику (воронку)
+```bash
+# Статистика через API (нужен Telegram initData пользователя из ADMIN_IDS)
+# Или напрямую через SQLite на Railway:
+RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway shell --service selenyx-bot
+# Внутри контейнера:
+sqlite3 /data/selenyx.db "SELECT event, COUNT(*) FROM event_log GROUP BY event ORDER BY 2 DESC;"
+sqlite3 /data/selenyx.db "SELECT COUNT(DISTINCT user_id) FROM event_log WHERE ts >= datetime('now','-7 days');"
+```
+
 ## Как остановить бота
 ```bash
 pkill -9 -f "bot.py"
@@ -43,7 +69,7 @@ pkill -9 -f "bot.py"
 bot.py           — хендлеры бота + scheduler + main() (1545 строк)
 data.py          — все контентные константы (~1044 строк, из bot.py)
 astro.py         — астро-расчёты: get_moon_data, get_natal_chart, etc.
-db.py            — функции БД + колонка tier (для Telegram Stars)
+db.py            — функции БД + таблицы users + event_log (аналитика)
 api.py           — aiohttp REST API для Mini App + HMAC-аутентификация
 webapp/
   index.html     — полноценный SPA: 4 вкладки с реальным контентом из API
@@ -67,15 +93,16 @@ Procfile         — резервный запуск для других пла�
 ```
 GET  /webapp              → index.html
 GET  /health              → "ok"
-GET  /api/me              → {name, sign, streak, notify_time, has_birth, tier}
-GET  /api/today           → {moon, phase_energy, domains, prediction, extras, color}
-GET  /api/moon            → {phase, sign, degree, lunar_day, aspects, retrogrades}
+GET  /api/me              → {name, sign, streak, notify_time, has_birth, tier}  + log: app_open
+GET  /api/today           → {moon, phase_energy, domains, prediction, extras, color}  + log: today_view
+GET  /api/moon            → {phase, sign, degree, lunar_day, aspects, retrogrades}  + log: moon_view
 GET  /api/moon/calendar   → {text: ...}
-GET  /api/natal           → {has_data, sun, moon, asc}
-POST /api/natal           → body:{birth_date, birth_time}
-GET  /api/compat?sign=leo → {rating, title, text, user_sign, target_sign}
-POST /api/notify          → body:{time}
-POST /api/sign            → body:{sign}
+GET  /api/natal           → {has_data, sun, moon, asc}  + log: natal_view
+POST /api/natal           → body:{birth_date, birth_time}  + log: natal_submit
+GET  /api/compat?sign=leo → {rating, title, text, user_sign, target_sign}  + log: compat_check
+POST /api/notify          → body:{time}  + log: notify_set
+POST /api/sign            → body:{sign}  + log: sign_set
+GET  /api/admin/stats     → {total_users, active_7d, active_1d, today_views_7d, ...}  (только ADMIN_IDS)
 ```
 
 ## Статус разработки (план в PLAN.md)
