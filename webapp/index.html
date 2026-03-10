@@ -633,6 +633,51 @@
       animation: pred-appear 0.5s 0.3s both;
     }
 
+    /* ─── Welcome Carousel ─── */
+    #welcome-carousel {
+      z-index: 22; background: var(--bg);
+      padding: 32px 20px; justify-content: center;
+    }
+    .wc-card {
+      background: var(--bg2); border: 1px solid rgba(255,213,79,0.22);
+      border-radius: 28px; padding: 40px 28px 32px;
+      max-width: 360px; width: 100%;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      transition: opacity 0.22s, transform 0.22s;
+    }
+    .wc-card.slide-out { opacity: 0; transform: translateX(-28px); }
+    .wc-card.slide-in  { opacity: 0; transform: translateX(28px); }
+    .wc-emoji {
+      font-size: 72px; line-height: 1; margin-bottom: 20px;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .wc-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 2.5px;
+      color: var(--gold); margin-bottom: 12px; text-transform: uppercase;
+    }
+    .wc-headline {
+      font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 700;
+      color: var(--text); margin-bottom: 14px; line-height: 1.2;
+    }
+    .wc-desc {
+      font-size: 15px; color: var(--hint); line-height: 1.65; margin-bottom: 32px;
+    }
+    .wc-btn {
+      width: 100%; padding: 16px; border-radius: 24px;
+      background: linear-gradient(135deg, #ffd54f 0%, #ffb300 100%);
+      color: #1a1000; font-size: 16px; font-weight: 700;
+      border: none; cursor: pointer; touch-action: manipulation;
+      margin-bottom: 24px; transition: opacity 0.15s, transform 0.15s;
+    }
+    .wc-btn:active { opacity: 0.85; transform: scale(0.98); }
+    .wc-btn:disabled { opacity: 0.55; }
+    .wc-dots { display: flex; gap: 8px; align-items: center; justify-content: center; }
+    .wc-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,213,79,0.22); transition: all 0.3s;
+    }
+    .wc-dot.active { width: 24px; border-radius: 4px; background: var(--gold); }
+
     /* ─── Доступность: focus-visible ─── */
     :focus-visible {
       outline: 2px solid var(--btn);
@@ -729,6 +774,18 @@
   <div id="loading"><div class="spinner"></div></div>
 
   <!-- Лендинг -->
+  <!-- Welcome Carousel (только для новых пользователей) -->
+  <div class="screen" id="welcome-carousel">
+    <div class="wc-card" id="wc-card">
+      <div class="wc-emoji" id="wc-emoji">🌙</div>
+      <div class="wc-label" id="wc-label">SELENYX</div>
+      <h2 class="wc-headline" id="wc-headline">Добро пожаловать!</h2>
+      <p class="wc-desc" id="wc-desc"></p>
+      <button class="wc-btn" id="wc-btn">Далее ›</button>
+      <div class="wc-dots" id="wc-dots"></div>
+    </div>
+  </div>
+
   <div class="screen active" id="moon-screen">
     <div class="landing-inner">
       <div class="landing-top-badge">✨ Персональная астрология</div>
@@ -1438,8 +1495,66 @@
     if(me?.sign){
       document.getElementById('moon-screen').classList.remove('active');
       showApp('today');
+    } else if(!me?.registered){
+      document.getElementById('moon-screen').classList.remove('active');
+      showCarousel();
     }
   }
+
+  // ── Welcome Carousel ─────────────────────────────────────────────────────
+  const WC_SLIDES = [
+    { emoji:'🌙', label:'SELENYX',          headline:'Добро пожаловать!',
+      desc:'Каждый день Луна меняет положение — и вместе с ней меняется энергия. Selenyx читает реальное небо и говорит простым языком.' },
+    { emoji:'✨', label:'МОЙ ДЕНЬ',         headline:'Куда направить силы?',
+      desc:'Персональный разбор по 4 сферам жизни: здоровье, работа, отношения, психология. Плюс цвет дня и число.' },
+    { emoji:'🌙', label:'ЛУНА',             headline:'Реальное небо прямо сейчас',
+      desc:'Фаза, знак, лунный день и аспекты с планетами — всё, что формирует энергию сегодня.' },
+    { emoji:'🌟', label:'НАТАЛЬНАЯ КАРТА',  headline:'Солнце, Луна, Асцендент',
+      desc:'Введи дату рождения — рассчитаю три ключевых планеты и объясню их влияние на твой характер.' },
+    { emoji:'💞', label:'СОВМЕСТИМОСТЬ',    headline:'Кто тебе подходит?',
+      desc:'Анализ пары по знакам зодиака — узнай, как вы дополняете и поддерживаете друг друга.' },
+    { emoji:'🎁', label:'БЕСПЛАТНО',        headline:'7 дней — твои.',
+      desc:'Полный доступ ко всем разделам без оплаты. Начнётся прямо сейчас.', isCta:true },
+  ];
+  let wcStep=0;
+
+  function showCarousel(){
+    document.getElementById('welcome-carousel').classList.add('active');
+    renderWcSlide(0, false);
+  }
+
+  function renderWcSlide(step, animate=true){
+    wcStep=step;
+    const s=WC_SLIDES[step], isLast=step===WC_SLIDES.length-1;
+    const card=document.getElementById('wc-card');
+    function apply(){
+      document.getElementById('wc-emoji').textContent=s.emoji;
+      document.getElementById('wc-label').textContent=s.label;
+      document.getElementById('wc-headline').textContent=s.headline;
+      document.getElementById('wc-desc').textContent=s.desc;
+      document.getElementById('wc-btn').textContent=isLast?'Попробовать бесплатно':'Далее ›';
+      document.getElementById('wc-dots').innerHTML=WC_SLIDES.map((_,i)=>
+        `<div class="wc-dot${i===step?' active':''}"></div>`).join('');
+    }
+    if(!animate){ apply(); return; }
+    card.classList.add('slide-out');
+    setTimeout(()=>{
+      apply();
+      card.classList.remove('slide-out'); card.classList.add('slide-in');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.remove('slide-in')));
+    },220);
+  }
+
+  // Свайп для карусели
+  (()=>{
+    let sx=0;
+    const el=document.getElementById('welcome-carousel');
+    el?.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; },{passive:true});
+    el?.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-sx;
+      if(Math.abs(dx)>50){ if(dx<0&&wcStep<WC_SLIDES.length-1) renderWcSlide(wcStep+1); }
+    },{passive:true});
+  })();
 
   // ── Fortune Cookie ────────────────────────────────────────────────────────
   function openFortune(prediction){
@@ -1494,19 +1609,28 @@
     if(e.target.id==='glossary-overlay') closeGlossary();
   });
 
+  async function registerAndExplode(btn, label){
+    btn.textContent='Регистрация…'; btn.disabled=true;
+    try{
+      await api('/api/register',{method:'POST',body:'{}'});
+      me=await api('/api/me'); updateTrialDisplay();
+    }catch(e){/*non-blocking*/}
+    btn.textContent=label; btn.disabled=false;
+    // Скрыть карусель/лендинг, показать луну для взрыва
+    document.getElementById('welcome-carousel').classList.remove('active');
+    document.getElementById('moon-screen').classList.add('active');
+    setTimeout(()=>explode(), 100);
+  }
+
+  // Кнопка карусели
+  document.getElementById('wc-btn')?.addEventListener('click', async()=>{
+    if(wcStep<WC_SLIDES.length-1){ renderWcSlide(wcStep+1); return; }
+    await registerAndExplode(document.getElementById('wc-btn'),'Попробовать бесплатно');
+  });
+
   // CTA: регистрация через Telegram → анимация → приложение
   document.getElementById('cta-btn')?.addEventListener('click', async () => {
-    const btn = document.getElementById('cta-btn');
-    btn.textContent = 'Регистрация…';
-    btn.disabled = true;
-    try {
-      await api('/api/register', {method: 'POST', body: '{}'});
-      me = await api('/api/me');
-      updateTrialDisplay();
-    } catch(e) { /* non-blocking — продолжаем в любом случае */ }
-    btn.textContent = 'Начать бесплатно';
-    btn.disabled = false;
-    explode();
+    await registerAndExplode(document.getElementById('cta-btn'),'Начать бесплатно');
   });
   // Показываем вторичную ссылку на Telegram только в браузере (не в Telegram)
   if(!tg?.initData){
