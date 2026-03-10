@@ -317,7 +317,6 @@ async def api_compat(request: web.Request) -> web.Response:
     tg = request["tg_user"]
     sign2 = request.rel_url.query.get("sign", "").lower()
     if not sign2:
-        await log_event(tg["id"], "compat_view")
         return _json({"error": "sign param required"}, status=400)
     await log_event(tg["id"], "compat_check", sign2)
     user = await get_user(tg["id"])
@@ -364,6 +363,27 @@ async def api_sign(request: web.Request) -> web.Response:
         name = tg.get("first_name", "")
         await save_user_sign(tg["id"], name, sign)
         await log_event(tg["id"], "sign_set", sign)
+        return _json({"ok": True})
+    except Exception as e:
+        return _json({"error": str(e)}, status=400)
+
+
+_ALLOWED_FRONTEND_EVENTS = {
+    "compat_view", "domain_tap", "prediction_open",
+    "moon_calendar_view", "glossary_open",
+}
+
+
+async def api_event(request: web.Request) -> web.Response:
+    """Логирует frontend-событие (domain_tap, prediction_open, compat_view и т.д.)."""
+    tg = request["tg_user"]
+    try:
+        body = await request.json()
+        event = body.get("event", "").strip()
+        data = body.get("data")
+        if not event or event not in _ALLOWED_FRONTEND_EVENTS:
+            return _json({"error": "unknown event"}, status=400)
+        await log_event(tg["id"], event, str(data) if data is not None else None)
         return _json({"ok": True})
     except Exception as e:
         return _json({"error": str(e)}, status=400)
@@ -416,6 +436,7 @@ async def start_api_server() -> None:
     app.router.add_get("/api/compat",          api_compat)
     app.router.add_post("/api/notify",         api_notify)
     app.router.add_post("/api/sign",           api_sign)
+    app.router.add_post("/api/event",          api_event)
     app.router.add_get("/api/admin/stats",     api_admin_stats)
 
     runner = web.AppRunner(app)
