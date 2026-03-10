@@ -489,6 +489,29 @@
     .planet-card { flex-shrink:0; width:88px; border-radius:16px; padding:14px 10px; display:flex; flex-direction:column; align-items:center; gap:5px; border:1px solid rgba(255,255,255,0.1); }
     .planet-card-emoji { font-size:26px; line-height:1; }
     .planet-card-name { font-size:12px; font-weight:500; color:var(--text); }
+    /* ─── Domain tabs: colour / number / fortune ─── */
+    .color-day-inline { padding: 4px 0 8px; }
+    .color-name-big {
+      font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700;
+      color: var(--color-accent, var(--text)); margin-bottom: 8px;
+    }
+    .color-reason-text { font-size: 13px; color: var(--hint); margin-bottom: 8px; }
+    .color-hint-text {
+      font-size: 14px; color: var(--text); padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.06); line-height: 1.6;
+    }
+    .fortune-pill-hint {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 16px 0 8px; gap: 10px; text-align: center;
+    }
+    .fortune-pill-emoji { font-size: 52px; animation: cookie-rock 2.2s ease-in-out infinite; }
+    .fortune-pill-text { font-size: 14px; color: var(--hint); line-height: 1.5; max-width: 220px; }
+    .fortune-pill-btn {
+      margin-top: 4px; padding: 11px 28px; border-radius: 24px;
+      background: linear-gradient(135deg, rgba(124,77,255,0.3), rgba(124,77,255,0.15));
+      border: 1px solid rgba(124,77,255,0.5); color: var(--text);
+      font-size: 15px; font-weight: 500; cursor: pointer; touch-action: manipulation;
+    }
     /* ─── Prediction reveal ─── */
     .prediction-text { font-size: 14px; line-height: 1.65; }
     .prediction-text.hidden { display: none; }
@@ -978,20 +1001,38 @@
     const m=d.moon, pe=d.phase_energy, streak=me?.streak||0;
     const sb=streak>1?`<span class="streak-badge">🔥 ${streak} ${dw(streak)} подряд</span>`:'';
     const dk=['health','work','love','psych'];
-    const pills=dk.map(k=>`<div class="pill${k==='health'?' active':''}" data-domain="${k}">${DOMAIN_LABELS[k]}</div>`).join('');
+    // Основные вкладки
+    const pills=dk.map(k=>`<div class="pill${k==='health'?' active':''}" data-domain="${k}">${DOMAIN_LABELS[k]}</div>`).join('')
+      + (d.color?.color?`<div class="pill" data-domain="color">🎨 Цвет</div>`:'')
+      + (d.day_number?`<div class="pill" data-domain="number">🔢 Число</div>`:'')
+      + (d.prediction?`<div class="pill" data-domain="fortune">🥠 Предсказание</div>`:'');
+    // Контент основных вкладок
     const doms=dk.map(k=>{
       const dd=d.domains[k]||{};
       const tips=(dd.tips||[]).map(t=>`<div class="domain-tip">${t}</div>`).join('');
       const ctx2=dd.context?`<div class="domain-context">${dd.context}</div>`:'';
       return `<div class="domain-content${k==='health'?' active':''}" data-dc="${k}">${tips}${ctx2}</div>`;
     }).join('');
-    const pred=d.prediction?`<div class="prediction-wrap">
-      <div class="prediction-seal">
-        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Личное предсказание" onclick="openFortune(${JSON.stringify(d.prediction)})">
-          <span class="seal-sparkle">🥠</span> Личное предсказание
-        </button>
-      </div>
+    // Контент цвета
+    const accent=colorAccent(d.color?.color||'');
+    const colorContent=d.color?.color?`<div class="domain-content" data-dc="color">
+      <div class="color-day-inline" style="--color-accent:${accent}">
+        <div class="color-name-big">${d.color.color}</div>
+        ${d.color.reason?`<div class="color-reason-text">${d.color.reason}</div>`:''}
+        ${d.color.hint?`<div class="color-hint-text">${d.color.hint}</div>`:''}
+      </div></div>`:'';
+    // Контент числа
+    const numberContent=d.day_number?`<div class="domain-content" data-dc="number">
+      <div class="num-day-big">${d.day_number}</div>
+      <div style="font-size:14px;line-height:1.6;color:var(--text)">${d.day_number_text||''}</div>
     </div>`:'';
+    // Предсказание — фиктивная панель, клик открывает fortune screen
+    const fortuneContent=d.prediction?`<div class="domain-content" data-dc="fortune">
+      <div class="fortune-pill-hint">
+        <div class="fortune-pill-emoji">🥠</div>
+        <div class="fortune-pill-text">Нажми, чтобы разбить печеньку и узнать предсказание</div>
+        <button class="fortune-pill-btn" onclick="openFortune(${JSON.stringify(d.prediction)})">Разбить →</button>
+      </div></div>`:'';
 
     const mySignInfo = me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
     const signRow = mySignInfo
@@ -1011,9 +1052,9 @@
       </div>
       <div class="phase-intro">${pe.intro}</div>
       <div class="info-card" style="padding:14px 16px;margin-top:4px">
-        <div class="domain-pills">${pills}</div><div>${doms}</div>
-      </div>
-      ${pred}`;
+        <div class="domain-pills">${pills}</div>
+        <div>${doms}${colorContent}${numberContent}${fortuneContent}</div>
+      </div>`;
 
     document.getElementById('btn-change-sign')?.addEventListener('click',()=>{
       // Сбрасываем данные чтобы после смены знака обновился контент
@@ -1025,12 +1066,12 @@
     document.querySelectorAll('#tab-today .pill').forEach(p=>{
       p.addEventListener('click',()=>{
         const k=p.dataset.domain;
-        document.querySelectorAll('#tab-today .pill').forEach(x=>x.classList.remove('active'));
-        document.querySelectorAll('#tab-today .domain-content').forEach(x=>x.classList.remove('active'));
-        p.classList.add('active');
-        document.querySelector(`[data-dc="${k}"]`)?.classList.add('active');
         tg?.HapticFeedback?.selectionChanged?.();
         logEvent('domain_tap', k);
+        document.querySelectorAll('#tab-today .pill').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        document.querySelectorAll('#tab-today .domain-content').forEach(x=>x.classList.remove('active'));
+        document.querySelector(`#tab-today [data-dc="${k}"]`)?.classList.add('active');
       });
     });
   }
@@ -1165,8 +1206,7 @@
         <div class="section-title">🪐 Аспекты Луны</div>
         <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Как Луна взаимодействует с планетами прямо сейчас</div>
         <div class="info-card">${asp}</div>
-      </div>
-      ${col}${num}`;
+      </div>`;
     const activeChip=document.querySelector('.moon-sign-chip.active');
     if(activeChip) activeChip.scrollIntoView({behavior:'instant',block:'nearest',inline:'center'});
   }
