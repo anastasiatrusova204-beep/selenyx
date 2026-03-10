@@ -769,7 +769,18 @@
       <div class="prediction-hint" id="pred-hint">нажми чтобы открыть</div>
     </div>`:'';
 
+    const mySignInfo = me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
+    const signRow = mySignInfo
+      ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:4px">
+           <span style="font-size:13px;color:var(--hint)">Твой знак: <b style="color:var(--text)">${mySignInfo.e} ${mySignInfo.n}</b></span>
+           <button id="btn-change-sign" style="background:transparent;font-size:12px;color:var(--hint);padding:4px 8px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;touch-action:manipulation">✏️ сменить</button>
+         </div>`
+      : `<div style="margin-top:8px;margin-bottom:4px">
+           <button id="btn-change-sign" style="background:transparent;font-size:13px;color:var(--btn);padding:6px 12px;border:1px solid rgba(124,77,255,0.3);border-radius:10px;touch-action:manipulation">✏️ Выбрать свой знак</button>
+         </div>`;
+
     document.getElementById('tab-today').innerHTML=`
+      ${signRow}
       <div class="moon-badge" style="margin-top:8px">
         <span class="phase-icon">${m.phase_emoji}</span>
         <span>Луна в ${m.sign_nom} ${m.degree}° &nbsp;·&nbsp; ${m.lunar_day} лунный день</span>${sb}
@@ -780,6 +791,13 @@
         <div class="domain-pills">${pills}</div><div>${doms}</div>
       </div>
       ${pred}`;
+
+    document.getElementById('btn-change-sign')?.addEventListener('click',()=>{
+      // Сбрасываем данные чтобы после смены знака обновился контент
+      todayData=null; tabLoaded.today=false;
+      showOnboarding();
+      tg?.BackButton?.show();
+    });
 
     document.querySelectorAll('#tab-today .pill').forEach(p=>{
       p.addEventListener('click',()=>{
