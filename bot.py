@@ -329,7 +329,7 @@ async def handle_start(message: Message, state: FSMContext) -> None:
                 "🎁 <b>7 дней — бесплатно.</b> Начнётся сейчас.",
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                     InlineKeyboardButton(
-                        text="🎁 Попробовать бесплатно",
+                        text="🌙 Перейти в приложение →",
                         web_app=WebAppInfo(url=WEBAPP_URL),
                     ),
                 ]]),
