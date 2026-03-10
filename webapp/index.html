@@ -982,19 +982,43 @@
   window.buyFeature=buyFeature;
 
   function showOnboarding(){
+    // Если открыто в браузере (без Telegram) — показать подсказку вместо сетки
+    if(!tg?.initData){
+      document.getElementById('sign-grid').innerHTML=`
+        <div style="grid-column:1/-1;text-align:center;padding:20px 0">
+          <div style="font-size:32px;margin-bottom:12px">🌙</div>
+          <div style="font-size:14px;color:var(--hint);line-height:1.6">
+            Чтобы начать, откройте Selenyx в Telegram
+          </div>
+          <a href="https://t.me/Selenyx_mybot" target="_blank"
+             style="display:inline-block;margin-top:16px;padding:12px 24px;
+             background:var(--btn);color:#fff;border-radius:12px;font-size:14px;text-decoration:none">
+            Открыть @Selenyx_mybot
+          </a>
+        </div>`;
+      document.getElementById('onboarding').classList.add('active');
+      return;
+    }
     document.getElementById('sign-grid').innerHTML=ZODIAC.map(s=>
       `<button class="sign-btn" data-sign="${s.k}"><span class="sign-emoji">${s.e}</span>${s.n}</button>`
     ).join('');
     document.querySelectorAll('.sign-btn').forEach(btn=>{
       btn.addEventListener('click',async()=>{
         tg?.HapticFeedback?.impactOccurred('light');
+        // Визуальный фидбек — выделяем выбранный знак
+        document.querySelectorAll('.sign-btn').forEach(b=>b.style.opacity='0.4');
+        btn.style.opacity='1';
         try{
           await api('/api/sign',{method:'POST',body:JSON.stringify({sign:btn.dataset.sign})});
           me=await api('/api/me');
           document.getElementById('onboarding').classList.remove('active');
           todayData=await api('/api/today');
           showApp('today');
-        } catch{ btn.textContent='Ошибка :('; }
+        } catch{
+          document.querySelectorAll('.sign-btn').forEach(b=>b.style.opacity='1');
+          const sub=document.querySelector('.onb-sub');
+          if(sub){sub.textContent='Не удалось сохранить. Попробуй ещё раз.';sub.style.color='var(--red)';}
+        }
       });
     });
     document.getElementById('onboarding').classList.add('active');
