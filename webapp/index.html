@@ -403,9 +403,33 @@
     .cta-tg-link { font-size: 12px; color: var(--hint); text-align: center; margin-top: 8px; opacity: 0.6; }
     .cta-tg-link a { color: inherit; text-decoration: underline; }
 
-    /* Fix 5: Blur предсказания до тапа */
-    .prediction-text:not(.revealed) { filter: blur(5px); user-select: none; cursor: pointer; transition: filter 0.3s; }
-    .prediction-text.revealed { filter: none; transition: filter 0.3s; }
+    /* ─── Prediction reveal ─── */
+    .prediction-text { font-size: 14px; line-height: 1.65; }
+    .prediction-text.hidden { display: none; }
+    .prediction-text.revealed { animation: pred-reveal 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .prediction-seal { min-height: 64px; display: flex; align-items: center; justify-content: center; padding: 8px 0; }
+    .prediction-seal.gone { display: none; }
+    .prediction-seal-btn {
+      background: linear-gradient(135deg, rgba(255,213,79,0.13) 0%, rgba(255,143,0,0.08) 100%);
+      border: 1px solid rgba(255,213,79,0.4); border-radius: 24px;
+      padding: 11px 22px; color: var(--gold); font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; gap: 8px; touch-action: manipulation; cursor: pointer;
+      letter-spacing: 0.2px; animation: seal-pulse 2.5s ease-in-out infinite;
+    }
+    .seal-sparkle { display: inline-block; animation: sparkle-rock 3s ease-in-out infinite; }
+    @keyframes seal-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,213,79,0.3), 0 2px 10px rgba(255,213,79,0.08); }
+      50%      { box-shadow: 0 0 0 7px rgba(255,213,79,0), 0 2px 22px rgba(255,213,79,0.22); }
+    }
+    @keyframes sparkle-rock {
+      0%,100% { transform: rotate(0deg) scale(1); }
+      25%     { transform: rotate(18deg) scale(1.25); }
+      75%     { transform: rotate(-14deg) scale(1.15); }
+    }
+    @keyframes pred-reveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
     /* ─── Доступность: focus-visible ─── */
     :focus-visible {
@@ -768,8 +792,12 @@
     }).join('');
     const pred=d.prediction?`<div class="prediction-wrap">
       <div class="prediction-label">🥠 Личное предсказание</div>
-      <div class="prediction-text" id="pred-text">${d.prediction}</div>
-      <div class="prediction-hint" id="pred-hint">нажми чтобы открыть</div>
+      <div class="prediction-seal" id="pred-seal">
+        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Открыть предсказание">
+          <span class="seal-sparkle">✨</span> Открыть предсказание
+        </button>
+      </div>
+      <div class="prediction-text hidden" id="pred-text">${d.prediction}</div>
     </div>`:'';
 
     const mySignInfo = me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
@@ -812,10 +840,17 @@
         tg?.HapticFeedback?.selectionChanged?.();
       });
     });
-    document.getElementById('pred-text')?.addEventListener('click',function(){
-      if(!this.classList.contains('revealed')){
-        this.classList.add('revealed');
-        document.getElementById('pred-hint')?.classList.add('hidden');
+    document.getElementById('pred-open-btn')?.addEventListener('click',function(){
+      const seal=document.getElementById('pred-seal');
+      const text=document.getElementById('pred-text');
+      if(seal&&text){
+        seal.style.transition='opacity 0.18s, transform 0.18s';
+        seal.style.opacity='0'; seal.style.transform='scale(0.92)';
+        setTimeout(()=>{
+          seal.classList.add('gone');
+          text.classList.remove('hidden');
+          text.classList.add('revealed');
+        },180);
         tg?.HapticFeedback?.notificationOccurred('success');
       }
     });
