@@ -117,7 +117,7 @@
 
     .tab-content {
       flex: 1; overflow-y: auto; overflow-x: hidden;
-      padding: 56px 0 calc(var(--tab-h) + env(safe-area-inset-bottom));
+      padding: 12px 0 calc(var(--tab-h) + env(safe-area-inset-bottom) + 20px);
       -webkit-overflow-scrolling: touch;
     }
     .tab-panel { display: none; padding: 0 20px 20px; }
@@ -327,7 +327,7 @@
     .compat-text { font-size: 14px; color: var(--text); line-height: 1.65; }
 
     /* ─── Premium gate ─── */
-    .premium-gate { position: relative; border-radius: var(--radius); overflow: hidden; margin-top: 12px; }
+    .premium-gate { position: relative; border-radius: var(--radius); overflow: hidden; margin-top: 12px; min-height: 150px; }
     .gate-blur {
       padding: 20px; filter: blur(4px); pointer-events: none; user-select: none;
       font-size: 14px; color: var(--text); line-height: 1.6;
