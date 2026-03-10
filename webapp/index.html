@@ -516,6 +516,99 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ─── Fortune Cookie Screen ─── */
+    #fortune-screen {
+      position: fixed; inset: 0; z-index: 500;
+      background: radial-gradient(ellipse at 50% 40%, #1a0a2e 0%, #08060f 60%, #050308 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.35s;
+    }
+    #fortune-screen.active { opacity: 1; pointer-events: auto; }
+    .fortune-stars {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.7) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px);
+      background-size: 120px 120px, 80px 80px, 60px 60px;
+      background-position: 20px 30px, 55px 10px, 5px 55px;
+    }
+    .fortune-cookie-wrap {
+      position: relative; display: flex; flex-direction: column; align-items: center;
+      gap: 0; transition: transform 0.3s, opacity 0.3s;
+    }
+    .fortune-cookie-emoji {
+      font-size: 96px; line-height: 1;
+      animation: cookie-rock 2.2s ease-in-out infinite;
+      display: block; user-select: none;
+    }
+    @keyframes cookie-rock {
+      0%,100% { transform: rotate(0deg) scale(1); }
+      20%     { transform: rotate(12deg) scale(1.05); }
+      40%     { transform: rotate(-10deg) scale(1.03); }
+      60%     { transform: rotate(8deg) scale(1.04); }
+      80%     { transform: rotate(-6deg) scale(1.02); }
+    }
+    .fortune-cookie-wrap.breaking {
+      animation: cookie-break 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    @keyframes cookie-break {
+      0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+      30%  { transform: scale(1.25) rotate(-8deg); opacity: 1; }
+      70%  { transform: scale(0.7) rotate(15deg); opacity: 0.4; }
+      100% { transform: scale(0) rotate(30deg); opacity: 0; }
+    }
+    .fortune-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
+      color: var(--gold); margin-top: 24px; letter-spacing: 1px;
+      opacity: 0.9; text-align: center;
+    }
+    .fortune-hint {
+      font-size: 13px; color: var(--hint); margin-top: 8px; text-align: center;
+    }
+    .fortune-break-btn {
+      margin-top: 36px; position: relative;
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, #4a3aff 0%, #7c4dff 100%);
+      box-shadow: 0 0 0 0 rgba(124,77,255,0.5);
+      animation: break-btn-pulse 2s ease-in-out infinite;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 22px; border: none; cursor: pointer;
+      touch-action: manipulation; transition: transform 0.15s;
+    }
+    .fortune-break-btn:active { transform: scale(0.92); }
+    .fortune-break-btn-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; font-weight: 700; letter-spacing: 2px;
+      color: var(--text); margin-top: 14px;
+    }
+    @keyframes break-btn-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(124,77,255,0.5); }
+      50%      { box-shadow: 0 0 0 14px rgba(124,77,255,0); }
+    }
+    .fortune-prediction {
+      display: none; flex-direction: column; align-items: center; padding: 0 32px;
+      max-width: 360px; text-align: center;
+    }
+    .fortune-prediction.visible { display: flex; }
+    .fortune-prediction-icon { font-size: 48px; margin-bottom: 20px;
+      animation: pred-appear 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .fortune-prediction-text {
+      font-size: 16px; line-height: 1.7; color: var(--text);
+      animation: pred-appear 0.6s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes pred-appear {
+      from { opacity: 0; transform: translateY(24px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .fortune-close-btn {
+      margin-top: 32px; padding: 12px 32px; border-radius: 24px;
+      background: rgba(124,77,255,0.2); border: 1px solid rgba(124,77,255,0.4);
+      color: var(--text); font-size: 15px; font-weight: 500; cursor: pointer;
+      touch-action: manipulation;
+      animation: pred-appear 0.5s 0.3s both;
+    }
+
     /* ─── Доступность: focus-visible ─── */
     :focus-visible {
       outline: 2px solid var(--btn);
@@ -677,6 +770,25 @@
     <div class="onb-title">Выбери знак зодиака</div>
     <div class="onb-sub">Это нужно для персональных подсказок по сферам жизни</div>
     <div class="sign-grid" id="sign-grid"></div>
+  </div>
+
+  <!-- Fortune Cookie Screen -->
+  <div id="fortune-screen">
+    <div class="fortune-stars"></div>
+    <!-- Печенька (скрывается после удара) -->
+    <div class="fortune-cookie-wrap" id="fortune-cookie-wrap">
+      <span class="fortune-cookie-emoji" id="fortune-cookie-emoji">🥠</span>
+      <div class="fortune-title">Личное предсказание</div>
+      <div class="fortune-hint">Загадай желание и разбей печеньку</div>
+      <button class="fortune-break-btn" id="fortune-break-btn" aria-label="Разбить печеньку">›</button>
+      <div class="fortune-break-btn-label">РАЗБИТЬ!</div>
+    </div>
+    <!-- Предсказание (появляется после) -->
+    <div class="fortune-prediction" id="fortune-prediction">
+      <div class="fortune-prediction-icon">✨</div>
+      <div class="fortune-prediction-text" id="fortune-prediction-text"></div>
+      <button class="fortune-close-btn" id="fortune-close-btn">Закрыть</button>
+    </div>
   </div>
 
   <!-- Приложение -->
@@ -885,12 +997,11 @@
       return `<div class="domain-content${k==='health'?' active':''}" data-dc="${k}">${tips}${ctx2}</div>`;
     }).join('');
     const pred=d.prediction?`<div class="prediction-wrap">
-      <div class="prediction-seal" id="pred-seal">
-        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Личное предсказание">
+      <div class="prediction-seal">
+        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Личное предсказание" onclick="openFortune(${JSON.stringify(d.prediction)})">
           <span class="seal-sparkle">🥠</span> Личное предсказание
         </button>
       </div>
-      <div class="prediction-text hidden" id="pred-text">${d.prediction}</div>
     </div>`:'';
 
     const mySignInfo = me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
@@ -932,21 +1043,6 @@
         tg?.HapticFeedback?.selectionChanged?.();
         logEvent('domain_tap', k);
       });
-    });
-    document.getElementById('pred-open-btn')?.addEventListener('click',function(){
-      const seal=document.getElementById('pred-seal');
-      const text=document.getElementById('pred-text');
-      if(seal&&text){
-        seal.style.transition='opacity 0.18s, transform 0.18s';
-        seal.style.opacity='0'; seal.style.transform='scale(0.92)';
-        setTimeout(()=>{
-          seal.classList.add('gone');
-          text.classList.remove('hidden');
-          text.classList.add('revealed');
-        },180);
-        tg?.HapticFeedback?.notificationOccurred('success');
-        logEvent('prediction_open');
-      }
     });
   }
 
@@ -1291,15 +1387,54 @@
     try{ me=await api('/api/me'); } catch{ me={registered:false}; }
     updateTrialDisplay();
     if(me?.sign){
-      const hint=document.getElementById('moon-tap-hint');
-      if(hint) hint.style.display='none';
-      setTimeout(()=>explode(), 2000);
+      document.getElementById('moon-screen').classList.remove('active');
+      showApp('today');
     }
   }
 
+  // ── Fortune Cookie ────────────────────────────────────────────────────────
+  function openFortune(prediction){
+    const screen=document.getElementById('fortune-screen');
+    const wrap=document.getElementById('fortune-cookie-wrap');
+    const pred=document.getElementById('fortune-prediction');
+    const predText=document.getElementById('fortune-prediction-text');
+    // сбросить состояние
+    wrap.style.display='flex'; wrap.classList.remove('breaking');
+    pred.classList.remove('visible');
+    predText.textContent=prediction||'';
+    document.getElementById('fortune-cookie-emoji').style.animation='cookie-rock 2.2s ease-in-out infinite';
+    screen.classList.add('active');
+    tg?.BackButton?.show();
+    logEvent('fortune_open');
+  }
+
+  function closeFortune(){
+    document.getElementById('fortune-screen').classList.remove('active');
+    tg?.BackButton?.hide();
+  }
+
+  // Разбить печеньку
+  document.getElementById('fortune-break-btn')?.addEventListener('click',()=>{
+    const wrap=document.getElementById('fortune-cookie-wrap');
+    const pred=document.getElementById('fortune-prediction');
+    wrap.classList.add('breaking');
+    tg?.HapticFeedback?.impactOccurred('medium');
+    setTimeout(()=>{
+      wrap.style.display='none';
+      pred.classList.add('visible');
+    }, 550);
+    logEvent('fortune_break');
+  });
+
+  document.getElementById('fortune-close-btn')?.addEventListener('click',closeFortune);
+
   // ── Events ────────────────────────────────────────────────────────────────
-  // Системная кнопка «Назад» Telegram — всегда возвращает к лендингу
-  tg?.BackButton?.onClick(showMoon);
+  // Системная кнопка «Назад» Telegram — закрыть fortune если открыт, иначе на лендинг
+  tg?.BackButton?.onClick(()=>{
+    const fs=document.getElementById('fortune-screen');
+    if(fs?.classList.contains('active')){ closeFortune(); return; }
+    showMoon();
+  });
 
   document.getElementById('sticker-wrap')?.addEventListener('click',explode);
   document.getElementById('onb-back-btn')?.addEventListener('click',showMoon);
