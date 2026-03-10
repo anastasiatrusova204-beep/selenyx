@@ -455,8 +455,33 @@
     .cta-tg-link { font-size: 12px; color: var(--hint); text-align: center; margin-top: 8px; opacity: 0.6; }
     .cta-tg-link a { color: inherit; text-decoration: underline; }
 
-    /* ─── Zodiac Wheel ─── */
-    .zodiac-wheel-wrap { display:flex; justify-content:center; margin:8px 0 16px; filter:drop-shadow(0 0 20px rgba(124,77,255,0.3)); }
+    /* ─── Moon Hero (Astronautica style) ─── */
+    .moon-hero { display:flex; flex-direction:column; align-items:center; padding:12px 0 8px; }
+    .moon-sign-row { display:flex; gap:6px; overflow-x:auto; padding:0 20px 12px; scrollbar-width:none; width:100%; }
+    .moon-sign-row::-webkit-scrollbar { display:none; }
+    .moon-sign-chip { flex-shrink:0; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--hint); background:rgba(124,77,255,0.08); border:1px solid rgba(124,77,255,0.15); transition:all 0.2s; }
+    .moon-sign-chip.active { background:rgba(255,213,79,0.15); border-color:#ffd54f; color:#ffd54f; font-size:18px; box-shadow:0 0 12px rgba(255,213,79,0.3); }
+    .moon-planet-wrap { position:relative; width:240px; height:240px; display:flex; align-items:center; justify-content:center; }
+    .moon-planet-glow { position:absolute; inset:-16px; border-radius:50%; background:radial-gradient(ellipse at center, rgba(124,77,255,0.35) 30%, transparent 70%); animation:glow-pulse 3.8s ease-in-out infinite; pointer-events:none; }
+    .moon-planet { width:200px; height:200px; border-radius:50%; overflow:hidden; position:relative; }
+    .moon-surface {
+      position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 14% 9% at 22% 33%, rgba(255,255,255,0.14) 0%, transparent 100%),
+        radial-gradient(ellipse 9% 7% at 68% 22%, rgba(220,220,230,0.11) 0%, transparent 100%),
+        radial-gradient(ellipse 7% 5% at 42% 72%, rgba(190,190,200,0.09) 0%, transparent 100%),
+        linear-gradient(90deg, #252540 0%, #454565 15%, #858598 30%, #b0b0c8 45%, #c8c8d8 50%, #b0b0c8 55%, #858598 70%, #454565 85%, #252540 100%);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 200% 100%;
+      animation: moon-spin 28s linear infinite;
+    }
+    @keyframes moon-spin {
+      from { background-position: 0% 50%, 10% 50%, 30% 50%, 0% 50%; }
+      to   { background-position: 0% 50%, 10% 50%, 30% 50%, 100% 50%; }
+    }
+    .moon-shadow { position:absolute; inset:0; border-radius:50%; background:radial-gradient(ellipse 85% 90% at 72% 50%, transparent 20%, rgba(0,0,15,0.45) 55%, rgba(0,0,15,0.88) 80%); pointer-events:none; }
+    .moon-highlight { position:absolute; inset:0; border-radius:50%; background:radial-gradient(ellipse 45% 42% at 28% 28%, rgba(255,255,255,0.18) 0%, transparent 65%); pointer-events:none; }
+    .moon-hero-sign { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; color:var(--text); margin-top:12px; margin-bottom:4px; }
+    .moon-hero-phase { font-size:13px; color:var(--hint); margin-bottom:8px; }
     /* ─── Planet Cards ─── */
     .planet-cards-scroll { display:flex; gap:10px; overflow-x:auto; padding:4px 0 10px; scrollbar-width:none; -webkit-overflow-scrolling:touch; margin-bottom:8px; }
     .planet-cards-scroll::-webkit-scrollbar { display:none; }
@@ -954,38 +979,30 @@
     'оппозиция':  {sym:'☍', label:'противостояние',color:'#ef9a9a'},
   };
 
-  function buildZodiacWheel(moonSignName){
+  function buildMoonHero(d){
     const signs=[
-      {sym:'♈',name:'Овен'},{sym:'♉',name:'Телец'},{sym:'♊',name:'Близнецы'},
-      {sym:'♋',name:'Рак'},{sym:'♌',name:'Лев'},{sym:'♍',name:'Дева'},
-      {sym:'♎',name:'Весы'},{sym:'♏',name:'Скорпион'},{sym:'♐',name:'Стрелец'},
+      {sym:'♈',name:'Овен'}, {sym:'♉',name:'Телец'}, {sym:'♊',name:'Близнецы'},
+      {sym:'♋',name:'Рак'},  {sym:'♌',name:'Лев'},   {sym:'♍',name:'Дева'},
+      {sym:'♎',name:'Весы'}, {sym:'♏',name:'Скорпион'},{sym:'♐',name:'Стрелец'},
       {sym:'♑',name:'Козерог'},{sym:'♒',name:'Водолей'},{sym:'♓',name:'Рыбы'}
     ];
-    const cx=140,cy=140,R=130,r=75,labelR=108,symR=90;
-    const activeIdx=signs.findIndex(s=>moonSignName&&moonSignName.includes(s.name));
-    let sectors='',labels='',symbols='';
-    signs.forEach((s,i)=>{
-      const a1=(i*30-90)*Math.PI/180, a2=((i+1)*30-90)*Math.PI/180;
-      const x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
-      const x2=cx+R*Math.cos(a2),y2=cy+R*Math.sin(a2);
-      const xi1=cx+r*Math.cos(a1),yi1=cy+r*Math.sin(a1);
-      const xi2=cx+r*Math.cos(a2),yi2=cy+r*Math.sin(a2);
-      const isActive=i===activeIdx;
-      const fill=isActive?'rgba(255,213,79,0.18)':'rgba(124,77,255,0.07)';
-      const stroke=isActive?'#ffd54f':'rgba(124,77,255,0.3)';
-      sectors+=`<path d="M${xi1},${yi1} L${x1},${y1} A${R},${R} 0 0,1 ${x2},${y2} L${xi2},${yi2} A${r},${r} 0 0,0 ${xi1},${yi1}" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
-      const aMid=(i*30+15-90)*Math.PI/180;
-      const sx=cx+symR*Math.cos(aMid),sy=cy+symR*Math.sin(aMid);
-      symbols+=`<text x="${sx}" y="${sy}" text-anchor="middle" dominant-baseline="central" font-size="13" fill="${isActive?'#ffd54f':'#9090cc'}" font-weight="${isActive?'700':'400'}">${s.sym}</text>`;
-      const lx=cx+labelR*Math.cos(aMid),ly=cy+labelR*Math.sin(aMid);
-      labels+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="7.5" fill="${isActive?'#ffd54f':'rgba(200,200,255,0.5)'}" font-weight="${isActive?'600':'400'}">${s.name}</text>`;
-    });
-    return `<div class="zodiac-wheel-wrap"><svg viewBox="0 0 280 280" width="280" height="280">
-      <circle cx="140" cy="140" r="73" fill="rgba(10,10,26,0.9)" stroke="rgba(124,77,255,0.25)" stroke-width="1"/>
-      ${sectors}${symbols}${labels}
-      <circle cx="140" cy="140" r="36" fill="rgba(124,77,255,0.15)" stroke="rgba(124,77,255,0.4)" stroke-width="1"/>
-      <text x="140" y="140" text-anchor="middle" dominant-baseline="central" font-size="28">🌙</text>
-    </svg></div>`;
+    const activeIdx=signs.findIndex(s=>d.sign_nom&&d.sign_nom.includes(s.name));
+    const chips=signs.map((s,i)=>
+      `<div class="moon-sign-chip${i===activeIdx?' active':''}">${s.sym}</div>`
+    ).join('');
+    return `<div class="moon-hero">
+      <div class="moon-sign-row">${chips}</div>
+      <div class="moon-planet-wrap">
+        <div class="moon-planet-glow"></div>
+        <div class="moon-planet">
+          <div class="moon-surface"></div>
+          <div class="moon-shadow"></div>
+          <div class="moon-highlight"></div>
+        </div>
+      </div>
+      <div class="moon-hero-sign">Луна в ${d.sign_nom}</div>
+      <div class="moon-hero-phase">${d.phase_emoji} ${d.phase_name} · ${d.degree}°</div>
+    </div>`;
   }
 
   const PLANET_STYLE={
@@ -1051,12 +1068,7 @@
       <div style="font-size:14px;line-height:1.55">${d.day_number_text}</div></div>`:'';
 
     document.getElementById('tab-moon').innerHTML=
-      buildZodiacWheel(d.sign_nom)+`
-      <div class="moon-display">
-        <div class="moon-phase-big">${d.phase_emoji}</div>
-        <div class="moon-phase-name">${d.phase_name}</div>
-        <div class="moon-position">Луна в ${d.sign_nom} ${d.degree}°</div>
-      </div>
+      buildMoonHero(d)+`
       <div class="lunar-day-card">
         <div class="ld-day">⚡ ${d.lunar_day} лунный день</div>
         <div class="ld-symbol">${d.lunar_day_symbol}</div>
@@ -1070,6 +1082,8 @@
         <div class="info-card">${asp}</div>
       </div>
       ${col}${num}`;
+    const activeChip=document.querySelector('.moon-sign-chip.active');
+    if(activeChip) activeChip.scrollIntoView({behavior:'instant',block:'nearest',inline:'center'});
   }
 
   function renderNatal(d){
