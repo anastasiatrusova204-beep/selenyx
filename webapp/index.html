@@ -1001,37 +1001,31 @@
     const m=d.moon, pe=d.phase_energy, streak=me?.streak||0;
     const sb=streak>1?`<span class="streak-badge">🔥 ${streak} ${dw(streak)} подряд</span>`:'';
     const dk=['health','work','love','psych'];
-    // Основные вкладки
-    const pills=dk.map(k=>`<div class="pill${k==='health'?' active':''}" data-domain="${k}">${DOMAIN_LABELS[k]}</div>`).join('')
-      + (d.color?.color?`<div class="pill" data-domain="color">🎨 Цвет</div>`:'')
-      + (d.day_number?`<div class="pill" data-domain="number">🔢 Число</div>`:'')
-      + (d.prediction?`<div class="pill" data-domain="fortune">🥠 Предсказание</div>`:'');
-    // Контент основных вкладок
+    const pills=dk.map(k=>`<div class="pill${k==='health'?' active':''}" data-domain="${k}">${DOMAIN_LABELS[k]}</div>`).join('');
     const doms=dk.map(k=>{
       const dd=d.domains[k]||{};
       const tips=(dd.tips||[]).map(t=>`<div class="domain-tip">${t}</div>`).join('');
       const ctx2=dd.context?`<div class="domain-context">${dd.context}</div>`:'';
       return `<div class="domain-content${k==='health'?' active':''}" data-dc="${k}">${tips}${ctx2}</div>`;
     }).join('');
-    // Контент цвета
+    // Карточка цвета дня
     const accent=colorAccent(d.color?.color||'');
-    const colorContent=d.color?.color?`<div class="domain-content" data-dc="color">
-      <div class="color-day-inline" style="--color-accent:${accent}">
-        <div class="color-name-big">${d.color.color}</div>
-        ${d.color.reason?`<div class="color-reason-text">${d.color.reason}</div>`:''}
-        ${d.color.hint?`<div class="color-hint-text">${d.color.hint}</div>`:''}
-      </div></div>`:'';
-    // Контент числа
-    const numberContent=d.day_number?`<div class="domain-content" data-dc="number">
+    const colorCard=d.color?.color?`<div class="color-day-card" style="--color-accent:${accent}">
+      <div class="card-section-label">🎨 Цвет дня</div>
+      <div class="color-name">${d.color.color}</div>
+      <div class="color-reason">${d.color.reason||''}</div>
+      ${d.color.hint?`<div class="color-hint">${d.color.hint}</div>`:''}</div>`:'';
+    // Карточка числа дня
+    const numCard=d.day_number?`<div class="info-card">
+      <div class="card-section-label" style="margin-bottom:0">🔢 Число дня</div>
       <div class="num-day-big">${d.day_number}</div>
-      <div style="font-size:14px;line-height:1.6;color:var(--text)">${d.day_number_text||''}</div>
-    </div>`:'';
-    // Предсказание — фиктивная панель, клик открывает fortune screen
-    const fortuneContent=d.prediction?`<div class="domain-content" data-dc="fortune">
-      <div class="fortune-pill-hint">
-        <div class="fortune-pill-emoji">🥠</div>
-        <div class="fortune-pill-text">Нажми, чтобы разбить печеньку и узнать предсказание</div>
-        <button class="fortune-pill-btn" onclick="openFortune(${JSON.stringify(d.prediction)})">Разбить →</button>
+      <div style="font-size:14px;line-height:1.55">${d.day_number_text||''}</div></div>`:'';
+    // Кнопка предсказания
+    const pred=d.prediction?`<div class="prediction-wrap">
+      <div class="prediction-seal">
+        <button class="prediction-seal-btn" id="pred-open-btn" aria-label="Личное предсказание" onclick="openFortune(${JSON.stringify(d.prediction)})">
+          <span class="seal-sparkle">🥠</span> Личное предсказание
+        </button>
       </div></div>`:'';
 
     const mySignInfo = me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
@@ -1052,9 +1046,9 @@
       </div>
       <div class="phase-intro">${pe.intro}</div>
       <div class="info-card" style="padding:14px 16px;margin-top:4px">
-        <div class="domain-pills">${pills}</div>
-        <div>${doms}${colorContent}${numberContent}${fortuneContent}</div>
-      </div>`;
+        <div class="domain-pills">${pills}</div><div>${doms}</div>
+      </div>
+      ${colorCard}${numCard}${pred}`;
 
     document.getElementById('btn-change-sign')?.addEventListener('click',()=>{
       // Сбрасываем данные чтобы после смены знака обновился контент
@@ -1066,12 +1060,12 @@
     document.querySelectorAll('#tab-today .pill').forEach(p=>{
       p.addEventListener('click',()=>{
         const k=p.dataset.domain;
+        document.querySelectorAll('#tab-today .pill').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('#tab-today .domain-content').forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        document.querySelector(`[data-dc="${k}"]`)?.classList.add('active');
         tg?.HapticFeedback?.selectionChanged?.();
         logEvent('domain_tap', k);
-        document.querySelectorAll('#tab-today .pill').forEach(x=>x.classList.remove('active'));
-        p.classList.add('active');
-        document.querySelectorAll('#tab-today .domain-content').forEach(x=>x.classList.remove('active'));
-        document.querySelector(`#tab-today [data-dc="${k}"]`)?.classList.add('active');
       });
     });
   }
