@@ -1505,13 +1505,11 @@ async def handle_admin(message: Message) -> None:
 
 @router.message(Command("resetme"))
 async def handle_resetme(message: Message) -> None:
-    """Удалить свои данные из БД (только для admin, для тестирования первого входа)."""
-    if message.from_user.id not in ADMIN_IDS:
-        return
+    """Удалить свои данные из БД (для тестирования первого входа)."""
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("DELETE FROM users WHERE user_id = ?", (message.from_user.id,))
         await db.commit()
-    await message.answer("✅ Твои данные удалены. Теперь отправь /start для первого входа.")
+    await message.answer("✅ Данные удалены. Отправь /start для первого входа.")
 
 
 @router.message(Command("broadcast"))
