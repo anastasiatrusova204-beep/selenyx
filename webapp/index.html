@@ -396,6 +396,12 @@
       animation: dot-pulse 2s ease-in-out infinite;
     }
     @keyframes dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+    .moon-tap-hint {
+      font-size: 11px; color: var(--hint); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-top: 6px;
+      opacity: 0; animation: tap-hint-pulse 2s ease-in-out 1.2s infinite;
+    }
+    @keyframes tap-hint-pulse { 0%,100% { opacity: 0; } 50% { opacity: 0.55; } }
     .cta-btn {
       background: linear-gradient(135deg, #7c4dff 0%, #9c6fff 100%);
       color: #fff; border-radius: var(--radius-sm); padding: 18px 32px;
@@ -549,6 +555,7 @@
       <div class="landing-moon-wrap" id="sticker-wrap">
         <div class="ring"></div><div class="ring"></div><div class="ring"></div>
         <div class="moon-emoji">🌙</div>
+        <div class="moon-tap-hint" id="moon-tap-hint">нажми</div>
       </div>
       <div class="landing-brand">SELENYX</div>
       <div class="landing-brand-sub">космический навигатор</div>
@@ -577,7 +584,7 @@
 
       <div class="trial-badge">
         <span class="trial-dot"></span>
-        Тестовый доступ · 7 дней бесплатно
+        Основные функции — бесплатно навсегда
       </div>
 
       <button class="cta-btn" id="cta-btn">Начать бесплатно</button>
@@ -1152,6 +1159,11 @@
     setTimeout(()=>document.getElementById('loading').classList.add('gone'),500);
     try{ me=await api('/api/me'); } catch{ me={registered:false}; }
     updateTrialDisplay();
+    if(me?.sign){
+      const hint=document.getElementById('moon-tap-hint');
+      if(hint) hint.style.display='none';
+      setTimeout(()=>explode(), 400);
+    }
   }
 
   // ── Events ────────────────────────────────────────────────────────────────
