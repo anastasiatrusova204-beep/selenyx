@@ -321,17 +321,15 @@ async def handle_start(message: Message, state: FSMContext) -> None:
         if WEBAPP_URL:
             await message.answer(
                 f"🌙 <b>Привет, {name}!</b>\n\n"
-                "Каждое утро Луна меняет положение — и вместе с ней меняется энергия дня.\n\n"
-                "Selenyx читает реальное небо и говорит простым языком:\n"
+                "Selenyx читает реальное небо каждый день и говорит простым языком:\n"
                 "· ✨ Куда направить силы сегодня\n"
                 "· 🌙 Фаза и знак Луны прямо сейчас\n"
                 "· 🌟 Натальная карта по дате рождения\n"
                 "· 💞 Совместимость по знакам\n\n"
-                "<b>Основные функции — бесплатно.</b>\n\n"
-                "Нажми, чтобы начать:",
+                "🎁 <b>7 дней — бесплатно.</b> Начнётся сейчас.",
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                     InlineKeyboardButton(
-                        text="🌙 Начать бесплатно →",
+                        text="🎁 Попробовать бесплатно",
                         web_app=WebAppInfo(url=WEBAPP_URL),
                     ),
                 ]]),

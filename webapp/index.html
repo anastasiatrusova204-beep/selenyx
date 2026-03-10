@@ -395,16 +395,17 @@
     .feature-name { font-size: 15px; font-weight: 500; color: var(--text); }
     .feature-desc { font-size: 13px; color: var(--hint); margin-top: 2px; line-height: 1.45; }
     .trust-row { display: flex; gap: 14px; margin-bottom: 28px; font-size: 12px; color: var(--hint); flex-wrap: wrap; justify-content: center; }
-    .trial-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(255,213,79,0.08); border: 1px solid rgba(255,213,79,0.35);
-      border-radius: 20px; padding: 7px 16px; font-size: 12px; color: var(--gold);
-      letter-spacing: 0.4px; margin-bottom: 14px;
+    .trial-countdown-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      background: rgba(255,213,79,0.06); border: 1px solid rgba(255,213,79,0.3);
+      border-radius: 16px; padding: 10px 24px; margin-bottom: 14px;
     }
-    .trial-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--gold); flex-shrink: 0;
-      animation: dot-pulse 2s ease-in-out infinite;
+    .trial-countdown-label {
+      font-size: 12px; color: var(--gold); letter-spacing: 0.3px; opacity: 0.85;
+    }
+    .trial-countdown-timer {
+      font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700;
+      color: var(--gold); letter-spacing: 1px; font-variant-numeric: tabular-nums;
     }
     @keyframes dot-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
     .moon-tap-hint {
@@ -751,12 +752,12 @@
         </div>
       </div>
 
-      <div class="trial-badge">
-        <span class="trial-dot"></span>
-        Основные функции — бесплатно навсегда
+      <div class="trial-countdown-wrap" id="trial-countdown-wrap">
+        <div class="trial-countdown-label">🎁 Бесплатный доступ — 7 дней</div>
+        <div class="trial-countdown-timer" id="trial-countdown-timer">7 дн. 00:00:00</div>
       </div>
 
-      <button class="cta-btn" id="cta-btn">Начать бесплатно</button>
+      <button class="cta-btn" id="cta-btn">Попробовать бесплатно</button>
       <div class="cta-hint-text">Автоматическая регистрация через Telegram</div>
       <div class="cta-tg-link" id="tg-link" style="display:none">
         <a href="https://t.me/Selenyx_mybot" target="_blank">Открыть в Telegram</a>
@@ -1370,13 +1371,39 @@
     document.getElementById('glossary-overlay').classList.remove('active');
   }
 
+  let _countdownInterval=null;
+
   function updateTrialDisplay(){
     const el=document.getElementById('trial-counter');
-    if(!el||!me) return;
-    const d=me.trial_days_left;
-    if(d==null||d<0){ el.style.display='none'; return; }
-    el.textContent=d===0?'посл. день ⭐':`ещё ${d} дн ⭐`;
-    el.style.display='block';
+    if(el&&me){
+      const d=me.trial_days_left;
+      if(d!=null&&d>=0){ el.textContent=d===0?'посл. день ⭐':`ещё ${d} дн ⭐`; el.style.display='block'; }
+      else { el.style.display='none'; }
+    }
+    // Countdown на лендинге
+    const wrap=document.getElementById('trial-countdown-wrap');
+    const timer=document.getElementById('trial-countdown-timer');
+    if(!wrap||!timer) return;
+    if(_countdownInterval){ clearInterval(_countdownInterval); _countdownInterval=null; }
+    // Определяем дату окончания
+    let endTs=null;
+    if(me?.trial_ends){
+      endTs=new Date(me.trial_ends).getTime();
+    } else {
+      // Новый пользователь — ещё не зарегистрирован, показываем 7 дней от сейчас
+      endTs=Date.now()+7*24*60*60*1000;
+    }
+    function tick(){
+      const diff=endTs-Date.now();
+      if(diff<=0){ timer.textContent='0 дн. 00:00:00'; return; }
+      const days=Math.floor(diff/86400000);
+      const h=Math.floor((diff%86400000)/3600000).toString().padStart(2,'0');
+      const m=Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+      const s=Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+      timer.textContent=`${days} дн. ${h}:${m}:${s}`;
+    }
+    tick();
+    _countdownInterval=setInterval(tick,1000);
   }
 
   async function init(){

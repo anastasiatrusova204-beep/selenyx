@@ -218,6 +218,15 @@ async def api_me(request: web.Request) -> web.Response:
     if not user:
         return _json({"registered": False, "name": tg.get("first_name", "")})
     days_left = await get_trial_days_left(tg["id"])
+    trial_ends = None
+    trial_start_raw = user.get("trial_start")
+    if trial_start_raw:
+        from datetime import datetime, timezone, timedelta
+        try:
+            ts = datetime.fromisoformat(trial_start_raw.replace(" ", "T")).replace(tzinfo=timezone.utc)
+            trial_ends = (ts + timedelta(days=7)).isoformat()
+        except Exception:
+            pass
     return _json({
         "registered":       True,
         "name":             user.get("first_name") or tg.get("first_name", ""),
@@ -227,6 +236,7 @@ async def api_me(request: web.Request) -> web.Response:
         "has_birth":        bool(user.get("birth_date")),
         "tier":             user.get("tier", "free"),
         "trial_days_left":  days_left,
+        "trial_ends":       trial_ends,
     })
 
 
