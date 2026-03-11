@@ -4,9 +4,12 @@
 # ─── Imports ──────────────────────────────────────────────────────────────────
 
 import asyncio
+import glob as _glob
 import logging
 import os
 import re
+import subprocess as _subprocess
+import time as _time
 import urllib.parse
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -1646,8 +1649,29 @@ async def main() -> None:
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
 
+    async def _backup_db():
+        """Ежедневный бэкап SQLite (sqlite3 .backup — безопасен при активных connections)."""
+        today = _time.strftime("%Y%m%d")
+        dst = DB_PATH.replace(".db", f"_backup_{today}.db")
+        try:
+            r = _subprocess.run(
+                ["sqlite3", DB_PATH, f".backup {dst}"],
+                capture_output=True, timeout=30
+            )
+            if r.returncode == 0:
+                logger.info(f"DB backup OK → {dst}")
+                for f in _glob.glob(DB_PATH.replace(".db", "_backup_*.db")):
+                    if _time.time() - os.path.getmtime(f) > 7 * 86400:
+                        os.remove(f)
+                        logger.info(f"DB backup cleanup: {f}")
+            else:
+                logger.error(f"DB backup FAILED: {r.stderr.decode()}")
+        except Exception as e:
+            logger.error(f"DB backup error: {e}")
+
     scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
     scheduler.add_job(send_daily_notifications, "cron", minute="*", args=[bot])
+    scheduler.add_job(_backup_db, "cron", hour=3, minute=0)
     scheduler.start()
 
     dp = Dispatcher(storage=MemoryStorage())

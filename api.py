@@ -8,7 +8,9 @@ import json
 import logging
 import os
 import re
+import time as _t
 import urllib.parse
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -37,6 +39,13 @@ from db import (
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+if DEMO_MODE:
+    import logging as _log
+    _log.getLogger(__name__).warning(
+        "⚠️  DEMO_MODE=true — Telegram HMAC auth ОТКЛЮЧЕНА! "
+        "Все /api/* запросы принимаются без проверки подписи. "
+        "Установите DEMO_MODE=false в production."
+    )
 _railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
     f"https://{_railway_domain}/webapp" if _railway_domain else ""
@@ -106,6 +115,23 @@ def verify_init_data(init_data: str, bot_token: str) -> Optional[dict]:
         return None
 
 
+# ─── Rate Limiting ────────────────────────────────────────────────────────────
+
+_rate_buckets: dict = defaultdict(list)
+_RATE_MAX = 30    # запросов
+_RATE_WINDOW = 60  # в секундах
+
+
+def _check_rate(uid: int) -> bool:
+    """True если запрос разрешён (не превышен лимит)."""
+    now = _t.time()
+    _rate_buckets[uid] = [t for t in _rate_buckets[uid] if now - t < _RATE_WINDOW]
+    if len(_rate_buckets[uid]) >= _RATE_MAX:
+        return False
+    _rate_buckets[uid].append(now)
+    return True
+
+
 @web.middleware
 async def auth_middleware(request: web.Request, handler):
     """Для /api/* — требует валидный X-Telegram-Init-Data или initData в query."""
@@ -120,6 +146,8 @@ async def auth_middleware(request: web.Request, handler):
                 user = {"id": 999999999, "first_name": "Демо"}
             else:
                 return web.Response(status=401)
+        if not DEMO_MODE and not _check_rate(user.get("id", 0)):
+            return web.Response(status=429, text="Too Many Requests")
         request["tg_user"] = user
     return await handler(request)
 
@@ -208,6 +236,8 @@ async def api_register(request: web.Request) -> web.Response:
     await ensure_user_exists(tg["id"], tg.get("first_name", ""))
     await start_trial(tg["id"])
     days_left = await get_trial_days_left(tg["id"])
+    if days_left is None:
+        days_left = 7
     return _json({"ok": True, "is_new": is_new, "trial_days_left": days_left})
 
 
@@ -218,6 +248,8 @@ async def api_me(request: web.Request) -> web.Response:
     if not user:
         return _json({"registered": False, "name": tg.get("first_name", "")})
     days_left = await get_trial_days_left(tg["id"])
+    if days_left is None:
+        days_left = 7
     trial_ends = None
     trial_start_raw = user.get("trial_start")
     if trial_start_raw:

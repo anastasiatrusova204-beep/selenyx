@@ -509,3 +509,30 @@ astrolog/
 - `notify_set` — настройка уведомлений
 
 Посмотреть статистику: `GET /api/admin/stats` (с initData пользователя из ADMIN_IDS)
+
+---
+
+## После MVP — архитектурные улучшения
+
+Задачи, отложенные до набора 100+ активных пользователей и стабилизации продукта:
+
+1. **Разделить bot + API → два Railway-сервиса**
+   - Сейчас: один процесс, одно падение = бот + API вниз одновременно
+   - Решение: `selenyx-bot` (только aiogram polling) и `selenyx-api` (только aiohttp)
+   - Shared DB через Railway Volume с одним writer-процессом
+
+2. **Мигрировать SQLite → Turso** (managed edge SQLite)
+   - Сейчас: ежедневный .backup на том же Volume — не защищает от потери Volume
+   - Turso: автоматические бэкапы, point-in-time recovery, совместим с aiosqlite через libsql-client-py
+
+3. **Рефакторить monolith webapp/index.html → ES-модули**
+   - Сейчас: 2000+ строк инлайн CSS/JS — любое изменение требует контекст всего файла
+   - Решение: Vite mini bundle или нативные ES-модули (tab-today.js, tab-moon.js, shared.js)
+
+4. **Тайм-зоны → хранить в users таблице**
+   - Сейчас: хардкод Moscow для всего СНГ (Казахстан GMT+5, Беларусь GMT+3)
+   - Решение: `timezone TEXT DEFAULT 'Europe/Moscow'` в users + Intl.DateTimeFormat на фронте
+
+5. **Контент-менеджмент → вынести data.py в SQLite/JSON**
+   - Сейчас: редактирование контента требует деплоя
+   - Решение: таблица `content` (key, value, updated_at) + простой /admin/content endpoint
