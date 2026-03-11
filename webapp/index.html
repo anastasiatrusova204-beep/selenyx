@@ -1952,8 +1952,12 @@
     // Совпадение хрома TG с нашей тёмной темой
     tg?.setBackgroundColor?.('#0a0a1a');
     tg?.setHeaderColor?.('#0a0a1a');
-    setTimeout(()=>document.getElementById('loading').classList.add('gone'),500);
-    try{ me=await api('/api/me'); } catch{ me={registered:false}; }
+    // Показываем сплэш минимум 2.5с — пользователь видит всю анимацию
+    const [,meResult] = await Promise.allSettled([
+      new Promise(r=>setTimeout(r,2500)),
+      api('/api/me').then(r=>{me=r;}).catch(()=>{me={registered:false};})
+    ]);
+    document.getElementById('loading').classList.add('gone');
     updateTrialDisplay();
     if(me?.sign){
       document.getElementById('moon-screen').classList.remove('active');
