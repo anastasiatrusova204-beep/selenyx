@@ -311,14 +311,17 @@
       font-size: 16px; font-weight: 500; width: 100%; transition: opacity 0.2s, transform 0.15s;
     }
     .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
-    .planet-card { border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
-    .planet-card.sun  { background: linear-gradient(135deg,rgba(255,213,79,0.1),rgba(255,143,0,0.06)); border: 1px solid rgba(255,213,79,0.2); }
-    .planet-card.moon { background: linear-gradient(135deg,rgba(124,77,255,0.12),rgba(100,255,218,0.06)); border: 1px solid rgba(124,77,255,0.2); }
-    .planet-card.asc  { background: linear-gradient(135deg,rgba(100,255,218,0.1),rgba(206,147,216,0.06)); border: 1px solid rgba(100,255,218,0.2); }
-    .planet-name {
-      font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; margin-bottom: 6px;
+    .natal-card { border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
+    .natal-card.sun  { background: linear-gradient(135deg,rgba(255,213,79,0.12),rgba(255,143,0,0.06)); border: 1px solid rgba(255,213,79,0.25); }
+    .natal-card.moon { background: linear-gradient(135deg,rgba(124,77,255,0.14),rgba(100,255,218,0.06)); border: 1px solid rgba(124,77,255,0.25); }
+    .natal-card.asc  { background: linear-gradient(135deg,rgba(100,255,218,0.12),rgba(206,147,216,0.06)); border: 1px solid rgba(100,255,218,0.25); }
+    .natal-card-label {
+      font-size: 11px; color: var(--hint); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px;
     }
-    .planet-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+    .natal-card-sign {
+      font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+    }
+    .natal-card-desc { font-size: 14px; color: var(--hint); line-height: 1.6; }
     .btn-text {
       background: transparent; color: var(--hint); font-size: 13px; padding: 8px;
       margin-top: 4px; width: 100%; border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm);
@@ -822,6 +825,102 @@
       display: none;
     }
     .glos-item.open .glos-a { display: block; }
+    /* ─── Today Landing ─── */
+    .today-header {
+      padding: 8px 0 4px;
+    }
+    .today-dateline {
+      font-size: 12px; color: var(--hint); letter-spacing: 0.4px;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .today-greeting {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    /* Герой лунного дня */
+    .ld-hero {
+      border-radius: var(--radius); padding: 20px;
+      margin-bottom: 12px; position: relative; overflow: hidden;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .ld-hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--ld-grad, linear-gradient(135deg,rgba(124,77,255,0.18),rgba(100,255,218,0.08)));
+      z-index: 0;
+    }
+    .ld-hero-num-wrap {
+      flex-shrink: 0; width: 56px; height: 56px; border-radius: 16px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 1; position: relative;
+    }
+    .ld-hero-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; font-weight: 700; color: var(--text); line-height: 1;
+    }
+    .ld-hero-num-label {
+      font-size: 9px; color: var(--hint); letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .ld-hero-content { flex: 1; z-index: 1; position: relative; }
+    .ld-hero-symbol {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.2;
+    }
+    .ld-hero-energy {
+      font-size: 13px; color: var(--hint); line-height: 1.55; margin-bottom: 10px;
+    }
+    .ld-status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; font-weight: 500; padding: 4px 10px;
+      border-radius: 20px; border: 1px solid currentColor;
+    }
+    .ld-status-badge.good  { color: #81c784; background: rgba(129,199,132,0.1); }
+    .ld-status-badge.hard  { color: #ef9a9a; background: rgba(239,154,154,0.1); }
+    .ld-status-badge.neutral { color: var(--hint); background: rgba(255,255,255,0.05); }
+
+    /* Практика дня */
+    .practice-card {
+      background: linear-gradient(135deg, rgba(100,255,218,0.08), rgba(124,77,255,0.06));
+      border: 1px solid rgba(100,255,218,0.2); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px;
+      font-size: 14px; color: var(--text); line-height: 1.6;
+    }
+    .practice-label {
+      font-size: 11px; color: var(--teal); letter-spacing: 0.5px;
+      text-transform: uppercase; margin-bottom: 6px; font-weight: 600;
+    }
+
+    /* Домены как 2×2 плитки */
+    .domain-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+    }
+    .domain-card {
+      background: var(--bg2); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .domain-card-header {
+      font-size: 13px; font-weight: 600; color: var(--text);
+    }
+    .domain-card-context {
+      font-size: 12px; color: var(--btn); line-height: 1.4; opacity: 0.85;
+    }
+    .domain-card-tips { display: flex; flex-direction: column; gap: 4px; }
+    .domain-card-tip {
+      font-size: 12px; color: var(--hint); line-height: 1.45;
+      padding-left: 10px; position: relative;
+    }
+    .domain-card-tip::before {
+      content: '·'; position: absolute; left: 0; color: var(--btn);
+    }
+
+    /* Секция-разделитель */
+    .section-label {
+      font-size: 11px; color: var(--hint); letter-spacing: 0.6px;
+      text-transform: uppercase; margin: 16px 0 8px; font-weight: 600;
+    }
+
   </style>
 </head>
 <body>
@@ -1116,86 +1215,108 @@
   function renderToday(d){
     const m=d.moon, pe=d.phase_energy, streak=me?.streak||0;
     const name=me?.name||'';
-    const greeting=`<div style="margin-top:8px;margin-bottom:4px">
-      <div style="font-size:12px;color:var(--hint);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:4px">Твой день${name?', '+name:''}</div>
-      <div style="font-size:13px;color:var(--hint);line-height:1.5">${m.phase_emoji} ${m.phase_name} · Луна в ${m.sign_nom} · ${m.lunar_day} лунный день</div>
+
+    // ── Заголовок ──
+    const now=new Date();
+    const dateStr=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+    const header=`<div class="today-header reveal">
+      <div class="today-dateline">${dateStr}</div>
+      <div class="today-greeting">Твой день${name?', '+name:''}</div>
     </div>`;
-    const sb=streak>1?`<div class="streak-badge">🔥 ${streak} ${dw(streak)} подряд</div>`:'';
-    const dk=['health','work','love','psych'];
-    const pills=dk.map(k=>`<div class="pill${k==='health'?' active':''}" data-domain="${k}">${DOMAIN_LABELS[k]}</div>`).join('');
-    const doms=dk.map(k=>{
-      const dd=d.domains[k]||{};
-      const tips=(dd.tips||[]).map(t=>`<div class="domain-tip">${t}</div>`).join('');
-      const ctx2=dd.context?`<div class="domain-context">${dd.context}</div>`:'';
-      return `<div class="domain-content${k==='health'?' active':''}" data-dc="${k}">${tips}${ctx2}</div>`;
-    }).join('');
-    // Плитки цвета и числа дня
+
+    // ── Мой знак ──
+    const mySignInfo=me?.sign?ZODIAC.find(z=>z.k===me.sign):null;
+    const signRow=mySignInfo
+      ?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;color:var(--hint);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px">Мой знак</div>
+            <div style="font-size:15px;color:var(--text);font-weight:500">${mySignInfo.e} ${mySignInfo.n}</div>
+          </div>
+          <button id="btn-change-sign" style="background:transparent;font-size:12px;color:var(--hint);padding:4px 10px;border:1px solid rgba(124,77,255,0.25);border-radius:20px;touch-action:manipulation">✏️ Сменить</button>
+        </div>`
+      :`<div style="margin-bottom:10px">
+          <button id="btn-change-sign" style="background:transparent;font-size:14px;color:var(--btn);padding:8px 14px;border:1px solid rgba(124,77,255,0.3);border-radius:10px;touch-action:manipulation">✏️ Выбрать свой знак</button>
+        </div>`;
+
+    // ── Стрик ──
+    const sb=streak>1?`<div class="streak-badge" style="margin-bottom:10px">🔥 ${streak} ${dw(streak)} подряд</div>`:'';
+
+    // ── Герой лунного дня ──
+    const ldNum=m.lunar_day||1;
+    const ldSymbol=m.lunar_day_symbol||'';
+    const ldEnergy=m.lunar_day_energy||'';
+    const ldPractice=m.lunar_day_practice||'';
+    let badgeClass='neutral',badgeText='◽ Нейтральный';
+    const lde=ldEnergy.toLowerCase();
+    if(lde.includes('благоприятн')||lde.includes('один из наиболее')||lde.includes('высоко')||lde.includes('позитивн')){
+      badgeClass='good'; badgeText='✅ Благоприятный';
+    } else if(lde.includes('сложн')||lde.includes('напряжённ')||lde.includes('конфликт')||lde.includes('труден')){
+      badgeClass='hard'; badgeText='⚠️ Сложный';
+    }
+    const grads=['linear-gradient(135deg,rgba(124,77,255,0.22),rgba(100,255,218,0.08))','linear-gradient(135deg,rgba(255,213,79,0.18),rgba(124,77,255,0.12))','linear-gradient(135deg,rgba(100,255,218,0.18),rgba(124,77,255,0.08))','linear-gradient(135deg,rgba(206,147,216,0.18),rgba(124,77,255,0.08))','linear-gradient(135deg,rgba(255,154,154,0.15),rgba(124,77,255,0.08))','linear-gradient(135deg,rgba(100,200,255,0.15),rgba(124,77,255,0.08))'];
+    const grad=grads[(ldNum-1)%grads.length];
+    const heroCard=`<div class="ld-hero reveal" style="--ld-grad:${grad}">
+      <div class="ld-hero-num-wrap">
+        <div class="ld-hero-num">${ldNum}</div>
+        <div class="ld-hero-num-label">лун. день</div>
+      </div>
+      <div class="ld-hero-content">
+        <div class="ld-hero-symbol">${ldSymbol}</div>
+        <div class="ld-hero-energy">${ldEnergy}</div>
+        <span class="ld-status-badge ${badgeClass}">${badgeText}</span>
+      </div>
+    </div>`;
+
+    // ── Плитки цвета и числа ──
     const accent=colorAccent(d.color?.color||'');
     const colorTile=d.color?.color?`<div class="tile" style="border-left:3px solid ${accent}">
       <div class="tile-label">🎨 Цвет дня</div>
       <div class="tile-value" style="color:var(--gold);font-size:14px">${d.color.color}</div>
       <div class="tile-sub">${d.color.reason||''}</div>
       ${d.color.hint?`<div class="tile-sub" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06)">${d.color.hint}</div>`:''}</div>`:'';
-    const numTile=d.day_number?`<div class="tile">
+    const numTile=m.day_number?`<div class="tile">
       <div class="tile-label">🔢 Число дня</div>
-      <div class="tile-value" style="color:var(--gold);font-size:32px;line-height:1;margin:4px 0">${d.day_number}</div>
-      <div class="tile-sub" style="line-height:1.45">${(d.day_number_text||'').split('.')[0]}</div></div>`:'';
-    const colorNumRow=(colorTile||numTile)?`<div class="tile-row">${colorTile}${numTile}</div>`:'';
+      <div class="tile-value" style="color:var(--gold);font-size:32px;line-height:1;margin:4px 0">${m.day_number}</div>
+      <div class="tile-sub" style="line-height:1.45">${(m.day_number_text||'').split('.')[0]}</div></div>`:'';
+    const colorNumRow=(colorTile||numTile)?`<div class="tile-row reveal">${colorTile}${numTile}</div>`:'';
 
+    // ── Домены 2×2 ──
+    const dk=['health','work','love','psych'];
+    const domainCards=dk.map(k=>{
+      const dd=d.domains[k]||{};
+      const tips=(dd.tips||[]).slice(0,2).map(t=>`<div class="domain-card-tip">${t}</div>`).join('');
+      const ctx=dd.context?`<div class="domain-card-context">${dd.context}</div>`:'';
+      return `<div class="domain-card">
+        <div class="domain-card-header">${DOMAIN_LABELS[k]}</div>
+        ${ctx}
+        <div class="domain-card-tips">${tips}</div>
+      </div>`;
+    }).join('');
 
-    const mySignInfo = me?.sign ? ZODIAC.find(z=>z.k===me.sign) : null;
-    const signRow = mySignInfo
-      ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:6px">
-           <div style="display:flex;flex-direction:column;gap:2px">
-             <span style="font-size:11px;color:var(--hint);letter-spacing:0.5px;text-transform:uppercase">Мой знак</span>
-             <span style="font-size:16px;color:var(--text);font-weight:500">${mySignInfo.e} ${mySignInfo.n}</span>
-           </div>
-           <button id="btn-change-sign" style="background:transparent;font-size:12px;color:var(--hint);padding:4px 10px;border:1px solid rgba(124,77,255,0.25);border-radius:20px;touch-action:manipulation">✏️ Сменить знак</button>
-         </div>`
-      : `<div style="margin-top:10px;margin-bottom:6px">
-           <button id="btn-change-sign" style="background:transparent;font-size:14px;color:var(--btn);padding:8px 14px;border:1px solid rgba(124,77,255,0.3);border-radius:10px;touch-action:manipulation">✏️ Выбрать свой знак</button>
-         </div>`;
+    // ── Квота фазы ──
+    const phaseIntro=pe.intro?`<div class="phase-intro reveal">${pe.intro}</div>`:'';
+
+    // ── Практика ──
+    const practiceCard=ldPractice?`<div class="practice-card reveal">
+      <div class="practice-label">💫 Практика дня</div>
+      ${ldPractice}
+    </div>`:'';
 
     document.getElementById('tab-today').innerHTML=`
-      ${greeting}
+      ${header}
       ${signRow}
       ${sb}
-      <div class="phase-intro reveal">${pe.intro}</div>
-      <div class="info-card reveal" style="padding:14px 16px;margin-top:4px">
-        <div class="domain-pills">${pills}</div><div>${doms}</div>
-      </div>
-      ${colorNumRow}`;
+      ${heroCard}
+      ${colorNumRow}
+      <div class="section-label">СОВЕТЫ НА СЕГОДНЯ</div>
+      <div class="domain-grid reveal">${domainCards}</div>
+      ${phaseIntro}
+      ${practiceCard}`;
 
     document.getElementById('btn-change-sign')?.addEventListener('click',()=>{
-      // Сбрасываем данные чтобы после смены знака обновился контент
       todayData=null; tabLoaded.today=false;
       showOnboarding();
       tg?.BackButton?.show();
-    });
-
-    // Hint при первом заходе — исчезает после первого тапа по пилюле
-    const hintKey='domain_hint_seen';
-    if(!localStorage.getItem(hintKey)){
-      const hint=document.createElement('div');
-      hint.id='domain-hint';
-      hint.style.cssText='font-size:12px;color:var(--btn);text-align:center;margin:-4px 0 8px;animation:blink 2s ease-in-out infinite;letter-spacing:0.3px';
-      hint.textContent='👆 Нажми на сферу — здоровье, работа, отношения, психология';
-      document.querySelector('.domain-pills')?.insertAdjacentElement('afterend', hint);
-    }
-
-    document.querySelectorAll('#tab-today .pill').forEach(p=>{
-      p.addEventListener('click',()=>{
-        const k=p.dataset.domain;
-        document.querySelectorAll('#tab-today .pill').forEach(x=>x.classList.remove('active'));
-        document.querySelectorAll('#tab-today .domain-content').forEach(x=>x.classList.remove('active'));
-        p.classList.add('active');
-        document.querySelector(`[data-dc="${k}"]`)?.classList.add('active');
-        tg?.HapticFeedback?.selectionChanged?.();
-        logEvent('domain_tap', k);
-        // Убираем hint после первого тапа
-        const h=document.getElementById('domain-hint');
-        if(h){ h.remove(); localStorage.setItem(hintKey,'1'); }
-      });
     });
   }
 
@@ -1285,6 +1406,54 @@
   }
 
   function renderMoon(d){
+    // ── Герой лунного дня (под планетой) ──
+    const ldNum=d.lunar_day||1;
+    const ldSymbol=d.lunar_day_symbol||'';
+    const ldEnergy=d.lunar_day_energy||'';
+    const ldPractice=d.lunar_day_practice||'';
+    let badgeClassM='neutral',badgeTextM='◽ Нейтральный';
+    const ldeM=ldEnergy.toLowerCase();
+    if(ldeM.includes('благоприятн')||ldeM.includes('один из наиболее')||ldeM.includes('высоко')||ldeM.includes('позитивн')){
+      badgeClassM='good'; badgeTextM='✅ Благоприятный';
+    } else if(ldeM.includes('сложн')||ldeM.includes('напряжённ')||ldeM.includes('конфликт')||ldeM.includes('труден')){
+      badgeClassM='hard'; badgeTextM='⚠️ Сложный';
+    }
+    const gradsM=['linear-gradient(135deg,rgba(124,77,255,0.22),rgba(100,255,218,0.08))','linear-gradient(135deg,rgba(255,213,79,0.18),rgba(124,77,255,0.12))','linear-gradient(135deg,rgba(100,255,218,0.18),rgba(124,77,255,0.08))','linear-gradient(135deg,rgba(206,147,216,0.18),rgba(124,77,255,0.08))','linear-gradient(135deg,rgba(255,154,154,0.15),rgba(124,77,255,0.08))','linear-gradient(135deg,rgba(100,200,255,0.15),rgba(124,77,255,0.08))'];
+    const gradM=gradsM[(ldNum-1)%gradsM.length];
+    const ldHeroM=`<div class="ld-hero reveal" style="--ld-grad:${gradM}">
+      <div class="ld-hero-num-wrap">
+        <div class="ld-hero-num">${ldNum}</div>
+        <div class="ld-hero-num-label">лун. день</div>
+      </div>
+      <div class="ld-hero-content">
+        <div class="ld-hero-symbol">${ldSymbol}</div>
+        <div class="ld-hero-energy">${ldEnergy}</div>
+        <span class="ld-status-badge ${badgeClassM}">${badgeTextM}</span>
+      </div>
+    </div>`;
+
+    // ── Практика ──
+    const practiceM=ldPractice?`<div class="practice-card reveal">
+      <div class="practice-label">💫 Практика дня</div>
+      ${ldPractice}
+    </div>`:'';
+
+    // ── Ретрограды ──
+    const retro=(d.retrogrades||[]).length?`<div class="section-label">РЕТРОГРАДНЫЕ ПЛАНЕТЫ</div>
+      <div class="info-card reveal" style="border-color:rgba(239,154,154,.3);margin-bottom:12px">
+        <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Видимое движение планеты назад — её сферы требуют осторожности</div>
+        ${d.retrogrades.map(r=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px">
+          <span style="font-size:18px;min-width:22px">${r.emoji||'⚠'}</span>
+          <div><div style="font-size:14px;font-weight:600;color:var(--red)">${r.name||r}</div>
+          <div style="font-size:12px;color:var(--hint);margin-top:2px;line-height:1.5">${r.hint||''}</div></div>
+        </div>`).join('')}
+      </div>`:'';
+
+    // ── Планеты-карточки ──
+    const planetsHtml=buildPlanetCards(d.aspects,d.retrogrades);
+    const planetsSection=planetsHtml?`<div class="section-label">ПЛАНЕТЫ СЕГОДНЯ</div>${planetsHtml}`:'';
+
+    // ── Аспекты ──
     const asp=(d.aspects||[]).map(a=>{
       const ad=ASPECT_DISPLAY[a.aspect]||{sym:'·',label:a.aspect,color:'var(--hint)'};
       return `<div class="aspect-item">
@@ -1293,55 +1462,17 @@
           <span style="font-size:15px;margin-right:4px">${ad.sym}</span>${ad.label}
         </span>
         <span class="aspect-hint">${a.hint}</span></div>`;
-    }).join('')||
-      `<div style="color:var(--hint);font-size:14px;padding:8px 0">Активных аспектов нет</div>`;
-    const retro=(d.retrogrades||[]).length?`<div class="info-card" style="border-color:rgba(239,154,154,.3)">
-      <div style="color:var(--red);font-size:13px;margin-bottom:4px">⚠ Ретроградные планеты</div>
-      <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Видимое движение планеты назад — её сферы требуют осторожности</div>
-      ${d.retrogrades.map(r=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
-        <span style="font-size:16px;min-width:20px">${r.emoji||'⚠'}</span>
-        <div><div style="font-size:14px;font-weight:600">${r.name||r}</div>
-        <div style="font-size:12px;color:var(--hint);margin-top:2px">${r.hint||''}</div></div>
-      </div>`).join('')}</div>`:'';
-    const c=d.color||{};
-    const accent=colorAccent(c.color||'');
-    const colorTileM=c.color?`<div class="tile" style="border-left:3px solid ${accent}">
-      <div class="tile-label">🎨 Цвет дня</div>
-      <div class="tile-value" style="color:var(--gold);font-size:14px">${c.color}</div>
-      <div class="tile-sub">${c.reason||''}</div>
-      ${c.hint?`<div class="tile-sub" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06)">${c.hint}</div>`:''}</div>`:'';
-    const numTileM=d.day_number?`<div class="tile">
-      <div class="tile-label">🔢 Число дня</div>
-      <div class="tile-value" style="color:var(--gold);font-size:32px;line-height:1;margin:4px 0">${d.day_number}</div>
-      <div class="tile-sub" style="line-height:1.45">${(d.day_number_text||'').split('.')[0]}</div></div>`:'';
-    const colorNumRowM=(colorTileM||numTileM)?`<div class="tile-row">${colorTileM}${numTileM}</div>`:'';
+    }).join('')||`<div style="color:var(--hint);font-size:14px;padding:8px 0">Активных аспектов нет</div>`;
 
     document.getElementById('tab-moon').innerHTML=
-      buildMoonHero(d)+`
-      <div class="tile-row">
-        <div class="tile">
-          <div class="tile-label">⚡ Лунный день</div>
-          <div class="tile-value">${d.lunar_day}</div>
-          <div class="tile-sub">${d.lunar_day_symbol}</div>
-        </div>
-        <div class="tile">
-          <div class="tile-label">🌑 Фаза</div>
-          <div class="tile-value" style="font-size:14px">${d.phase_name||d.phase}</div>
-          <div class="tile-sub">${d.phase_emoji||''}</div>
-        </div>
-      </div>
-      <div class="lunar-day-card">
-        <div class="ld-energy">${d.lunar_day_energy}</div>
-        <div class="ld-practice">💫 ${d.lunar_day_practice}</div>
-      </div>
-      ${colorNumRowM}
-      ${retro}
-      ${buildPlanetCards(d.aspects,d.retrogrades)}
-      <div class="section">
-        <div class="section-title">🪐 Аспекты Луны</div>
-        <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Как Луна взаимодействует с планетами прямо сейчас</div>
-        <div class="info-card">${asp}</div>
-      </div>`;
+      buildMoonHero(d)+
+      ldHeroM+
+      practiceM+
+      retro+
+      planetsSection+
+      `<div class="section-label">АСПЕКТЫ ЛУНЫ</div>
+      <div style="font-size:12px;color:var(--hint);margin-bottom:10px">Как Луна взаимодействует с планетами прямо сейчас</div>
+      <div class="info-card reveal">${asp}</div>`;
   }
 
   function renderNatal(d){
@@ -1381,13 +1512,22 @@
         },{once:true});
       });
     } else {
-      const asc=d.asc?`<div class="planet-card asc">
-        <div class="planet-name">⬆️ Асцендент в ${d.asc.sign}</div>
-        <div class="planet-desc">${d.asc.desc}</div></div>`:'';
+      const asc=d.asc?`<div class="natal-card asc reveal">
+        <div class="natal-card-label">⬆️ Асцендент</div>
+        <div class="natal-card-sign">${d.asc.sign}</div>
+        <div class="natal-card-desc">${d.asc.desc}</div></div>`:'';
       document.getElementById('tab-natal').innerHTML=`
-        <div class="section-title" style="margin-top:12px">🌟 Твоя натальная карта</div>
-        <div class="planet-card sun"><div class="planet-name">☀️ Солнце в ${d.sun.sign}</div><div class="planet-desc">${d.sun.desc}</div></div>
-        <div class="planet-card moon"><div class="planet-name">🌙 Луна в ${d.moon.sign}</div><div class="planet-desc">${d.moon.desc}</div></div>
+        <div class="section-label" style="margin-top:12px">ТВОЯ НАТАЛЬНАЯ КАРТА</div>
+        <div class="natal-card sun reveal">
+          <div class="natal-card-label">☀️ Солнце</div>
+          <div class="natal-card-sign">${d.sun.sign}</div>
+          <div class="natal-card-desc">${d.sun.desc}</div>
+        </div>
+        <div class="natal-card moon reveal">
+          <div class="natal-card-label">🌙 Луна</div>
+          <div class="natal-card-sign">${d.moon.sign}</div>
+          <div class="natal-card-desc">${d.moon.desc}</div>
+        </div>
         ${asc}
         <div class="premium-gate">
           <div class="gate-blur">Персональный прогноз на год · Глубокий разбор знаков · Точки роста и вызовы · Благоприятные периоды</div>
@@ -1722,13 +1862,15 @@
   },{threshold:0.05, rootMargin:'0px 0px -10px 0px'});
 
   function applyReveal(panel){
-    const sel='.info-card,.tile-row,.phase-intro,.lunar-day-card,.color-day-card,.planet-card,.section,.prediction-wrap,.moon-hero,.section-title,.compat-card,.natal-form,.premium-gate';
-    panel.querySelectorAll(sel).forEach((el,i)=>{
-      el.classList.remove('reveal','visible');
+    // Добавляем reveal к legacy-элементам (без класса reveal в шаблоне)
+    const legacySel='.info-card,.tile-row,.phase-intro,.lunar-day-card,.color-day-card,.section,.prediction-wrap,.moon-hero,.section-title,.compat-card,.natal-form,.premium-gate';
+    panel.querySelectorAll(legacySel).forEach(el=>{ if(!el.classList.contains('reveal')) el.classList.add('reveal'); });
+    // Обрабатываем все .reveal-элементы
+    panel.querySelectorAll('.reveal').forEach((el,i)=>{
+      el.classList.remove('visible');
       el.style.setProperty('--reveal-delay','0ms');
-      void el.offsetHeight; // force reflow
+      void el.offsetHeight;
       el.style.setProperty('--reveal-delay', `${Math.min(i*70,420)}ms`);
-      el.classList.add('reveal');
       _revealObs.observe(el);
     });
   }
