@@ -422,9 +422,9 @@ function applyMoonData(moon) {
   setText('moon-lunar-day', `${moon.lunarDay} лунный день`);
   setText('moon-illumination', `${moon.illumination}%`);
 
-  const energy = MOON_SIGN_ENERGY[moon.sign] || {};
-  setText('moon-energy-title', energy.title || '');
-  setText('moon-energy-text', energy.text || '');
+  const energyText = MOON_SIGN_ENERGY[moon.sign] || '';
+  setText('moon-lunar-day', `Луна в ${moon.signRu}`);
+  setText('moon-energy-text', energyText);
 
   // Tile row
   setHTML('moon-tile-row', `
