@@ -320,10 +320,6 @@ function applyTodayData(data) {
         icon: meta.icon,
         title: meta.label,
         text: domains[btn.dataset.domain] || '',
-        sections: [
-          { label: '✦ Сегодня хорошо', sub: phaseTips?.good  || '' },
-          { label: '✦ Избегай',        sub: phaseTips?.avoid || '', muted: true },
-        ],
       });
     });
   });
