@@ -1755,8 +1755,6 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 /* ── GYROSCOPE — луна наклоняется вслед за телефоном ────────────── */
 (function(){
   if(!window.DeviceOrientationEvent) return;
-  // Только мобильные
-  if(!window.matchMedia('(hover:none)').matches) return;
 
   let baseB=null, baseG=null;
 
@@ -1771,33 +1769,37 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
   function start(){
     baseB=null; baseG=null;
     window.addEventListener('deviceorientation',handle,{passive:true});
-    // Убрать кнопку если была
     const btn=document.getElementById('gyroBtn');
-    if(btn) btn.remove();
+    if(btn){ btn.style.opacity='0'; setTimeout(()=>btn.remove(),400); }
   }
 
   if(typeof DeviceOrientationEvent.requestPermission==='function'){
-    // iOS 13+ — нужна явная кнопка, иначе браузер игнорирует запрос
+    // iOS 13+ — requestPermission нужен явный клик по элементу
     const btn=document.createElement('button');
     btn.id='gyroBtn';
     btn.setAttribute('aria-label','Включить 3D-эффект луны');
     btn.style.cssText=
-      'position:absolute;bottom:14px;left:50%;transform:translateX(-50%);'+
+      'position:absolute;bottom:-36px;left:50%;transform:translateX(-50%);'+
       'background:rgba(200,169,110,.13);border:1px solid rgba(200,169,110,.35);'+
       'color:rgba(200,169,110,.85);font-size:11px;letter-spacing:.08em;'+
-      'padding:6px 14px;border-radius:20px;cursor:pointer;z-index:10;'+
-      'font-family:var(--fb);white-space:nowrap;backdrop-filter:blur(4px);';
+      'padding:6px 16px;border-radius:20px;cursor:pointer;z-index:20;'+
+      'font-family:var(--fb);white-space:nowrap;transition:opacity .4s;';
     btn.textContent='✦ 3D-эффект';
-    btn.addEventListener('click',()=>{
+    btn.addEventListener('click',function(){
       DeviceOrientationEvent.requestPermission()
-        .then(s=>{ if(s==='granted') start(); else btn.remove(); })
-        .catch(()=>btn.remove());
+        .then(function(s){ if(s==='granted') start(); else btn.remove(); })
+        .catch(function(){ btn.remove(); });
     });
-    // Добавить внутрь moon-scene
-    const scene=document.querySelector('.moon-scene');
-    if(scene){ scene.style.position='relative'; scene.appendChild(btn); }
+    // Добавить под moon-ring (не внутрь, чтобы не обрезаться)
+    const ring=document.querySelector('.moon-ring');
+    if(ring){
+      ring.style.position='relative';
+      ring.style.overflow='visible';
+      ring.appendChild(btn);
+    }
   } else {
-    start(); // Android — без разрешения
+    // Android и старый iOS — без запроса разрешения
+    start();
   }
 })();
 
