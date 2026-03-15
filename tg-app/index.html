@@ -147,7 +147,7 @@
           <button class="domain-btn" data-domain="love">❤️ Любовь</button>
           <button class="domain-btn" data-domain="psych">🧠 Эмоции</button>
         </div>
-        <div id="domain-content" class="domain-content"></div>
+        <p class="domain-hint">Нажми на раздел — получи развёрнутый совет</p>
 
       </div>
     </section>
@@ -344,6 +344,33 @@
     </div>
 
     <button id="settings-save" class="btn-primary full-width">Сохранить</button>
+  </div>
+</div>
+
+<!-- ── DOMAIN SHEET ──────────────────────────────────────────────────────────── -->
+<div id="domain-sheet" class="domain-sheet hidden">
+  <div id="domain-sheet-backdrop" class="domain-sheet-backdrop"></div>
+  <div class="domain-sheet-card">
+    <div class="domain-sheet-handle"></div>
+    <div class="domain-sheet-header">
+      <div>
+        <p id="sheet-domain-icon" class="sheet-icon"></p>
+        <h3 id="sheet-domain-title" class="sheet-title"></h3>
+      </div>
+      <button id="domain-sheet-close" class="icon-btn" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="domain-sheet-body">
+      <p id="sheet-domain-text" class="sheet-text"></p>
+      <div class="sheet-divider"></div>
+      <div class="sheet-section">
+        <p class="sheet-label">✦ Сегодня хорошо</p>
+        <p id="sheet-phase-good" class="sheet-sub"></p>
+      </div>
+      <div class="sheet-section">
+        <p class="sheet-label muted">✦ Избегай</p>
+        <p id="sheet-phase-avoid" class="sheet-sub muted"></p>
+      </div>
+    </div>
   </div>
 </div>
 
