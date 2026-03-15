@@ -377,7 +377,7 @@ function openSheet({ icon, title, text, sections }) {
   // Динамические секции
   const body = $('sheet-sections');
   if (body) {
-    body.innerHTML = sections
+    body.innerHTML = (sections || [])
       .filter(s => s.sub)
       .map(s => `
         <div class="sheet-section">
