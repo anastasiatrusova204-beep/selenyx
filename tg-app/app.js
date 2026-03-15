@@ -8,7 +8,7 @@ const tg = window.Telegram?.WebApp || {
   close() {},
   HapticFeedback: { impactOccurred() {}, notificationOccurred() {} },
   BackButton: { show() {}, hide() {}, onClick() {}, offClick() {} },
-  showPopup(p, cb) { cb && cb('ok'); },
+  showPopup(_p, cb) { cb && cb('ok'); },
   colorScheme: 'light',
   themeParams: {},
   initDataUnsafe: { user: null },
@@ -28,7 +28,8 @@ applyTheme();
 tg.onEvent?.('themeChanged', applyTheme);
 
 // ─── sessionStorage with date key ─────────────────────────────────────────────
-function _dk(k) { return k + '_' + new Date().toLocaleDateString('ru-RU'); }
+const _V = 'v2'; // увеличить при изменении структуры данных
+function _dk(k) { return k + '_' + _V + '_' + new Date().toLocaleDateString('ru-RU'); }
 function ssGet(k) { try { const v = sessionStorage.getItem(_dk(k)); return v ? JSON.parse(v) : null; } catch { return null; } }
 function ssSet(k, v) { try { sessionStorage.setItem(_dk(k), JSON.stringify(v)); } catch {} }
 
@@ -196,7 +197,6 @@ function renderToday() {
   const phase  = moon.phase;
   const phaseTips = PHASE_TIPS[phase] || {};
   const domains   = DOMAINS[sign] || {};
-  const activeDomain = currentDomain || 'health';
   const weekday = new Date().getDay(); // 0=вс
   const hint = WEEKDAY_HINTS[weekday] || '';
 
@@ -208,17 +208,17 @@ function renderToday() {
 let currentDomain = 'health';
 
 function applyTodayData(data) {
-  const { moon, sign, dayNum, color, phaseTips, domains, hint } = data;
+  const { moon, dayNum, color, phaseTips, domains, hint } = data;
 
   // Moon tile row
   setHTML('today-moon-tile', `
     <div class="tile">
-      <span class="tile-icon">${moon.phaseEmoji}</span>
+      <span class="tile-icon">${moon.emoji}</span>
       <span class="tile-label">${moon.phaseName}</span>
     </div>
     <div class="tile">
       <span class="tile-icon">🌙</span>
-      <span class="tile-label">Луна в ${moon.signName}</span>
+      <span class="tile-label">Луна в ${moon.signRu}</span>
     </div>
   `);
 
@@ -271,8 +271,8 @@ function renderMoon() {
 
 function applyMoonData(moon) {
   setText('moon-phase-name', moon.phaseName);
-  setText('moon-phase-emoji', moon.phaseEmoji);
-  setText('moon-sign-name', `Луна в ${moon.signName}`);
+  setText('moon-phase-emoji', moon.emoji);
+  setText('moon-sign-name', `Луна в ${moon.signRu}`);
   setText('moon-lunar-day', `${moon.lunarDay} лунный день`);
   setText('moon-illumination', `${moon.illumination}%`);
 
@@ -283,7 +283,7 @@ function applyMoonData(moon) {
   // Tile row
   setHTML('moon-tile-row', `
     <div class="tile">
-      <span class="tile-icon">${moon.phaseEmoji}</span>
+      <span class="tile-icon">${moon.emoji}</span>
       <span class="tile-label">${moon.phaseName}</span>
     </div>
     <div class="tile">
