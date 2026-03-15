@@ -17,6 +17,21 @@ const tg = window.Telegram?.WebApp || {
 tg.ready();
 tg.expand();
 
+// iOS: пересчитывать высоту при появлении клавиатуры
+tg.onEvent?.('viewportChanged', ({ isStateStable }) => {
+  if (isStateStable) {
+    const h = tg.viewportStableHeight;
+    if (h) document.getElementById('app').style.height = h + 'px';
+  }
+});
+
+// Глобальный перехватчик ошибок
+window.onerror = (msg, src, line) => {
+  if (typeof tg.showAlert === 'function') {
+    tg.showAlert(`Ошибка: ${msg} (${src}:${line})`);
+  }
+};
+
 // ─── Theme ────────────────────────────────────────────────────────────────────
 function applyTheme() {
   const dark = tg.colorScheme === 'dark';
@@ -76,20 +91,28 @@ function showScreen(id) {
 // ─── Splash ───────────────────────────────────────────────────────────────────
 function initSplash() {
   showScreen('splash');
-  // Skip splash after 1.6s
   setTimeout(() => {
-    const saved = localStorage.getItem('userSign');
-    const savedBirth = localStorage.getItem('userBirth');
-    if (saved) {
-      userSign   = saved;
-      onboarded  = true;
-      if (savedBirth) userBirth = JSON.parse(savedBirth);
-      showScreen('main');
-      initMain();
-    } else {
-      showScreen('onboarding');
-      initOnboarding();
-    }
+    // Читаем сохранённый знак: сначала CloudStorage, затем localStorage
+    const loadSign = (cb) => {
+      if (tg.CloudStorage) {
+        tg.CloudStorage.getItem('userSign', (_err, val) => cb(val || localStorage.getItem('userSign')));
+      } else {
+        cb(localStorage.getItem('userSign'));
+      }
+    };
+    loadSign(saved => {
+      if (saved) {
+        userSign  = saved;
+        onboarded = true;
+        const savedBirth = localStorage.getItem('userBirth');
+        if (savedBirth) { try { userBirth = JSON.parse(savedBirth); } catch {} }
+        showScreen('main');
+        initMain();
+      } else {
+        showScreen('onboarding');
+        initOnboarding();
+      }
+    });
   }, 1600);
 }
 
@@ -113,6 +136,11 @@ function initOnboarding() {
 
   $('ob-next')?.addEventListener('click', nextObSlide);
   $('ob-start')?.addEventListener('click', finishOnboarding);
+  $('ob-skip')?.addEventListener('click', () => {
+    showObSlide(OB_COUNT - 1);
+    obSlide = OB_COUNT - 1;
+    tg.HapticFeedback.impactOccurred('light');
+  });
 }
 
 function showObSlide(idx) {
@@ -120,13 +148,13 @@ function showObSlide(idx) {
     const el = $(`ob-slide-${i}`);
     if (el) el.classList.toggle('hidden', i !== idx);
   }
-  // Update dots
   document.querySelectorAll('.ob-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
-  // Show/hide buttons
   const nextBtn  = $('ob-next');
   const startBtn = $('ob-start');
+  const skipBtn  = $('ob-skip');
   if (nextBtn)  nextBtn.classList.toggle('hidden', idx === OB_COUNT - 1);
   if (startBtn) startBtn.classList.toggle('hidden', idx !== OB_COUNT - 1);
+  if (skipBtn)  skipBtn.classList.toggle('hidden', idx === OB_COUNT - 1);
 }
 
 function nextObSlide() {
@@ -140,13 +168,18 @@ function nextObSlide() {
 function finishOnboarding() {
   if (!userSign) {
     showToast('Выбери свой знак зодиака', '#e74c3c');
+    tg.HapticFeedback.notificationOccurred('error');
     return;
   }
   localStorage.setItem('userSign', userSign);
+  // Также сохраняем в CloudStorage (если доступен)
+  tg.CloudStorage?.setItem('userSign', userSign, () => {});
   onboarded = true;
   tg.HapticFeedback.notificationOccurred('success');
-  showScreen('main');
-  initMain();
+  tg.showPopup({ message: 'Знак сохранён ✓\nПрогноз на сегодня готов!', buttons: [{ id: 'ok', type: 'ok' }] }, () => {
+    showScreen('main');
+    initMain();
+  });
 }
 
 // ─── Main / Tabs ──────────────────────────────────────────────────────────────
@@ -252,6 +285,23 @@ function applyTodayData(data) {
   });
 
   renderDomainContent(domains, currentDomain);
+
+  // Retention hook: показать через 3с при первом визите
+  if (!localStorage.getItem('retentionShown')) {
+    setTimeout(showRetentionBanner, 3000);
+  }
+}
+
+function showRetentionBanner() {
+  const banner = $('retention-banner');
+  if (!banner) return;
+  banner.classList.remove('hidden');
+  localStorage.setItem('retentionShown', '1');
+  $('retention-btn')?.addEventListener('click', () => {
+    banner.classList.add('hidden');
+    openSettings();
+  });
+  $('retention-close')?.addEventListener('click', () => banner.classList.add('hidden'));
 }
 
 function renderDomainContent(domains, domain) {
@@ -450,6 +500,17 @@ function revealFortune() {
     show('oracle-text-block');
     const prediction = getRandomPrediction(userSign || 'aries');
     setText('oracle-prediction', prediction);
+
+    // Кнопка шаринг
+    const shareBtn = $('oracle-share');
+    if (shareBtn) {
+      shareBtn.onclick = () => {
+        const text = `🥠 Оракул говорит:\n«${prediction}»\n\nУзнай своё послание → @Selenyx_mybot`;
+        window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot&text=${encodeURIComponent(text)}`, '_blank');
+        tg.HapticFeedback.impactOccurred('medium');
+      };
+    }
+
     // Animate in
     const block = $('oracle-text-block');
     if (block) {
