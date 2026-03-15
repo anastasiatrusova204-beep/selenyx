@@ -41,6 +41,7 @@ async def init_db() -> None:
         ("birth_time",   "TEXT"),
         ("tier",         "TEXT DEFAULT 'free'"),  # для Telegram Stars (Шаг 12)
         ("trial_start",  "TEXT"),                  # дата начала 7-дневного пробного доступа
+        ("email",        "TEXT"),                  # email для рассылки (опционально)
     ]:
         try:
             await _db.execute(f"ALTER TABLE users ADD COLUMN {col} {definition}")
@@ -187,6 +188,30 @@ async def get_trial_days_left(user_id: int) -> int:
         return max(0, 7 - elapsed)
     except Exception:
         return -1
+
+
+async def save_user_email(user_id: int, email: str) -> None:
+    """Сохраняет email пользователя."""
+    await _db.execute(
+        "UPDATE users SET email = ? WHERE user_id = ?",
+        (email.lower().strip(), user_id)
+    )
+    await _db.commit()
+
+
+async def delete_user_email(user_id: int) -> None:
+    """Удаляет email пользователя."""
+    await _db.execute("UPDATE users SET email = NULL WHERE user_id = ?", (user_id,))
+    await _db.commit()
+
+
+async def get_email_list() -> list[dict]:
+    """Возвращает список {user_id, first_name, email} для рассылки."""
+    async with _db.execute(
+        "SELECT user_id, first_name, email FROM users WHERE email IS NOT NULL"
+    ) as cursor:
+        rows = await cursor.fetchall()
+        return [dict(r) for r in rows]
 
 
 async def log_event(user_id: int, event: str, data: Optional[str] = None) -> None:
