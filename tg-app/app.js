@@ -445,13 +445,17 @@ function renderChart() {
   const natal = calcNatalChart(birth.date, birth.time);
   if (!natal) return;
 
-  setHTML('chart-sun', `<span class="sign-emoji">${natal.sun.emoji}</span> Солнце в ${natal.sun.name}`);
-  setHTML('chart-moon', `<span class="sign-emoji">${natal.moon.emoji}</span> Луна в ${natal.moon.name}`);
-  setHTML('chart-asc', `<span class="sign-emoji">${natal.asc.emoji}</span> Асцендент в ${natal.asc.name}`);
+  const nSun  = SIGNS.find(s => s.id === natal.sun)  || {};
+  const nMoon = SIGNS.find(s => s.id === natal.moon) || {};
+  const nAsc  = SIGNS.find(s => s.id === natal.asc)  || {};
 
-  setText('chart-sun-desc', natal.sun.desc);
-  setText('chart-moon-desc', natal.moon.desc);
-  setText('chart-asc-desc', natal.asc.desc);
+  setHTML('chart-sun',  `<span class="sign-emoji">${nSun.emoji  || ''}</span> Солнце в ${nSun.ru  || natal.sun}`);
+  setHTML('chart-moon', `<span class="sign-emoji">${nMoon.emoji || ''}</span> Луна в ${nMoon.ru || natal.moon}`);
+  setHTML('chart-asc',  `<span class="sign-emoji">${nAsc.emoji  || ''}</span> Асцендент в ${nAsc.ru || natal.asc}`);
+
+  setText('chart-sun-desc',  nSun.dates  || '');
+  setText('chart-moon-desc', nMoon.dates || '');
+  setText('chart-asc-desc',  nAsc.dates  || '');
 }
 
 function initChartForm() {
@@ -504,9 +508,9 @@ function renderCompat() {
   if (grid && !grid.dataset.init) {
     grid.dataset.init = '1';
     grid.innerHTML = SIGNS.map(s =>
-      `<button class="compat-sign-btn" data-sign="${s.id}" aria-label="${s.name}">
+      `<button class="compat-sign-btn" data-sign="${s.id}" aria-label="${s.ru}">
         <span class="sign-emoji">${s.emoji}</span>
-        <span class="sign-name-short">${s.name}</span>
+        <span class="sign-name-short">${s.ru}</span>
       </button>`
     ).join('');
     grid.querySelectorAll('.compat-sign-btn').forEach(btn => {
@@ -533,7 +537,7 @@ function showCompatResult(target) {
   const myS = SIGNS.find(s => s.id === mySign);
   const tgS = SIGNS.find(s => s.id === target);
 
-  setText('compat-pair', `${myS?.emoji || '✨'} ${myS?.name || ''} + ${tgS?.emoji || '✨'} ${tgS?.name || ''}`);
+  setText('compat-pair', `${myS?.emoji || '✨'} ${myS?.ru || ''} + ${tgS?.emoji || '✨'} ${tgS?.ru || ''}`);
   setText('compat-rating', result.rating);
   setText('compat-title', result.title);
   setText('compat-text', result.text);
@@ -546,7 +550,7 @@ function showCompatResult(target) {
   const shareBtn = $('compat-share');
   if (shareBtn) {
     shareBtn.onclick = () => {
-      const text = `${myS?.emoji} ${myS?.name} + ${tgS?.emoji} ${tgS?.name}: ${result.title} — ${result.rating}% совместимость!\nПроверь свою в @Selenyx_mybot`;
+      const text = `${myS?.emoji} ${myS?.ru} + ${tgS?.emoji} ${tgS?.ru}: ${result.title} — ${result.rating}% совместимость!\nПроверь свою в @Selenyx_mybot`;
       const url = `https://t.me/share/url?url=https://t.me/Selenyx_mybot&text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
       tg.HapticFeedback.impactOccurred('medium');
