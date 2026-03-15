@@ -384,12 +384,77 @@ ul { list-style: none; }
   color: var(--accent); font-weight: 600;
 }
 
-.domain-content {
-  background: var(--card); border-radius: var(--r); padding: 16px;
-  border: 1px solid var(--card-border); min-height: 80px; box-shadow: var(--shadow);
+.domain-hint {
+  font-size: 12px; color: var(--text-hint); text-align: center; padding: 8px 0;
 }
 
-.domain-text { font-size: 14px; color: var(--text); line-height: 1.65; }
+/* ── DOMAIN BOTTOM SHEET ────────────────────────────── */
+.domain-sheet {
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 200;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+.domain-sheet-backdrop {
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+  background: rgba(0,0,0,0); transition: background 0.3s ease;
+}
+
+.domain-sheet.open .domain-sheet-backdrop {
+  background: rgba(0,0,0,0.45);
+}
+
+.domain-sheet-card {
+  position: relative; z-index: 1;
+  background: var(--card);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: 12px 20px calc(28px + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 80vh; overflow-y: auto;
+}
+
+.domain-sheet.open .domain-sheet-card { transform: translateY(0); }
+
+.domain-sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--bg3); margin: 0 auto 20px;
+}
+
+.domain-sheet-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; margin-bottom: 16px;
+}
+
+.sheet-icon { font-size: 36px; line-height: 1; margin-bottom: 6px; }
+
+.sheet-title {
+  font-family: var(--font-display); font-size: 26px;
+  font-weight: 600; color: var(--text);
+}
+
+.domain-sheet-body { display: flex; flex-direction: column; gap: 14px; }
+
+.sheet-text {
+  font-size: 16px; color: var(--text); line-height: 1.7;
+}
+
+.sheet-divider {
+  height: 1px; background: var(--card-border); margin: 2px 0;
+}
+
+.sheet-section { display: flex; flex-direction: column; gap: 4px; }
+
+.sheet-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--gold);
+}
+
+.sheet-label.muted { color: var(--text-hint); }
+
+.sheet-sub {
+  font-size: 14px; color: var(--text-sub); line-height: 1.6;
+}
 
 /* ─── 14. ВКЛАДКА ЛУНА ──────────────────────────────────── */
 .moon-hero {

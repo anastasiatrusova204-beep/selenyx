@@ -281,19 +281,13 @@ function applyTodayData(data) {
   setText('today-good', phaseTips.good || '');
   setText('today-avoid', phaseTips.avoid || '');
 
-  // Domain buttons
+  // Domain buttons → открывают bottom sheet
   document.querySelectorAll('.domain-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.domain === currentDomain);
     btn.addEventListener('click', () => {
-      currentDomain = btn.dataset.domain;
-      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderDomainContent(domains, currentDomain);
-      tg.HapticFeedback.impactOccurred('light');
+      tg.HapticFeedback.impactOccurred('medium');
+      openDomainSheet(btn.dataset.domain, domains, phaseTips);
     });
   });
-
-  renderDomainContent(domains, currentDomain);
 
   // Retention hook: показать через 3с при первом визите
   if (!localStorage.getItem('retentionShown')) {
@@ -313,9 +307,41 @@ function showRetentionBanner() {
   $('retention-close')?.addEventListener('click', () => banner.classList.add('hidden'));
 }
 
-function renderDomainContent(domains, domain) {
-  const text = domains[domain] || '';
-  setHTML('domain-content', `<p class="domain-text">${text}</p>`);
+const DOMAIN_META = {
+  health: { label: 'Здоровье',  icon: '🏥' },
+  work:   { label: 'Работа',    icon: '💼' },
+  love:   { label: 'Любовь',    icon: '❤️' },
+  psych:  { label: 'Эмоции',    icon: '🧠' },
+};
+
+function openDomainSheet(domain, domains, phaseTips) {
+  const meta  = DOMAIN_META[domain] || { label: domain, icon: '✨' };
+  const text  = domains[domain] || '';
+  const good  = phaseTips?.good  || '';
+  const avoid = phaseTips?.avoid || '';
+
+  setText('sheet-domain-icon',  meta.icon);
+  setText('sheet-domain-title', meta.label);
+  setText('sheet-domain-text',  text);
+  setText('sheet-phase-good',   good);
+  setText('sheet-phase-avoid',  avoid);
+
+  const sheet = $('domain-sheet');
+  sheet.classList.remove('hidden');
+  requestAnimationFrame(() => sheet.classList.add('open'));
+
+  tg.BackButton.show();
+  const close = () => closeDomainSheet();
+  tg.BackButton.onClick(close);
+  $('domain-sheet-close')?.addEventListener('click', close, { once: true });
+  $('domain-sheet-backdrop')?.addEventListener('click', close, { once: true });
+}
+
+function closeDomainSheet() {
+  const sheet = $('domain-sheet');
+  sheet.classList.remove('open');
+  tg.BackButton.hide();
+  setTimeout(() => sheet.classList.add('hidden'), 350);
 }
 
 // ─── Moon tab ─────────────────────────────────────────────────────────────────
