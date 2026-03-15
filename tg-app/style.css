@@ -77,11 +77,11 @@ ul { list-style: none; }
 .full-width { width: 100%; }
 
 /* ─── 4. ОБОЛОЧКА ───────────────────────────────────────── */
-#app { position: fixed; inset: 0; overflow: hidden; }
+#app { position: fixed; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden; }
 
 /* ─── 5. ЭКРАНЫ ─────────────────────────────────────────── */
 .screen {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   display: flex; flex-direction: column;
   background: var(--bg);
 }
@@ -255,7 +255,7 @@ ul { list-style: none; }
 /* ─── 10. ВКЛАДКИ ───────────────────────────────────────── */
 .tab-content { flex: 1; position: relative; overflow: hidden; }
 
-.tab-pane { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.tab-pane { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column; }
 
 .pane-scroll {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -524,7 +524,7 @@ select.form-input { cursor: pointer; }
 
 /* ─── 18. ОВЕРЛЕЙ НАСТРОЙКИ ─────────────────────────────── */
 .overlay {
-  position: fixed; inset: 0; z-index: 100;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 100;
   background: rgba(0,0,0,0.5);
   display: flex; align-items: flex-end;
   backdrop-filter: blur(4px);

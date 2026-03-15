@@ -26,10 +26,11 @@ tg.onEvent?.('viewportChanged', ({ isStateStable }) => {
 });
 
 // Глобальный перехватчик ошибок
-window.onerror = (msg, src, line) => {
-  if (typeof tg.showAlert === 'function') {
-    tg.showAlert(`Ошибка: ${msg} (${src}:${line})`);
-  }
+window.onerror = (msg, src, line, _col, err) => {
+  const text = `Ошибка: ${msg}\n${src}:${line}`;
+  console.error(text, err);
+  if (typeof tg.showAlert === 'function') tg.showAlert(text);
+  else alert(text);
 };
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -91,8 +92,11 @@ function showScreen(id) {
 // ─── Splash ───────────────────────────────────────────────────────────────────
 function initSplash() {
   showScreen('splash');
-  setTimeout(() => {
-    // Читаем сохранённый знак: сначала CloudStorage, затем localStorage
+
+  let advanced = false;
+  function advance() {
+    if (advanced) return;
+    advanced = true;
     const loadSign = (cb) => {
       if (tg.CloudStorage) {
         tg.CloudStorage.getItem('userSign', (_err, val) => cb(val || localStorage.getItem('userSign')));
@@ -113,7 +117,12 @@ function initSplash() {
         initOnboarding();
       }
     });
-  }, 1600);
+  }
+
+  // Авто-переход через 1.2с
+  setTimeout(advance, 1200);
+  // Тап по сплэшу — переход сразу
+  $('splash-screen')?.addEventListener('click', advance, { once: true });
 }
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
