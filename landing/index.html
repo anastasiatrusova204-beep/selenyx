@@ -1760,9 +1760,10 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
   function handle(e){
     if(baseB===null){ baseB=e.beta||0; baseG=e.gamma||0; return; }
-    const dx=Math.min(Math.max((e.gamma||0)-baseG,-35),35);
-    const dy=Math.min(Math.max((e.beta ||0)-baseB,-35),35);
-    window._moonTilt=`rotateX(${dy*1.4}deg) rotateY(${-dx*1.4}deg)`;
+    const dx=Math.min(Math.max((e.gamma||0)-baseG,-40),40);
+    const dy=Math.min(Math.max((e.beta ||0)-baseB,-40),40);
+    /* perspective() в самом transform — даёт видимый объём, в отличие от perspective на родителе */
+    window._moonTilt=`perspective(380px) rotateX(${dy*1.2}deg) rotateY(${-dx*1.2}deg)`;
     _applyMoon();
   }
 
