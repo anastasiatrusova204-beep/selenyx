@@ -1,1327 +1,578 @@
-/**
- * style.css — все стили приложения Selenyx TMA
- * Структура:
- *   1. CSS-переменные (светлая + тёмная тема)
- *   2. Сброс и база
- *   3. Экраны и переходы
- *   4. Сплэш
- *   5. Онбординг
- *   6. Главный экран
- *   7. Таб-бар
- *   8. Вкладки (Мой день, Луна, Карта, Совместимость, Оракул)
- *   9. Оверлеи (Fortune, Настройки, Календарь)
- *  10. Компоненты (карточки, кнопки, tile-row и т.д.)
- *  11. Анимации
- *  12. prefers-reduced-motion
- */
+/* ═══════════════════════════════════════════════════════════
+   Selenyx Mini App — style.css
+   Шрифты: Cormorant Garamond (display) + DM Sans (body)
+   Палитра: Telegram-native + #c8a96e gold
+═══════════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════
-   1. CSS-ПЕРЕМЕННЫЕ
-═══════════════════════════════════════ */
+/* ─── 1. CSS ПЕРЕМЕННЫЕ ─────────────────────────────────── */
 :root {
-  /* Светлая тема (Telegram-native) */
-  --bg:           #ffffff;
-  --bg2:          #f4f4f5;
-  --bg3:          #ebebec;
-  --text:         #000000;
-  --text-sub:     #707579;
-  --text-hint:    #aaaaaa;
-  --accent:       #2AABEE;
-  --accent-dark:  #1a8fcc;
-  --accent-light: rgba(42, 171, 238, 0.12);
-  --gold:         #c8a96e;
-  --gold-light:   rgba(200, 169, 110, 0.15);
-  --danger:       #e53935;
-  --success:      #43a047;
-  --card:         #ffffff;
-  --card-border:  rgba(0, 0, 0, 0.07);
-  --shadow:       0 2px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg:    0 8px 32px rgba(0, 0, 0, 0.12);
-  --radius:       16px;
-  --radius-sm:    10px;
-  --radius-xs:    8px;
-  --tab-h:        60px;
-  --header-h:     52px;
-  --transition:   220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --bg:          #f4f4f8;
+  --bg2:         #ffffff;
+  --bg3:         #ebebee;
+  --text:        #111111;
+  --text-sub:    #707579;
+  --text-hint:   #aaaaaa;
+  --accent:      #2AABEE;
+  --accent-dim:  rgba(42,171,238,0.12);
+  --gold:        #c8a96e;
+  --gold-dim:    rgba(200,169,110,0.15);
+  --card:        #ffffff;
+  --card-border: rgba(0,0,0,0.08);
+  --shadow:      0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.12);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'DM Sans', -apple-system, system-ui, sans-serif;
+  --r-xs: 8px; --r-sm: 12px; --r: 16px; --r-lg: 24px;
+  --header-h: 56px;
+  --tab-h:    60px;
+  --t: 200ms ease;
 }
 
-/* Тёмная тема */
 .dark {
-  --bg:           #212121;
-  --bg2:          #2c2c2e;
-  --bg3:          #3a3a3c;
-  --text:         #ffffff;
-  --text-sub:     #8e8e93;
-  --text-hint:    #555558;
-  --accent:       #2AABEE;
-  --accent-dark:  #1a8fcc;
-  --accent-light: rgba(42, 171, 238, 0.15);
-  --gold:         #c8a96e;
-  --gold-light:   rgba(200, 169, 110, 0.12);
-  --danger:       #ff5252;
-  --success:      #66bb6a;
-  --card:         #2c2c2e;
-  --card-border:  rgba(255, 255, 255, 0.07);
-  --shadow:       0 2px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg:    0 8px 32px rgba(0, 0, 0, 0.4);
+  --bg:          #17212b;
+  --bg2:         #232e3c;
+  --bg3:         #2b3b4e;
+  --text:        #f5f5f5;
+  --text-sub:    #8a9aab;
+  --text-hint:   #5b6d7e;
+  --card:        #232e3c;
+  --card-border: rgba(255,255,255,0.07);
+  --shadow:      0 2px 12px rgba(0,0,0,0.3);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.4);
 }
 
-/* ═══════════════════════════════════════
-   2. СБРОС И БАЗА
-═══════════════════════════════════════ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent; /* убираем синюю вспышку на тапе */
-}
+/* ─── 2. СБРОС ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden; /* нет скролла всей страницы */
-  font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
-  font-size: 16px;
+  width: 100%; height: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
   line-height: 1.5;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
-  touch-action: manipulation; /* убирает задержку double-tap */
+  touch-action: manipulation;
+  overscroll-behavior: none;
 }
 
 button {
-  font-family: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: inherit;
-  -webkit-appearance: none;
+  font-family: inherit; border: none; background: none;
+  cursor: pointer; color: inherit; -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-input {
-  font-family: inherit;
-  font-size: 16px; /* >= 16px чтобы iOS не зумировал */
-  border: none;
-  outline: none;
-  background: none;
-  color: var(--text);
+input, select {
+  font-family: inherit; font-size: 16px;
+  border: none; outline: none; color: var(--text); background: none;
 }
 
-/* Запрет горизонтального переполнения */
-.screen, .tab-content, .overlay {
-  overflow-x: hidden;
-}
+ul { list-style: none; }
 
-/* ═══════════════════════════════════════
-   3. ЭКРАНЫ И ПЕРЕХОДЫ
-═══════════════════════════════════════ */
+/* ─── 3. УТИЛИТЫ ────────────────────────────────────────── */
+.hidden     { display: none !important; }
+.muted      { color: var(--text-sub); }
+.bold       { font-weight: 600; }
+.small      { font-size: 12px; }
+.full-width { width: 100%; }
 
-/* Обёртка всего приложения */
-#app {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-}
+/* ─── 4. ОБОЛОЧКА ───────────────────────────────────────── */
+#app { position: fixed; inset: 0; overflow: hidden; }
 
-/* Базовый экран */
+/* ─── 5. ЭКРАНЫ ─────────────────────────────────────────── */
 .screen {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
   background: var(--bg);
-  transition: opacity var(--transition), transform var(--transition);
-  will-change: opacity, transform;
 }
 
-/* Состояния экранов */
-.screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(40px);
+/* ─── 6. СПЛЭШ ──────────────────────────────────────────── */
+#splash-screen {
+  align-items: center; justify-content: center; z-index: 10;
 }
 
-.screen.slide-in {
-  animation: slideInRight 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-.screen.slide-out {
-  animation: slideOutLeft 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* Fade-переход для оверлеев */
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition);
-}
-
-.overlay.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* ═══════════════════════════════════════
-   4. СПЛЭШ-ЭКРАН
-═══════════════════════════════════════ */
-#screen-splash {
-  background: var(--bg);
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  z-index: 10;
+.splash-content {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 16px;
 }
 
 .splash-moon {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
+  width: 92px; height: 92px; border-radius: 50%;
   background: radial-gradient(circle at 35% 35%,
-    #fff9e6 0%,
-    #ffd97d 30%,
-    #c8a96e 60%,
-    #8a6a2a 100%
-  );
-  box-shadow:
-    0 0 0 12px var(--gold-light),
-    0 0 40px rgba(200, 169, 110, 0.4);
+    #fff7d6 0%, #ffd97d 35%, #c8a96e 65%, #8a6a2a 100%);
+  box-shadow: 0 0 0 16px var(--gold-dim), 0 0 60px rgba(200,169,110,0.4);
   animation: moonPulse 3s ease-in-out infinite;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0;
 }
 
+.splash-moon::after { content: '🌙'; font-size: 46px; line-height: 1; }
+
 .splash-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 32px;
-  font-weight: 600;
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 38px; font-weight: 600;
+  letter-spacing: 9px; text-transform: uppercase; color: var(--text);
 }
 
 .splash-sub {
-  font-size: 13px;
-  color: var(--text-hint);
-  letter-spacing: 1px;
+  font-size: 13px; color: var(--text-hint); letter-spacing: 1.5px;
 }
 
-/* Звёзды на сплэше */
-.splash-stars {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* ─── 7. ОНБОРДИНГ ──────────────────────────────────────── */
+#onboarding-screen { z-index: 9; }
+
+.ob-container {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
 }
 
-.splash-star {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--gold);
-  animation: twinkle 2s ease-in-out infinite;
+.ob-slide {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 28px 16px; gap: 18px; text-align: center;
 }
 
-/* ═══════════════════════════════════════
-   5. ОНБОРДИНГ
-═══════════════════════════════════════ */
-#screen-onboarding {
-  z-index: 9;
+.ob-illustration { font-size: 64px; line-height: 1; margin-bottom: 4px; }
+
+.ob-title {
+  font-family: var(--font-display);
+  font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.2;
 }
 
-.onboarding-slides {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-
-.onboarding-slide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 24px;
-  gap: 20px;
-  opacity: 0;
-  transform: translateX(100%);
-  transition: opacity 280ms ease, transform 280ms ease;
-}
-
-.onboarding-slide.active {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.onboarding-slide.prev {
-  opacity: 0;
-  transform: translateX(-100%);
-}
-
-.slide-icon {
-  font-size: 64px;
-  line-height: 1;
-}
-
-.slide-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 32px;
-  font-weight: 600;
-  text-align: center;
-  color: var(--text);
-  line-height: 1.2;
-  text-wrap: balance;
-}
-
-.slide-sub {
-  font-size: 16px;
-  color: var(--text-sub);
-  text-align: center;
-  line-height: 1.6;
+.ob-text {
+  font-size: 15px; color: var(--text-sub); line-height: 1.65;
   max-width: 300px;
-  text-wrap: balance;
 }
 
-/* Сетка 2×2 для слайда 2 */
-.features-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-  max-width: 320px;
+.ob-list {
+  display: flex; flex-direction: column; gap: 8px;
+  text-align: left; width: 100%; max-width: 280px;
 }
 
-.feature-card {
-  background: var(--bg2);
-  border-radius: var(--radius-sm);
-  padding: 16px 12px;
-  text-align: center;
+.ob-list li {
+  font-size: 15px; color: var(--text-sub);
+  padding: 10px 14px;
+  background: var(--bg2); border-radius: var(--r-sm);
   border: 1px solid var(--card-border);
 }
 
-.feature-card .icon { font-size: 28px; display: block; margin-bottom: 6px; }
-.feature-card .name { font-size: 13px; color: var(--text-sub); font-weight: 500; }
-
-/* Dots-индикатор */
-.onboarding-dots {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  padding: 8px 0;
+.sign-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; width: 100%; max-width: 340px;
 }
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--bg3);
-  transition: background var(--transition), transform var(--transition);
+.sign-btn {
+  min-height: 52px; border-radius: var(--r-sm);
+  background: var(--bg2); border: 2px solid transparent;
+  font-size: 13px; font-weight: 500; color: var(--text-sub);
+  transition: all var(--t); padding: 6px 4px;
 }
 
-.dot.active {
-  background: var(--accent);
-  transform: scale(1.2);
+.sign-btn:active { transform: scale(0.95); }
+
+.sign-btn.active {
+  background: var(--accent-dim); border-color: var(--accent);
+  color: var(--accent); font-weight: 600;
 }
 
-/* Кнопки онбординга */
-.onboarding-footer {
-  padding: 16px 24px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.ob-dots {
+  display: flex; gap: 8px; justify-content: center; padding: 12px 0;
 }
 
-/* Сетка знаков (слайд 3) */
-.signs-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  width: 100%;
-  max-width: 340px;
+.ob-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bg3); transition: all var(--t);
 }
 
-.sign-btn-ob {
-  min-height: 52px;
-  border-radius: var(--radius-sm);
-  background: var(--bg2);
-  border: 2px solid transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  transition: background var(--transition), border-color var(--transition), transform 120ms ease;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  active-scale: 0.95;
+.ob-dot.active {
+  background: var(--accent); transform: scale(1.2);
+  width: 20px; border-radius: 4px;
 }
 
-.sign-btn-ob .sign-emoji { font-size: 20px; }
-.sign-btn-ob .sign-name  { font-size: 11px; color: var(--text-sub); }
-
-.sign-btn-ob:active { transform: scale(0.95); }
-
-.sign-btn-ob.selected {
-  background: var(--accent-light);
-  border-color: var(--accent);
+.ob-buttons {
+  padding: 12px 24px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 8px;
 }
 
-/* ═══════════════════════════════════════
-   6. ГЛАВНЫЙ ЭКРАН
-═══════════════════════════════════════ */
-#screen-main {
-  z-index: 8;
-}
+/* ─── 8. ГЛАВНЫЙ ЭКРАН ──────────────────────────────────── */
+#main-screen { display: flex; flex-direction: column; z-index: 8; }
 
-.main-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  padding-top: calc(12px + env(safe-area-inset-top));
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  padding-top: env(safe-area-inset-top);
   height: calc(var(--header-h) + env(safe-area-inset-top));
-}
-
-.main-header-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.settings-btn {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 22px;
-  transition: background var(--transition);
-}
-
-.settings-btn:active { background: var(--bg2); }
-
-.main-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 24px;
-  gap: 16px;
-  position: relative;
-}
-
-/* Луна на главном экране */
-.moon-wrap {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.moon-orb {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%,
-    #fff9e6 0%,
-    #ffd97d 30%,
-    #c8a96e 60%,
-    #8a6a2a 100%
-  );
-  box-shadow:
-    0 0 0 16px var(--gold-light),
-    0 0 60px rgba(200, 169, 110, 0.35);
-  cursor: pointer;
-  animation: moonPulse 3s ease-in-out infinite;
-  transition: transform 200ms ease, box-shadow 200ms ease;
-  position: relative;
-  z-index: 1;
-}
-
-.moon-orb:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 0 8px var(--gold-light), 0 0 30px rgba(200, 169, 110, 0.25);
-}
-
-.moon-label {
-  text-align: center;
-}
-
-.moon-sign-text {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.moon-phase-text {
-  font-size: 13px;
-  color: var(--text-sub);
-}
-
-/* Canvas для частиц */
-#particles-canvas {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* 4 карточки на главном */
-.main-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 350ms ease, transform 350ms ease;
-}
-
-.main-cards.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.main-card {
   background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  transition: transform 150ms ease, box-shadow 150ms ease;
-  min-height: 88px;
-}
-
-.main-card:active {
-  transform: scale(0.97);
-  box-shadow: none;
-}
-
-.main-card-icon { font-size: 28px; }
-.main-card-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-sub);
-  text-align: center;
-}
-
-/* ═══════════════════════════════════════
-   7. ТАБ-БАР
-═══════════════════════════════════════ */
-.tab-bar {
-  display: flex;
-  background: var(--card);
-  border-top: 1px solid var(--card-border);
-  padding-bottom: env(safe-area-inset-bottom);
-  position: relative;
-  z-index: 50;
+  border-bottom: 1px solid var(--card-border);
   flex-shrink: 0;
 }
 
+.app-logo {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  letter-spacing: 3px; color: var(--text);
+}
+
+.header-actions { display: flex; gap: 4px; }
+
+.icon-btn {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-size: 18px;
+  color: var(--text-sub); transition: background var(--t);
+}
+
+.icon-btn:active { background: var(--bg3); }
+
+/* ─── 9. ТАБ-БАР ────────────────────────────────────────── */
+.tab-bar {
+  display: flex; background: var(--card);
+  border-top: 1px solid var(--card-border);
+  padding-bottom: env(safe-area-inset-bottom);
+  flex-shrink: 0; z-index: 50;
+}
+
 .tab-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-height: var(--tab-h);
-  padding: 8px 4px;
-  transition: color var(--transition);
-  color: var(--text-hint);
-  position: relative;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; min-height: var(--tab-h); padding: 8px 4px;
+  color: var(--text-hint); transition: color var(--t); position: relative;
 }
 
 .tab-btn.active { color: var(--accent); }
 
-.tab-btn .tab-icon  { font-size: 22px; line-height: 1; }
-.tab-btn .tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.2px; }
+.tab-icon  { font-size: 22px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.3px; }
 
-/* Активная точка под иконкой */
 .tab-btn.active::after {
   content: '';
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
+  position: absolute; bottom: 4px; left: 50%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
+  width: 18px; height: 3px;
+  border-radius: 2px; background: var(--accent);
 }
 
-/* ═══════════════════════════════════════
-   8. ВКЛАДКИ — общая обёртка
-═══════════════════════════════════════ */
-#screen-tabs {
-  z-index: 7;
-  display: flex;
-  flex-direction: column;
-}
+/* ─── 10. ВКЛАДКИ ───────────────────────────────────────── */
+.tab-content { flex: 1; position: relative; overflow: hidden; }
 
-.tabs-body {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
+.tab-pane { position: absolute; inset: 0; display: flex; flex-direction: column; }
 
-.tab-content {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding: 16px 16px 16px;
-  display: none;
-  flex-direction: column;
-  gap: 12px;
+.pane-scroll {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 16px; display: flex; flex-direction: column; gap: 12px;
   scrollbar-width: none;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
 }
 
-.tab-content::-webkit-scrollbar { display: none; }
-.tab-content.active { display: flex; }
+.pane-scroll::-webkit-scrollbar { display: none; }
 
-/* Заголовок вкладки */
-.tab-heading {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--text);
-  padding: 4px 0 8px;
+/* ─── 11. КАРТОЧКИ ──────────────────────────────────────── */
+.accent-card {
+  background: var(--card); border-radius: var(--r); padding: 16px;
+  border: 1px solid var(--card-border); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 6px;
 }
 
-/* ─── 8a. МОЙ ДЕНЬ ─── */
+.card-label {
+  font-size: 10px; color: var(--text-hint);
+  text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
+}
 
-/* Domain switcher */
-.domain-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+.card-label.mt { margin-top: 8px; }
+
+.card-text { font-size: 14px; color: var(--text); line-height: 1.55; }
+
+.mini-card {
+  background: var(--card); border-radius: var(--r); padding: 14px;
+  border: 1px solid var(--card-border); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.mini-label {
+  font-size: 10px; color: var(--text-hint);
+  text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
+}
+
+.mini-text { font-size: 14px; color: var(--text); line-height: 1.4; }
+
+.mini-text.big-num {
+  font-family: var(--font-body);
+  font-size: 34px; font-weight: 700; color: var(--gold); line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ─── 12. TILE-ROW ──────────────────────────────────────── */
+.tile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.tile {
+  background: var(--card); border-radius: var(--r); padding: 14px 12px;
+  border: 1px solid var(--card-border); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+}
+
+.tile-icon  { font-size: 28px; line-height: 1; }
+.tile-label { font-size: 12px; color: var(--text-sub); font-weight: 500; line-height: 1.3; }
+
+/* ─── 13. ДОМЕНЫ ────────────────────────────────────────── */
+.domain-buttons {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
 }
 
 .domain-btn {
-  min-height: 44px;
-  border-radius: var(--radius-sm);
-  background: var(--bg2);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-sub);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 2px solid transparent;
-  transition: all var(--transition);
+  min-height: 44px; border-radius: var(--r-sm);
+  background: var(--bg2); border: 2px solid var(--card-border);
+  font-size: 13px; font-weight: 500; color: var(--text-sub);
+  transition: all var(--t); padding: 0 8px;
 }
 
 .domain-btn:active { transform: scale(0.97); }
 
 .domain-btn.active {
-  background: var(--accent-light);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-dim); border-color: var(--accent);
+  color: var(--accent); font-weight: 600;
 }
 
-/* Tile-row 2×2 */
-.tile-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+.domain-content {
+  background: var(--card); border-radius: var(--r); padding: 16px;
+  border: 1px solid var(--card-border); min-height: 80px; box-shadow: var(--shadow);
 }
 
-.tile {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-sm);
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  box-shadow: var(--shadow);
+.domain-text { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+/* ─── 14. ВКЛАДКА ЛУНА ──────────────────────────────────── */
+.moon-hero {
+  display: flex; flex-direction: column;
+  align-items: center; padding: 20px 0 12px; gap: 8px;
 }
 
-.tile-label {
-  font-size: 11px;
-  color: var(--text-hint);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.moon-big-emoji {
+  font-size: 64px; line-height: 1;
+  filter: drop-shadow(0 0 20px rgba(200,169,110,0.4));
 }
 
-.tile-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
+.moon-phase-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 600; color: var(--text);
 }
 
-.tile-sub {
-  font-size: 12px;
-  color: var(--text-sub);
+.moon-sign-sub { font-size: 14px; color: var(--text-sub); }
+
+/* ─── 15. ВКЛАДКА КАРТА ─────────────────────────────────── */
+.chart-intro {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px; padding: 8px 0 16px; text-align: center;
 }
 
-/* Карточка акцент дня */
-.accent-card {
-  background: var(--card);
-  border: 1px solid var(--gold-light);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
+.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 
-.accent-card-label {
-  font-size: 11px;
-  color: var(--gold);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin-bottom: 8px;
-}
+.form-label { font-size: 13px; font-weight: 500; color: var(--text-sub); }
 
-.accent-card-text {
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.6;
-}
-
-/* Цвет + число (малые карточки) */
-.mini-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.mini-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-sm);
-  padding: 14px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow);
-}
-
-.mini-card-icon { font-size: 22px; flex-shrink: 0; }
-
-.mini-card-body { min-width: 0; }
-.mini-card-label { font-size: 10px; color: var(--text-hint); font-weight: 500; text-transform: uppercase; }
-.mini-card-value { font-size: 14px; font-weight: 700; color: var(--text); }
-.mini-card-sub   { font-size: 11px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* Цветовой кружок */
-.color-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 2px solid var(--card-border);
-}
-
-/* Текст домена */
-.domain-text-card {
-  background: var(--bg2);
-  border-radius: var(--radius);
-  padding: 16px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text);
-}
-
-/* ─── 8b. ЛУНА ─── */
-
-.moon-main-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 28px;
-  font-weight: 600;
-}
-
-.moon-main-sub {
-  font-size: 14px;
-  color: var(--text-sub);
-  margin-top: -4px;
-}
-
-.section-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-hint);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-top: 4px;
-}
-
-.aspect-list {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-
-.aspect-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--card-border);
-}
-
-.aspect-item:last-child { border-bottom: none; }
-
-.aspect-emoji { font-size: 18px; flex-shrink: 0; }
-.aspect-text  { color: var(--text); }
-.aspect-type  { margin-left: auto; font-size: 12px; color: var(--text-hint); }
-
-.retro-card {
-  background: rgba(255, 82, 82, 0.08);
-  border: 1px solid rgba(255, 82, 82, 0.2);
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  font-size: 14px;
-  color: var(--danger);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ─── 8c. КАРТА ─── */
-
-.chart-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-sub);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+.optional { font-size: 11px; color: var(--text-hint); font-weight: 400; }
 
 .form-input {
-  height: 52px;
-  background: var(--bg2);
-  border: 2px solid transparent;
-  border-radius: var(--radius-sm);
-  padding: 0 16px;
-  font-size: 16px;
-  color: var(--text);
-  font-weight: 500;
-  transition: border-color var(--transition);
-  width: 100%;
+  width: 100%; padding: 13px 16px;
+  background: var(--card); border-radius: var(--r-sm);
+  border: 1.5px solid var(--card-border);
+  font-size: 16px; color: var(--text);
+  transition: border-color var(--t); -webkit-appearance: none;
 }
 
-.form-input:focus {
-  border-color: var(--accent);
-  background: var(--card);
+.form-input:focus { border-color: var(--accent); }
+
+select.form-input { cursor: pointer; }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 600; color: var(--text); padding: 4px 0 2px;
 }
 
-.form-hint {
-  font-size: 12px;
-  color: var(--text-hint);
+.section-sub { font-size: 13px; color: var(--text-sub); margin-bottom: 4px; }
+
+.natal-card {
+  background: var(--card); border-radius: var(--r); padding: 16px;
+  border: 1px solid var(--card-border); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 6px;
 }
 
-/* Результат натальной карты */
-.natal-result { display: flex; flex-direction: column; gap: 12px; }
+.natal-planet { font-size: 16px; font-weight: 600; color: var(--text); }
+.natal-desc { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
+.sign-emoji { margin-right: 2px; }
 
-.natal-planet-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
-
-.natal-planet-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.natal-planet-text {
-  font-size: 14px;
-  color: var(--text-sub);
-  line-height: 1.6;
-}
-
-/* ─── 8d. СОВМЕСТИМОСТЬ ─── */
-
-.compat-signs-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+/* ─── 16. ВКЛАДКА СОВМЕСТИМОСТЬ ─────────────────────────── */
+.compat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
 }
 
 .compat-sign-btn {
-  min-height: 52px;
-  border-radius: var(--radius-sm);
-  background: var(--bg2);
-  border: 2px solid transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-sub);
-  transition: all var(--transition);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; padding: 10px 4px; min-height: 62px;
+  background: var(--card); border-radius: var(--r-sm);
+  border: 2px solid var(--card-border);
+  transition: all var(--t); box-shadow: var(--shadow);
 }
 
-.compat-sign-btn .s-emoji { font-size: 18px; }
-.compat-sign-btn:active   { transform: scale(0.95); }
+.compat-sign-btn:active { transform: scale(0.92); }
 
-.compat-sign-btn.selected {
-  background: var(--accent-light);
-  border-color: var(--accent);
-  color: var(--accent);
+.compat-sign-btn.active {
+  background: var(--accent-dim); border-color: var(--accent);
 }
 
-.compat-result {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: 20px 16px;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 300ms ease, transform 300ms ease;
+.compat-sign-btn .sign-emoji { font-size: 22px; }
+.compat-sign-btn .sign-name-short { font-size: 10px; color: var(--text-sub); font-weight: 500; }
+
+.compat-result-card {
+  background: var(--card); border-radius: var(--r); padding: 20px;
+  border: 1px solid var(--card-border); box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 10px; text-align: center;
 }
 
-.compat-result.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.compat-pair-text { font-size: 17px; font-weight: 600; color: var(--text); }
+.compat-stars { font-size: 22px; color: var(--gold); letter-spacing: 4px; }
+.compat-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text); }
+.compat-text { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
 
-.compat-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 22px;
-  font-weight: 600;
-}
+/* ─── 17. ВКЛАДКА ОРАКУЛ ────────────────────────────────── */
+.oracle-pane .pane-scroll { align-items: center; }
 
-.compat-stars { color: var(--gold); font-size: 18px; letter-spacing: 2px; }
-
-.compat-text {
-  font-size: 14px;
-  color: var(--text-sub);
-  line-height: 1.7;
-}
-
-/* ─── 8e. ОРАКУЛ ─── */
-
-#tab-oracle {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 28px;
-  padding: 32px 24px;
+.oracle-cookie-wrap {
+  display: flex; align-items: center; justify-content: center; padding: 32px 0;
 }
 
 .oracle-cookie {
-  font-size: 72px;
-  line-height: 1;
-  animation: cookieSway 3s ease-in-out infinite;
-  cursor: pointer;
-  display: block;
+  font-size: 80px; line-height: 1; cursor: pointer;
+  animation: cookieSway 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 16px rgba(200,169,110,0.4));
+  transition: transform 200ms ease; display: block;
+}
+
+.oracle-cookie:active { transform: scale(0.9); }
+
+.oracle-cookie.revealed { animation: cookiePop 400ms ease forwards; }
+
+.oracle-result {
+  width: 100%; display: flex; flex-direction: column; gap: 14px;
+}
+
+.oracle-card {
+  background: var(--card); border-radius: var(--r); padding: 28px 20px;
+  border: 1px solid var(--card-border); box-shadow: var(--shadow-lg);
+  text-align: center; display: flex; flex-direction: column; gap: 14px;
+}
+
+.oracle-label {
+  font-size: 11px; color: var(--text-hint);
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
 }
 
 .oracle-text {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--text);
-  max-width: 280px;
-  text-wrap: balance;
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 22px; font-style: italic; color: var(--text); line-height: 1.55;
 }
 
-.oracle-hint {
-  font-size: 12px;
-  color: var(--text-hint);
-}
-
-/* ═══════════════════════════════════════
-   9. ОВЕРЛЕИ
-═══════════════════════════════════════ */
-
-/* Затемнение фона */
-.overlay-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+/* ─── 18. ОВЕРЛЕЙ НАСТРОЙКИ ─────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: flex-end;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 
-/* ─── Fortune Cookie (full-screen) ─── */
-#overlay-fortune {
-  background: var(--bg);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
-  padding: 24px;
-  padding-top: calc(24px + env(safe-area-inset-top));
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
-}
-
-.fortune-close {
-  position: absolute;
-  top: calc(16px + env(safe-area-inset-top));
-  right: 16px;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  border-radius: 50%;
-  background: var(--bg2);
-  color: var(--text-sub);
-  transition: background var(--transition);
-}
-
-.fortune-close:active { background: var(--bg3); }
-
-.fortune-moon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%,
-    #fff9e6 0%, #ffd97d 30%, #c8a96e 60%, #8a6a2a 100%
-  );
-  box-shadow: 0 0 0 12px var(--gold-light), 0 0 40px rgba(200,169,110,0.4);
-  animation: moonPulse 3s ease-in-out infinite;
-}
-
-.fortune-text {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 24px;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.5;
-  color: var(--text);
-  max-width: 300px;
-  text-wrap: balance;
-}
-
-.fortune-quote {
-  font-size: 36px;
-  color: var(--gold);
-  line-height: 0.5;
-  align-self: flex-start;
-  margin-left: 24px;
-}
-
-/* ─── Настройки уведомлений ─── */
-#overlay-settings {
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.settings-sheet {
-  background: var(--bg);
-  border-radius: var(--radius) var(--radius) 0 0;
-  padding: 20px 20px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-  max-height: 80vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: relative;
-  z-index: 1;
-  transform: translateY(100%);
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#overlay-settings.visible .settings-sheet {
-  transform: translateY(0);
-}
-
-.sheet-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.sheet-title {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.sheet-close {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  border-radius: 50%;
-  color: var(--text-sub);
-  transition: background var(--transition);
-}
-
-.sheet-close:active { background: var(--bg2); }
-
-.time-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.time-option {
-  min-height: 52px;
-  border-radius: var(--radius-sm);
-  background: var(--bg2);
-  border: 2px solid transparent;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all var(--transition);
-  cursor: pointer;
-  gap: 12px;
-}
-
-.time-option.selected {
-  background: var(--accent-light);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.time-option-check {
-  margin-left: auto;
-  font-size: 18px;
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-
-.time-option.selected .time-option-check { opacity: 1; }
-
-/* ─── Лунный календарь ─── */
-#overlay-calendar {
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.calendar-sheet {
-  background: var(--bg);
-  border-radius: var(--radius) var(--radius) 0 0;
+.overlay-sheet {
+  width: 100%; background: var(--card);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
   padding: 20px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
-  max-height: 75vh;
-  overflow-y: auto;
-  position: relative;
-  z-index: 1;
-  transform: translateY(100%);
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column; gap: 16px;
+  animation: slideUp 250ms cubic-bezier(0.32,0.72,0,1);
 }
 
-#overlay-calendar.visible .calendar-sheet {
-  transform: translateY(0);
+.overlay-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 12px; border-bottom: 1px solid var(--card-border);
 }
 
-.calendar-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-}
+.overlay-title { font-size: 17px; font-weight: 600; color: var(--text); }
 
-.cal-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--card-border);
-}
-
-.cal-item:last-child { border-bottom: none; }
-.cal-emoji  { font-size: 20px; flex-shrink: 0; }
-.cal-date   { font-size: 13px; font-weight: 600; color: var(--text); min-width: 64px; }
-.cal-phase  { font-size: 13px; color: var(--text-sub); }
-
-/* ═══════════════════════════════════════
-   10. ОБЩИЕ КОМПОНЕНТЫ
-═══════════════════════════════════════ */
-
-/* Основная кнопка */
+/* ─── 19. КНОПКИ ────────────────────────────────────────── */
 .btn-primary {
-  width: 100%;
-  min-height: 52px;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: opacity var(--transition), transform var(--transition);
-  letter-spacing: 0.3px;
+  min-height: 52px; border-radius: var(--r-sm);
+  background: var(--accent); color: #fff;
+  font-size: 15px; font-weight: 600; letter-spacing: 0.3px;
+  transition: all var(--t); padding: 0 24px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 
-.btn-primary:active {
-  opacity: 0.85;
-  transform: scale(0.98);
-}
+.btn-primary:active { background: #1e8fcf; transform: scale(0.98); }
 
-/* Золотая кнопка */
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold), #a07c4a);
-  color: #ffffff;
+  min-height: 52px; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, #c8a96e 0%, #e8c98e 50%, #c8a96e 100%);
+  color: #3d2800; font-size: 15px; font-weight: 600;
+  transition: all var(--t); padding: 0 24px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 
-/* Вторичная кнопка (текст) */
-.btn-secondary {
-  min-height: 44px;
-  background: none;
-  color: var(--text-sub);
-  font-size: 15px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  transition: color var(--transition);
+.btn-gold:active { transform: scale(0.98); }
+
+.btn-ghost {
+  min-height: 48px; border-radius: var(--r-sm);
+  border: 1.5px solid var(--card-border);
+  font-size: 14px; font-weight: 500; color: var(--text-sub);
+  transition: all var(--t); padding: 0 20px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
 
-.btn-secondary:active { color: var(--text); }
+.btn-ghost:active { background: var(--bg2); }
 
-/* Кнопка-опасность */
-.btn-danger {
-  color: var(--danger);
-}
-
-/* Разделитель */
-.divider {
-  height: 1px;
-  background: var(--card-border);
-  margin: 4px 0;
-}
-
-/* Toast-уведомление */
+/* ─── 20. ТОСТ ──────────────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: calc(var(--tab-h) + 16px + env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--text);
-  color: var(--bg);
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1a1a1a; color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 14px; font-weight: 500; white-space: nowrap;
+  opacity: 0; pointer-events: none;
   transition: opacity 250ms ease, transform 250ms ease;
   z-index: 200;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+.toast.visible {
+  opacity: 1; transform: translateX(-50%) translateY(0);
 }
 
-/* Скелет загрузки */
-.skeleton {
-  background: linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-xs);
-}
-
-/* Звёзды рейтинга */
-.stars { color: var(--gold); letter-spacing: 2px; }
-
-/* ═══════════════════════════════════════
-   11. АНИМАЦИИ
-═══════════════════════════════════════ */
+/* ─── 21. АНИМАЦИИ ──────────────────────────────────────── */
 @keyframes moonPulse {
-  0%, 100% { box-shadow: 0 0 0 12px var(--gold-light), 0 0 40px rgba(200,169,110,0.35); }
-  50%       { box-shadow: 0 0 0 20px var(--gold-light), 0 0 60px rgba(200,169,110,0.55); }
+  0%, 100% { box-shadow: 0 0 0 16px var(--gold-dim), 0 0 60px rgba(200,169,110,0.3); }
+  50%       { box-shadow: 0 0 0 24px var(--gold-dim), 0 0 80px rgba(200,169,110,0.5); }
 }
 
-@keyframes twinkle {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50%       { opacity: 1;   transform: scale(1.4); }
-}
-
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(40px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slideOutLeft {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(-40px); }
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
 
 @keyframes cookieSway {
-  0%, 100% { transform: rotate(-5deg); }
-  50%       { transform: rotate(5deg); }
+  0%, 100% { transform: rotate(-6deg) scale(1); }
+  50%       { transform: rotate(6deg) scale(1.05); }
 }
 
-@keyframes shimmer {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+@keyframes cookiePop {
+  0%   { transform: scale(1); opacity: 1; }
+  30%  { transform: scale(1.3) rotate(15deg); }
+  70%  { transform: scale(0.6); opacity: 0.3; }
+  100% { transform: scale(0); opacity: 0; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes popIn {
-  0%   { opacity: 0; transform: scale(0.85); }
-  70%  { transform: scale(1.05); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* ═══════════════════════════════════════
-   12. prefers-reduced-motion
-═══════════════════════════════════════ */
+/* ─── 22. prefers-reduced-motion ────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-
-  .screen, .overlay, .main-cards { transition: none; }
 }
