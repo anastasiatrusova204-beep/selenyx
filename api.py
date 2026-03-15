@@ -29,6 +29,7 @@ from data import (
     ZODIAC_SIGNS, ZODIAC_LABELS, SIGNS_RU_NOM,
     ZODIAC_PHASE_TIPS, MOON_SIGN_DOMAINS, PHASE_DOMAIN_CONTEXT,
     _DOMAIN_PLANETS, _DOMAIN_PRIMARY_PLANET, _PLANET_NEUTRAL,
+    WEEKDAY_SIGN_HINTS,
 )
 from db import (
     get_user, save_user_sign, save_birth_data,
@@ -183,6 +184,13 @@ def _build_today_payload(user: dict, moon: dict) -> dict:
     # Цвет дня — передаём moon чтобы не вызывать kerykeion повторно
     color = get_day_color(moon)
 
+    # Акцент дня по дню недели + знаку зодиака пользователя (третий слой вариативности)
+    weekday = datetime.now().weekday()  # 0=пн … 6=вс
+    weekday_hint = (
+        WEEKDAY_SIGN_HINTS.get(weekday, {}).get(zodiac_sign, "")
+        if zodiac_sign else ""
+    )
+
     return {
         "moon": {
             "phase_emoji":    moon["phase_emoji"],
@@ -209,6 +217,7 @@ def _build_today_payload(user: dict, moon: dict) -> dict:
         "prediction": prediction,
         "extras": extras,
         "color": color,
+        "weekday_hint": weekday_hint,
     }
 
 

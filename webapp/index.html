@@ -972,6 +972,20 @@
     .ld-status-badge.hard  { color: #ef9a9a; background: rgba(239,154,154,0.1); }
     .ld-status-badge.neutral { color: var(--hint); background: rgba(255,255,255,0.05); }
 
+    /* Акцент дня (день недели × знак) */
+    .weekday-hint-card {
+      background: linear-gradient(135deg, rgba(200,169,110,0.09), rgba(200,169,110,0.04));
+      border: 1px solid rgba(200,169,110,0.22); border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 12px;
+    }
+    .weekday-hint-label {
+      font-size: 11px; color: var(--gold); letter-spacing: 0.5px;
+      text-transform: uppercase; margin-bottom: 6px; font-weight: 600;
+    }
+    .weekday-hint-text {
+      font-size: 14px; color: var(--text); line-height: 1.6;
+    }
+
     /* Практика дня */
     .practice-card {
       background: linear-gradient(135deg, rgba(100,255,218,0.08), rgba(124,77,255,0.06));
@@ -1389,6 +1403,14 @@
       <div class="tile-sub" style="line-height:1.45">${(m.day_number_text||'').split('.')[0]}</div></div>`:'';
     const colorNumRow=(colorTile||numTile)?`<div class="tile-row reveal">${colorTile}${numTile}</div>`:'';
 
+    // ── Акцент дня (день недели × знак зодиака) ──
+    const weekdayHint = d.weekday_hint
+      ? `<div class="weekday-hint-card reveal">
+          <div class="weekday-hint-label">💫 Акцент дня</div>
+          <div class="weekday-hint-text">${d.weekday_hint}</div>
+        </div>`
+      : '';
+
     // ── Домены 2×2 ──
     const dk=['health','work','love','psych'];
     const domainCards=dk.map(k=>{
@@ -1417,6 +1439,7 @@
       ${sb}
       ${heroCard}
       ${colorNumRow}
+      ${weekdayHint}
       <div class="section-label">СОВЕТЫ НА СЕГОДНЯ</div>
       <div class="domain-grid reveal">${domainCards}</div>
       ${phaseIntro}
