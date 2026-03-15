@@ -66,40 +66,59 @@ pkill -9 -f "bot.py"
 
 ## Структура
 ```
-bot.py           — хендлеры бота + scheduler + main() (1545 строк)
-data.py          — все контентные константы (~1044 строк, из bot.py)
+bot.py           — хендлеры бота + scheduler + main()
+data.py          — все контентные константы (~1044 строк)
 astro.py         — астро-расчёты: get_moon_data, get_natal_chart, etc.
 db.py            — функции БД + таблицы users + event_log (аналитика)
-api.py           — aiohttp REST API для Mini App + HMAC-аутентификация
-webapp/
-  index.html     — полноценный SPA: 4 вкладки с реальным контентом из API
+api.py           — aiohttp REST API + HMAC-аутентификация (бэкенд для будущих интеграций)
+tg-app/          — ★ АКТУАЛЬНОЕ Mini App (автономный SPA, GitHub Pages)
+  index.html     — разметка SPA
+  app.js         — вся логика: экраны, анимации, данные
+  data.js        — контентные данные (знаки, фазы, нумерология, совместимость)
+  style.css      — стили
+webapp/          — УСТАРЕВШИЙ SPA (Railway, не используется пользователями)
+  index.html     — старая версия с API-вызовами (оставлен для совместимости)
 .env             — токен BOT_TOKEN и ADMIN_IDS (не коммитить!)
 .env.example     — шаблон переменных окружения
 selenyx.db       — SQLite база данных (создаётся автоматически, на Railway в /data/)
 requirements.txt — зависимости
 Dockerfile       — сборка для Railway (python:3.11-slim + libsqlite3)
 railway.toml     — конфиг Railway (builder=dockerfile)
-Procfile         — резервный запуск для других платформ
 ```
 
-## Mini App (SPA)
-- Вход: Telegram → кнопка «🌙 Перейти в приложение →» → Mini App
-- Поток (первый визит): карусель-онбординг (6 слайдов) → Луна → взрыв частиц → 4 карточки → тап → вкладки
-- Поток (повторный визит): сплэш → Луна → взрыв → 4 карточки → тап → вкладки
-- Вкладки: ✨ Мой день / 🌙 Луна / 🌟 Карта / 💞 Совместимость
-- API auth: `X-Telegram-Init-Data` (HMAC-подпись) на всех /api/* эндпоинтах
-- Premium gates: Прогноз на год / Детальная совместимость (заглушка, Шаг 12)
-- Кнопка «назад» убрана из header — приложение самодостаточно, нет навигации наружу
-- BackButton Telegram: только закрывает экран fortune cookie (предсказание)
-- Scroll-reveal: IntersectionObserver + двойной rAF для карточек при прокрутке
-- Tile-row: 2×2 grid (фаза + знак Луны) в renderToday() и renderMoon()
-- trial_ends передаётся из /api/me, на лендинге — живой обратный отсчёт (setInterval)
-- /resetme команда: пользователь удаляет свои данные (самосервис, без прав админа)
+## Деплой
+
+### Приложение (tg-app/) → GitHub Pages
+```bash
+git subtree split --prefix=tg-app -b tmp && git push origin tmp:gh-pages --force && git branch -D tmp
+```
+URL: https://anastasiatrusova204-beep.github.io/selenyx/
+
+### Бот + API → Railway
+```bash
+RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway up --service selenyx-bot
+```
+
+## Mini App (tg-app/ — актуальная версия)
+- **Прямая ссылка:** https://t.me/Selenyx_mybot/app (зарегистрировано в BotFather, short name: app)
+- **Деплой:** GitHub Pages → https://anastasiatrusova204-beep.github.io/selenyx/
+- **Тип:** автономный SPA — не делает API-вызовов, все данные в data.js
+- **Вход 1 (существующие):** синяя кнопка меню «Selenyx» в чате бота
+- **Вход 2 (новые):** прямая ссылка https://t.me/Selenyx_mybot/app — открывает сразу без /start
+- Поток первый визит: сплэш → онбординг знака → главный экран → вкладки
+- Поток повторный: сплэш → главный экран → вкладки
+- Вкладки: День / Луна / Карта / Пара / Оракул
+- Домены (Здоровье / Работа / Любовь / Эмоции) → bottom sheet с деталями
+- Цвет дня, Число дня → bottom sheet
+- Шрифты: Cormorant Garamond + DM Sans
+- BackButton Telegram: закрывает bottom sheet или возвращает к выбору знака
+- sessionStorage кэш: ключ с датой + версией (_V='v2')
+- /resetme команда: пользователь удаляет свои данные (самосервис)
 
 ## API эндпоинты (api.py)
 ```
-GET  /webapp              → index.html
 GET  /health              → "ok"
+GET  /webapp              → старый index.html (устаревший, не используется)
 GET  /api/me              → {name, sign, streak, notify_time, has_birth, tier, trial_ends}  + log: app_open
 GET  /api/today           → {moon, phase_energy, domains, prediction, extras, color}  + log: today_view
 GET  /api/moon            → {phase, sign, degree, lunar_day, aspects, retrogrades}  + log: moon_view
@@ -129,6 +148,7 @@ GET  /api/admin/stats     → {total_users, active_7d, active_1d, today_views_7d
 - [x] UX-сессия (март 2026) — карусель онбординга, scroll-reveal, tile-row 2×2, trial countdown, /resetme
 - [x] Виральность в совместимости — кнопка «Поделиться» (t.me/share/url)
 - [x] Итог недели — _weekly_summary_text() при streak кратном 7
+- [x] tg-app/ — новый автономный Mini App (GitHub Pages), все кнопки в боте → GitHub Pages
 - [ ] Шаг 7 — закрытый тест с реальными пользователями **(СЛЕДУЮЩИЙ)**
 - [ ] Шаг 12 — монетизация (Telegram Stars)
 
