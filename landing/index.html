@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a1a">
+  <meta name="robots" content="index, follow">
+  <title>Selenyx — Лунный навигатор для ежедневной ясности</title>
+  <meta name="description" content="Узнай за 30 секунд, что поддерживает тебя сегодня. Персональные рекомендации по знаку зодиака. Бесплатно в Telegram.">
+  <meta name="keywords" content="лунный календарь, гороскоп на сегодня, астрология Telegram, фаза луны, энергия дня, лунный навигатор">
+  <meta property="og:title" content="Selenyx — Живи в ритме дня">
+  <meta property="og:description" content="За 30 секунд — что поддерживает сегодня. Луна, энергия, рекомендации. Бесплатно.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://selenyx.vercel.app/">
+  <meta property="og:image" content="https://selenyx.vercel.app/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Selenyx — Живи в ритме дня">
+  <meta name="twitter:description" content="За 30 секунд — что поддерживает сегодня. Луна, энергия, рекомендации. Бесплатно.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23c8a96e'/><circle cx='65' cy='40' r='38' fill='%230a0a1a'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23c8a96e'/><circle cx='65' cy='40' r='38' fill='%230a0a1a'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── VARIABLES ───────────────────────────────────────────────── */
+    :root {
+      --bg:          #0a0a1a;
+      --bg2:         #0e0e24;
+      --card:        rgba(255,255,255,0.055);
+      --card-h:      rgba(255,255,255,0.095);
+      --border:      rgba(255,255,255,0.09);
+      --border-g:    rgba(200,169,110,0.28);
+      --gold:        #c8a96e;
+      --gold-l:      #e4ca90;
+      --gold-d:      rgba(200,169,110,0.38);
+      --blue:        #a8d8ea;
+      --text:        #f0e6d3;
+      --dim:         #b8a488;
+      --hint:        rgba(240,230,211,0.42);
+      --fd:          'Cormorant Garamond', Georgia, serif;
+      --fb:          'DM Sans', -apple-system, sans-serif;
+      --r:           20px;
+      --r-sm:        12px;
+      --W:           1160px;
+      --gap:         96px;
+    }
+
+    /* ── RESET ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--fb);
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 70% 60% at 8% 0%,   rgba(50,5,100,.7)  0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 92% 95%,  rgba(13,27,80,.8)  0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 55% 22%,  rgba(30,5,60,.45)  0%, transparent 45%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+    img   { display: block; max-width: 100%; }
+    button{ cursor: pointer; border: none; background: none; font-family: var(--fb); }
+    a     { color: inherit; text-decoration: none; }
+    ul, ol{ list-style: none; }
+
+    /* ── CANVAS ──────────────────────────────────────────────────── */
+    #stars {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0; opacity: .55;
+    }
+
+    /* ── LAYOUT ──────────────────────────────────────────────────── */
+    .wrap {
+      max-width: var(--W);
+      margin: 0 auto;
+      padding: 0 28px;
+      position: relative; z-index: 1;
+    }
+    .tag {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold); opacity: .85; margin-bottom: 14px;
+    }
+    .h2 {
+      font-family: var(--fd);
+      font-size: clamp(34px, 4.5vw, 54px);
+      font-weight: 600; line-height: 1.13;
+      text-wrap: balance; color: var(--text);
+    }
+    .sub {
+      font-size: 17px; color: var(--dim);
+      line-height: 1.72; margin-top: 14px;
+      text-wrap: balance;
+    }
+    .rule {
+      height: 1px; max-width: 560px; margin: 0 auto;
+      background: linear-gradient(90deg, transparent, var(--border-g), transparent);
+    }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200; padding: 15px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .3s, backdrop-filter .3s;
+    }
+    .nav.on {
+      background: rgba(10,10,26,.9);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--fd); font-size: 21px; font-weight: 600;
+      color: var(--gold-l); letter-spacing: .06em;
+    }
+    .logo-moon {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: radial-gradient(circle at 36% 32%, #f0e0b0, #c8a96e 52%, #6a3c0a);
+      box-shadow: 0 0 14px rgba(200,169,110,.5);
+      flex-shrink: 0;
+    }
+    .btn-tg {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 50px;
+      background: var(--gold); color: #0a0a1a;
+      font-weight: 600; font-size: 14px;
+      transition: transform .2s, box-shadow .2s;
+      touch-action: manipulation;
+    }
+    .btn-tg:hover { transform: translateY(-1px); box-shadow: 0 4px 22px rgba(200,169,110,.42); }
+    .btn-tg svg   { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-links {
+      display: flex; gap: 28px; align-items: center;
+    }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--dim);
+      transition: color .22s; position: relative; white-space: nowrap;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 1px; background: var(--gold);
+      transform: scaleX(0); transform-origin: left center;
+      transition: transform .28s ease;
+    }
+    .nav-links a:hover { color: var(--gold-l); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    @media (max-width: 820px) { .nav-links { display: none; } }
+
+    /* ── HERO ────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100svh;
+      display: flex; align-items: center;
+      padding: 130px 0 90px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px; align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 15px; border-radius: 50px;
+      border: 1px solid var(--border-g);
+      background: rgba(200,169,110,.08);
+      font-size: 13px; color: var(--gold);
+      margin-bottom: 30px; letter-spacing: .02em;
+    }
+    .hero-h1 {
+      font-family: var(--fd);
+      font-size: clamp(46px, 5.8vw, 78px);
+      font-weight: 600; line-height: 1.07;
+      text-wrap: balance; margin-bottom: 22px;
+    }
+    .hero-h1 em {
+      font-style: italic;
+      background: linear-gradient(90deg, #f0d898 0%, #c8a96e 25%, #a8d8ea 55%, #e4ca90 80%, #f0d898 100%);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradShift 6s linear infinite;
+    }
+    @keyframes gradShift { to { background-position: 300% center; } }
+    .hero-p {
+      font-size: 18px; color: var(--dim);
+      line-height: 1.72; margin-bottom: 36px;
+      text-wrap: balance;
+    }
+    .cta-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 13px; }
+    .cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 18px 38px; border-radius: 50px;
+      background: linear-gradient(138deg, var(--gold-l) 0%, var(--gold) 58%, #9e7438 100%);
+      color: #0a0a1a;
+      font-family: var(--fb); font-size: 17px; font-weight: 600;
+      box-shadow: 0 0 44px rgba(200,169,110,.34);
+      transition: transform .22s ease, box-shadow .22s ease;
+      touch-action: manipulation;
+    }
+    .cta:hover  { animation: none; transform: translateY(-3px); box-shadow: 0 8px 60px rgba(200,169,110,.65), 0 0 100px rgba(200,169,110,.2); }
+    .cta:active { animation: none; transform: translateY(0); }
+    .cta svg    { width: 20px; height: 20px; flex-shrink: 0; }
+    @keyframes ctaGlow { 0%,100%{box-shadow:0 0 44px rgba(200,169,110,.34)} 50%{box-shadow:0 0 70px rgba(200,169,110,.6), 0 0 110px rgba(200,169,110,.18)} }
+    .cta { animation: ctaGlow 3.5s ease-in-out infinite; }
+    .hero-hint  { font-size: 13px; color: var(--hint); line-height: 1.55; }
+    .hero-hint b{ color: var(--gold-d); font-weight: 400; }
+
+    /* ── MOON VISUAL ─────────────────────────────────────────────── */
+    .moon-scene {
+      display: flex; justify-content: center; align-items: center;
+      perspective: 900px; /* нужен для видимого 3D-поворота */
+    }
+    .moon-ring {
+      position: relative; width: 360px; height: 360px;
+      transform-style: preserve-3d;
+    }
+    /* орбитальное кольцо — статичное, не вращается */
+    .orbit {
+      position: absolute; inset: -32px; border-radius: 50%;
+      border: 1px dashed rgba(200,169,110,.18);
+    }
+    /* спутник — отдельный элемент, вращается независимо */
+    .satellite {
+      position: absolute; inset: -32px; border-radius: 50%;
+      animation: spin 22s linear infinite;
+    }
+    .satellite::after {
+      content: '';
+      position: absolute; top: 50%; right: -5px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--gold);
+      transform: translateY(-50%);
+      box-shadow: 0 0 9px var(--gold), 0 0 18px rgba(200,169,110,.4);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .halo1, .halo2 {
+      position: absolute; inset: 0; border-radius: 50%;
+      animation: pulse 5.5s ease-in-out infinite;
+    }
+    .halo1 { background: radial-gradient(circle, rgba(200,169,110,.14) 0%, transparent 62%); }
+    .halo2 { background: radial-gradient(circle, rgba(168,216,234,.08) 0%, transparent 68%); animation-delay: 2.75s; }
+    @keyframes pulse { 0%,100%{ transform: scale(1); opacity:1; } 50%{ transform: scale(1.09); opacity:.78; } }
+
+    .moon-svg {
+      position: absolute; inset: 28px;
+      filter: drop-shadow(0 0 28px rgba(200,169,110,.42)) drop-shadow(0 0 60px rgba(200,169,110,.15));
+      animation: float 9s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-13px); } }
+
+    .mstars { position: absolute; inset: 0; }
+    .ms {
+      position: absolute; border-radius: 50%; background: #f0e0b0;
+      animation: twinkle var(--d,3s) ease-in-out infinite;
+      animation-delay: var(--dl,0s);
+    }
+    @keyframes twinkle { 0%,100%{ opacity:.85; transform: scale(1); } 50%{ opacity:.15; transform: scale(.4); } }
+
+    /* ── APP PREVIEW ─────────────────────────────────────────────── */
+    .preview { padding: var(--gap) 0; }
+    .preview-hd { text-align: center; margin-bottom: 58px; }
+    .phones {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px; align-items: start;
+    }
+    .phone {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 26px; overflow: hidden;
+      aspect-ratio: 9/19;
+      display: flex; flex-direction: column;
+      backdrop-filter: blur(10px);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .phone:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 36px 80px rgba(0,0,0,.55), 0 0 40px rgba(200,169,110,.2);
+      border-color: var(--border-g);
+    }
+    .notch {
+      width: 74px; height: 20px;
+      background: var(--bg);
+      border-radius: 0 0 11px 11px;
+      margin: 7px auto 0; flex-shrink: 0;
+    }
+    .scr {
+      flex: 1; padding: 11px 13px 14px;
+      display: flex; flex-direction: column; gap: 0;
+      overflow: hidden;
+    }
+    .p-title {
+      font-family: var(--fd); font-size: 16px; font-weight: 600;
+      color: var(--gold-l); margin-bottom: 9px; letter-spacing: .03em;
+    }
+    .p-hr { height: 1px; background: var(--border); margin-bottom: 9px; flex-shrink: 0; }
+    .p-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 7px; }
+    .p-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 6px;
+    }
+    .p-emo  { font-size: 14px; line-height: 1; margin-bottom: 3px; }
+    .p-lbl  { font-size: 9px; color: var(--dim); }
+    .p-val  { font-size: 10px; color: var(--gold); margin-top: 2px; }
+    .pill   {
+      display: inline-block; padding: 3px 9px; border-radius: 20px;
+      font-size: 10px; color: var(--gold);
+      background: rgba(200,169,110,.13);
+      border: 1px solid var(--border-g);
+      white-space: nowrap; margin-bottom: 5px;
+    }
+    .bar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.08); margin-bottom: 5px; }
+    .bar.g { background: rgba(200,169,110,.2); }
+    .bar.b { background: rgba(168,216,234,.18); }
+    .bar.s { width: 55%; } .bar.m { width: 78%; } .bar.f { width: 100%; }
+    .p-circle {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(200,169,110,.4), rgba(168,216,234,.2));
+      border: 2px solid var(--border-g);
+      margin: 0 auto 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .p-cen { text-align: center; }
+    .p-cap { font-size: 9px; color: var(--dim); margin-bottom: 4px; }
+    .compat-row {
+      display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 9px;
+    }
+    .compat-big {
+      font-family: var(--fd); font-size: 22px; font-weight: 600;
+      color: var(--gold-l); text-align: center;
+    }
+    .compat-lbl { font-size: 9px; color: var(--dim); text-align: center; margin-bottom: 6px; }
+    .compat-bg { height: 4px; border-radius: 3px; background: linear-gradient(90deg,var(--gold),rgba(200,169,110,.15)); margin-bottom:6px; }
+    .ph-cap { text-align: center; margin-top: 12px; }
+    .ph-cap strong { display: block; font-size: 14px; margin-bottom: 3px; }
+    .ph-cap span   { font-size: 12px; color: var(--dim); }
+
+    /* ── PAIN ────────────────────────────────────────────────────── */
+    .pain { padding: var(--gap) 0; }
+    .pain-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px; align-items: center;
+    }
+    .pain-items { margin-top: 30px; }
+    .pain-row {
+      display: flex; align-items: flex-start; gap: 15px;
+      padding: 18px 0; border-bottom: 1px solid var(--border);
+    }
+    .pain-row:last-child { border-bottom: none; }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0; margin-top: 9px;
+      box-shadow: 0 0 8px var(--gold-d);
+    }
+    .pain-row p { font-size: 17px; color: var(--dim); line-height: 1.65; }
+    .quote-card {
+      padding: 38px; background: var(--card);
+      border: 1px solid var(--border-g);
+      border-radius: var(--r); backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .quote-card::before {
+      content: '\201C';
+      position: absolute; top: 12px; left: 24px;
+      font-family: var(--fd); font-size: 76px;
+      color: var(--gold); opacity: .28; line-height: 1;
+    }
+    .qt {
+      font-family: var(--fd); font-size: 24px; font-style: italic;
+      line-height: 1.52; color: var(--text); margin-top: 18px;
+    }
+    .qa {
+      margin-top: 18px; padding-top: 18px;
+      border-top: 1px solid var(--border);
+      font-size: 14px; color: var(--gold); line-height: 1.6;
+    }
+    .qa span { color: var(--dim); }
+
+    /* ── HOW ─────────────────────────────────────────────────────── */
+    .how { padding: var(--gap) 0; }
+    .how-hd { margin-bottom: 56px; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 22px; position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute; top: 46px;
+      left: calc(16.5% + 22px); right: calc(16.5% + 22px);
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold-d), rgba(200,169,110,.12));
+      z-index: 0;
+    }
+    .step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 34px 26px 30px;
+      position: relative; z-index: 1;
+      backdrop-filter: blur(8px);
+      transition: border-color .3s, transform .3s;
+    }
+    .step:hover { border-color: var(--border-g); transform: translateY(-7px); box-shadow: 0 20px 50px rgba(0,0,0,.38), 0 0 25px rgba(200,169,110,.1); }
+    .snum {
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 2px solid var(--border-g);
+      background: rgba(200,169,110,.09);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--fd); font-size: 22px; font-weight: 600;
+      color: var(--gold-l); margin-bottom: 22px;
+    }
+    .step h3 {
+      font-family: var(--fd); font-size: 23px; font-weight: 600;
+      margin-bottom: 11px; color: var(--text);
+    }
+    .step p { font-size: 15px; color: var(--dim); line-height: 1.7; }
+    .badge {
+      display: inline-block; margin-top: 15px;
+      font-size: 12px; color: var(--gold);
+      background: rgba(200,169,110,.09);
+      border: 1px solid rgba(200,169,110,.2);
+      border-radius: 20px; padding: 4px 12px;
+      letter-spacing: .03em;
+    }
+
+    /* ── FEATURES ────────────────────────────────────────────────── */
+    .features { padding: var(--gap) 0; }
+    .features-hd { text-align: center; margin-bottom: 52px; }
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 18px;
+    }
+    .feat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 30px 26px;
+      backdrop-filter: blur(8px);
+      transition: background .3s, border-color .3s, transform .3s;
+    }
+    .feat:hover { background: rgba(255,255,255,.1); border-color: var(--border-g); transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 55px rgba(0,0,0,.4), 0 0 30px rgba(200,169,110,.12); }
+    .feat-ico { font-size: 30px; margin-bottom: 14px; line-height: 1; display: block; }
+    .feat h3 {
+      font-family: var(--fd); font-size: 22px; font-weight: 600;
+      margin-bottom: 9px; color: var(--text);
+    }
+    .feat p { font-size: 15px; color: var(--dim); line-height: 1.7; }
+
+    /* ── SOCIAL ──────────────────────────────────────────────────── */
+    .social { padding: var(--gap) 0; }
+    .social-hd { text-align: center; margin-bottom: 0; }
+    .counter {
+      display: inline-flex; align-items: center; gap: 22px;
+      margin: 44px auto; padding: 26px 46px;
+      background: var(--card);
+      border: 1px solid var(--border-g);
+      border-radius: var(--r);
+      backdrop-filter: blur(10px);
+      display: flex; justify-content: center;
+    }
+    .cnt-n {
+      font-family: var(--fd); font-size: 58px; font-weight: 600;
+      color: var(--gold-l);
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .cnt-l strong { display: block; font-size: 15px; color: var(--text); margin-bottom: 4px; }
+    .cnt-l span   { font-size: 13px; color: var(--dim); }
+    .reviews {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 22px; margin-top: 44px;
+    }
+    .rev {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 30px;
+      backdrop-filter: blur(8px);
+      transition: border-color .3s, transform .3s, box-shadow .3s;
+    }
+    .rev:hover { border-color: var(--border-g); transform: translateY(-4px); box-shadow: 0 14px 44px rgba(0,0,0,.32), 0 0 20px rgba(200,169,110,.09); }
+    .stars { color: var(--gold); font-size: 15px; letter-spacing: 2px; margin-bottom: 14px; }
+    .rev-t {
+      font-family: var(--fd); font-size: 19px; font-style: italic;
+      line-height: 1.6; color: var(--text); margin-bottom: 18px;
+    }
+    .rev-a { display: flex; align-items: center; gap: 11px; }
+    .ava {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(200,169,110,.28), rgba(168,216,234,.18));
+      border: 1px solid var(--border-g);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .rev-name { font-size: 14px; font-weight: 600; }
+    .rev-meta { font-size: 12px; color: var(--dim); }
+    .author {
+      margin: 50px auto 0; max-width: 660px;
+      padding: 32px 36px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      display: flex; align-items: center; gap: 24px;
+      backdrop-filter: blur(8px);
+    }
+    .auth-ava {
+      width: 60px; height: 60px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold-d), rgba(168,216,234,.3));
+      border: 2px solid var(--border-g);
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+    }
+    .auth-name { font-weight: 600; font-size: 15px; margin-bottom: 5px; }
+    .auth-text { font-size: 14px; color: var(--dim); line-height: 1.65; }
+
+    /* ── FAQ ─────────────────────────────────────────────────────── */
+    .faq { padding: var(--gap) 0; }
+    .faq-hd { text-align: center; margin-bottom: 52px; }
+    .faq-list { max-width: 780px; margin: 0 auto; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .fq {
+      width: 100%; display: flex; align-items: center;
+      justify-content: space-between; gap: 14px;
+      padding: 22px 0; font-size: 17px; font-weight: 500;
+      color: var(--text); text-align: left; cursor: pointer;
+      transition: color .2s;
+    }
+    .fq:hover, .fq.open { color: var(--gold-l); }
+    .fq-ic {
+      width: 27px; height: 27px; border-radius: 50%;
+      border: 1px solid var(--border-g);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--gold);
+      transition: transform .32s, background .2s;
+    }
+    .fq.open .fq-ic { transform: rotate(45deg); background: rgba(200,169,110,.1); }
+    .fa { max-height: 0; overflow: hidden; transition: max-height .4s ease; }
+    .fa-in {
+      padding: 0 0 22px;
+      font-size: 15px; color: var(--dim); line-height: 1.8;
+    }
+    .fa-in strong { color: var(--gold-l); font-weight: 500; }
+
+    /* ── PRICING ─────────────────────────────────────────────────── */
+    .pricing { padding: var(--gap) 0; }
+    .pricing-hd { text-align: center; margin-bottom: 52px; }
+    .price-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 22px; max-width: 860px; margin: 0 auto;
+    }
+    .pc {
+      border-radius: var(--r); padding: 38px 34px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+    .pc.free    { background: var(--card); }
+    .pc.premium {
+      background: linear-gradient(138deg, rgba(200,169,110,.07) 0%, rgba(168,216,234,.04) 100%);
+      border-color: var(--border-g);
+      box-shadow: 0 0 42px rgba(200,169,110,.07);
+    }
+    .pbadge {
+      display: inline-block; padding: 5px 13px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 18px;
+    }
+    .pbadge.free    { background: rgba(255,255,255,.08); color: var(--dim); }
+    .pbadge.premium { background: rgba(200,169,110,.14); color: var(--gold); border: 1px solid var(--border-g); }
+    .ptitle {
+      font-family: var(--fd); font-size: 30px; font-weight: 600; margin-bottom: 7px;
+    }
+    .psub { font-size: 13px; color: var(--dim); margin-bottom: 26px; line-height: 1.55; }
+    .plist { margin-bottom: 28px; }
+    .plist li {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 9px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px; color: var(--dim); line-height: 1.5;
+    }
+    .plist li:last-child { border-bottom: none; }
+    .ck { color: var(--gold); font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+    .prow {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .prow:last-child { border-bottom: none; }
+    .prow .pname { color: var(--dim); }
+    .prow .pprice { color: var(--gold-l); font-weight: 600; }
+    .pnote { margin-top: 18px; font-size: 12px; color: var(--hint); line-height: 1.6; }
+    .pnote strong { color: var(--dim); }
+    .pc .cta { width: 100%; justify-content: center; font-size: 15px; padding: 14px 24px; margin-top: 4px; }
+
+    /* ── FINAL CTA ───────────────────────────────────────────────── */
+    .fcta { padding: var(--gap) 0; text-align: center; }
+    .fcta-box {
+      max-width: 680px; margin: 0 auto;
+      padding: 68px 44px;
+      background: var(--card);
+      border: 1px solid var(--border-g);
+      border-radius: 26px;
+      backdrop-filter: blur(10px);
+      position: relative; overflow: hidden;
+    }
+    .fcta-box::before {
+      content: '';
+      position: absolute; top: -110px; left: 50%; transform: translateX(-50%);
+      width: 320px; height: 320px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,169,110,.11), transparent 70%);
+      pointer-events: none;
+    }
+    .fcta-moon { font-size: 50px; margin-bottom: 22px; display: block; animation: float 9s ease-in-out infinite; }
+    .fcta h2 {
+      font-family: var(--fd);
+      font-size: clamp(34px, 4.8vw, 50px); font-weight: 600;
+      margin-bottom: 14px; text-wrap: balance;
+    }
+    .fcta p { font-size: 17px; color: var(--dim); margin-bottom: 34px; text-wrap: balance; }
+    .fcta-note { margin-top: 13px; font-size: 13px; color: var(--hint); }
+
+    /* ── FOOTER ──────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 46px 0 34px;
+    }
+    .ft {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 20px; text-align: center;
+    }
+    .ft-logo { font-family: var(--fd); font-size: 22px; font-weight: 600; color: var(--gold-l); letter-spacing: .05em; }
+    .ft-links { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; }
+    .ft-links a { font-size: 13px; color: var(--dim); transition: color .2s; }
+    .ft-links a:hover { color: var(--gold); }
+    .ft-disc { font-size: 12px; color: var(--hint); max-width: 580px; line-height: 1.65; }
+    .ft-copy { font-size: 12px; color: var(--hint); }
+
+    /* ── REVEAL ──────────────────────────────────────────────────── */
+    .r  { opacity: 0; transform: translateY(52px);  transition: opacity 1s cubic-bezier(.22,1,.36,1), transform 1s cubic-bezier(.22,1,.36,1); }
+    .rl { opacity: 0; transform: translateX(-60px); transition: opacity 1s cubic-bezier(.22,1,.36,1), transform 1s cubic-bezier(.22,1,.36,1); }
+    .rr { opacity: 0; transform: translateX(60px);  transition: opacity 1s cubic-bezier(.22,1,.36,1), transform 1s cubic-bezier(.22,1,.36,1); }
+    .rs { opacity: 0; transform: scale(.88);         transition: opacity 1s cubic-bezier(.22,1,.36,1), transform 1s cubic-bezier(.22,1,.36,1); }
+    .r.v, .rl.v, .rr.v, .rs.v { opacity: 1; transform: none; }
+    .d1 { transition-delay: .08s; } .d2 { transition-delay: .17s; }
+    .d3 { transition-delay: .26s; } .d4 { transition-delay: .35s; }
+    .d5 { transition-delay: .44s; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────── */
+    @media (max-width: 1040px) {
+      .phones      { grid-template-columns: repeat(2,1fr); }
+      .feat-grid   { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 820px) {
+      :root { --gap: 68px; }
+      .hero-grid   { grid-template-columns: 1fr; gap: 50px; text-align: center; }
+      .cta-wrap    { align-items: center; }
+      .moon-scene  { order: -1; }
+      .moon-ring   { width: 250px; height: 250px; }
+      .pain-grid   { grid-template-columns: 1fr; gap: 38px; }
+      .steps       { grid-template-columns: 1fr; gap: 14px; }
+      .steps::before{ display: none; }
+      .feat-grid   { grid-template-columns: 1fr; }
+      .reviews     { grid-template-columns: 1fr; }
+      .price-grid  { grid-template-columns: 1fr; }
+      .author      { flex-direction: column; text-align: center; }
+      .counter     { flex-direction: column; text-align: center; padding: 26px; }
+      .cnt-l       { text-align: center; }
+      .fcta-box    { padding: 46px 22px; }
+    }
+    @media (max-width: 540px) {
+      .phones      { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .btn-tg span { display: none; }
+      .btn-tg      { padding: 10px 14px; }
+    }
+
+    /* ── REDUCED MOTION — только reveal-анимации, остальное не трогаем ── */
+    @media (prefers-reduced-motion: reduce) {
+      .r, .rl, .rr, .rs {
+        opacity: 1; transform: none; transition: none;
+      }
+    }
+
+    /* ── SCROLLBAR ───────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(200,169,110,.28); border-radius: 3px; }
+
+    /* ── SHAKE ───────────────────────────────────────────────────── */
+    @keyframes shake {
+      0%,100%{ transform:translateX(0); }
+      20%    { transform:translateX(-5px); }
+      40%    { transform:translateX(5px); }
+      60%    { transform:translateX(-3px); }
+      80%    { transform:translateX(3px); }
+    }
+
+    /* ── BACK TO TOP ─────────────────────────────────────────────── */
+    .btt {
+      position:fixed; bottom:28px; right:28px; z-index:190;
+      width:46px; height:46px; border-radius:50%;
+      background:rgba(200,169,110,.12); border:1px solid var(--border-g);
+      backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--gold); cursor:pointer;
+      opacity:0; pointer-events:none; transform:translateY(12px);
+      transition:opacity .32s, transform .32s, background .2s, box-shadow .2s;
+    }
+    .btt.show { opacity:1; pointer-events:auto; transform:translateY(0); }
+    .btt:hover { background:rgba(200,169,110,.26); box-shadow:0 0 24px rgba(200,169,110,.22); }
+    .btt svg { width:18px; height:18px; }
+
+    /* ── HAMBURGER ───────────────────────────────────────────────── */
+    .nav-burger {
+      display:none; width:38px; height:38px;
+      align-items:center; justify-content:center; flex-direction:column; gap:5px;
+      border-radius:9px; border:1px solid var(--border);
+      background:rgba(255,255,255,.04); cursor:pointer;
+      transition:border-color .2s; flex-shrink:0;
+    }
+    .nav-burger:hover { border-color:var(--border-g); }
+    .nav-burger span {
+      display:block; width:17px; height:1.5px;
+      background:var(--gold); border-radius:2px;
+      transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .22s, width .3s;
+    }
+    .nav-burger.open span:nth-child(1){ transform:translateY(6.5px) rotate(45deg); }
+    .nav-burger.open span:nth-child(2){ opacity:0; width:0; }
+    .nav-burger.open span:nth-child(3){ transform:translateY(-6.5px) rotate(-45deg); }
+    @media (max-width:820px){ .nav-burger{ display:flex; } }
+
+    /* ── MOBILE OVERLAY ──────────────────────────────────────────── */
+    .mob-overlay {
+      position:fixed; inset:0; z-index:198;
+      background:rgba(8,8,22,.97);
+      backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:4px;
+      opacity:0; pointer-events:none;
+      transition:opacity .32s;
+    }
+    .mob-overlay.open { opacity:1; pointer-events:auto; }
+    .mob-nav { display:flex; flex-direction:column; align-items:center; gap:2px; width:100%; }
+    .mob-nav a {
+      font-family:var(--fd); font-size:clamp(28px,6.5vw,42px); font-weight:600;
+      color:var(--dim); padding:11px 32px;
+      border-radius:14px; width:100%; max-width:360px; text-align:center;
+      transition:color .2s, background .2s;
+    }
+    .mob-nav a:hover { color:var(--gold-l); background:rgba(200,169,110,.07); }
+    .mob-tg { margin-top:26px; }
+
+    /* ── CONTACT FORM ────────────────────────────────────────────── */
+    .contact { padding:var(--gap) 0; }
+    .contact-hd { text-align:center; margin-bottom:52px; }
+    .cf-wrap { max-width:600px; margin:0 auto; position:relative; }
+    .cf-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--r); padding:44px 40px;
+      backdrop-filter:blur(10px); position:relative; overflow:hidden;
+      transition:border-color .3s;
+    }
+    .cf-card:focus-within { border-color:var(--border-g); }
+    @media (max-width:540px){ .cf-card{ padding:28px 20px; } }
+    .cf-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    @media (max-width:540px){ .cf-row{ grid-template-columns:1fr; } }
+    .cf-group { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .cf-group label {
+      font-size:11px; font-weight:600; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--gold);
+    }
+    .cf-in {
+      background:rgba(255,255,255,.04); border:1px solid var(--border);
+      border-radius:var(--r-sm); padding:13px 16px;
+      font-family:var(--fb); font-size:15px; color:var(--text);
+      outline:none; width:100%;
+      transition:border-color .22s, background .22s;
+    }
+    .cf-in::placeholder { color:var(--hint); }
+    .cf-in:focus { border-color:var(--border-g); background:rgba(200,169,110,.04); }
+    textarea.cf-in { resize:vertical; min-height:118px; line-height:1.6; }
+    .cf-submit {
+      width:100%; padding:15px 24px; border-radius:50px; margin-top:6px;
+      background:linear-gradient(138deg, var(--gold-l) 0%, var(--gold) 60%, #9e7438 100%);
+      color:#0a0a1a; font-family:var(--fb); font-size:15px; font-weight:600;
+      border:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:9px;
+      transition:transform .2s, box-shadow .2s, opacity .2s;
+      touch-action:manipulation;
+    }
+    .cf-submit:hover:not(:disabled){ transform:translateY(-2px); box-shadow:0 8px 40px rgba(200,169,110,.44); }
+    .cf-submit:active:not(:disabled){ transform:translateY(0); }
+    .cf-submit:disabled{ opacity:.5; cursor:not-allowed; }
+    /* success overlay */
+    .cf-ok {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+      background:rgba(8,8,22,.95); border-radius:var(--r);
+      opacity:0; pointer-events:none; transform:scale(.92);
+      transition:opacity .4s cubic-bezier(.22,1,.36,1), transform .4s cubic-bezier(.22,1,.36,1);
+    }
+    .cf-ok.show { opacity:1; pointer-events:auto; transform:scale(1); }
+    .cf-check-ring {
+      width:70px; height:70px; border-radius:50%;
+      background:rgba(200,169,110,.1); border:2px solid var(--border-g);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cf-check-ring svg {
+      width:30px; height:30px; stroke:var(--gold); fill:none;
+      stroke-linecap:round; stroke-linejoin:round; stroke-width:2.5;
+      stroke-dasharray:30; stroke-dashoffset:30;
+      transition:stroke-dashoffset .6s cubic-bezier(.22,1,.36,1) .18s;
+    }
+    .cf-ok.show .cf-check-ring svg { stroke-dashoffset:0; }
+    .cf-ok h3 { font-family:var(--fd); font-size:28px; font-weight:600; color:var(--text); }
+    .cf-ok p { font-size:14px; color:var(--dim); text-align:center; max-width:270px; line-height:1.65; }
+    .cf-again {
+      font-size:13px; color:var(--gold); background:none;
+      border:1px solid var(--border-g); padding:8px 20px; border-radius:20px;
+      cursor:pointer; transition:background .2s; font-family:var(--fb); margin-top:2px;
+    }
+    .cf-again:hover { background:rgba(200,169,110,.09); }
+
+    /* ── SCROLL PROGRESS ─────────────────────────────────────────── */
+    .scroll-prog {
+      position:fixed; top:0; left:0; z-index:999;
+      height:4px; width:0%;
+      background:linear-gradient(90deg,#c8a96e,#f0d898,#a8d8ea,#c8a96e);
+      background-size:200% auto;
+      animation:gradShift 2s linear infinite;
+      box-shadow:0 0 12px rgba(200,169,110,.8), 0 0 24px rgba(200,169,110,.35);
+      pointer-events:none;
+      transition:width .1s linear;
+    }
+
+    /* ── RIPPLE ──────────────────────────────────────────────────── */
+    @keyframes ripple {
+      to { transform:scale(1); opacity:0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="scroll-prog" id="scrollProg" aria-hidden="true"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<!-- ── NAV ──────────────────────────────────────────────────────── -->
+<nav class="nav" id="nav" aria-label="Навигация">
+  <div class="nav-logo">
+    <div class="logo-moon" aria-hidden="true"></div>
+    <span>Selenyx</span>
+  </div>
+  <div class="nav-links" role="navigation" aria-label="Разделы страницы">
+    <a href="#preview">Приложение</a>
+    <a href="#features">Функции</a>
+    <a href="#faq">FAQ</a>
+    <a href="#pricing">Цены</a>
+  </div>
+  <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+     class="btn-tg" aria-label="Открыть Selenyx в Telegram" onclick="track('nav')">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
+    </svg>
+    <span>Открыть в Telegram</span>
+  </a>
+  <button class="nav-burger" id="navBurger"
+    aria-label="Открыть меню" aria-expanded="false" aria-controls="mobOverlay">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ── MOBILE OVERLAY ─────────────────────────────────────────── -->
+<div class="mob-overlay" id="mobOverlay" role="dialog" aria-modal="true" aria-label="Навигация">
+  <nav class="mob-nav" aria-label="Разделы страницы">
+    <a href="#preview"  onclick="closeMenu()">Приложение</a>
+    <a href="#features" onclick="closeMenu()">Функции</a>
+    <a href="#faq"      onclick="closeMenu()">FAQ</a>
+    <a href="#pricing"  onclick="closeMenu()">Цены</a>
+    <a href="#contact"  onclick="closeMenu()">Контакт</a>
+  </nav>
+  <div class="mob-tg">
+    <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+       class="cta" style="display:inline-flex;"
+       aria-label="Открыть Selenyx в Telegram"
+       onclick="track('mob-menu');closeMenu()">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
+      </svg>
+      Открыть в Telegram
+    </a>
+  </div>
+</div>
+
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<section class="hero" id="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <div class="hero-badge"><span aria-hidden="true">🌙</span> Ежедневный навигатор</div>
+        <h1 class="hero-h1">Живи в ритме дня.<br><em>Не вслепую.</em></h1>
+        <p class="hero-p">За 30 секунд узнаёшь, что поддерживает сегодня — в работе, здоровье и отношениях. Реальное положение планет, персонально для тебя.</p>
+        <div class="cta-wrap">
+          <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+             class="cta" aria-label="Открыть Selenyx в Telegram" onclick="track('hero')">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
+            </svg>
+            Открыть в Telegram
+          </a>
+          <p class="hero-hint">
+            Астрономические данные: <b>Swiss Ephemeris (NASA JPL)</b><br>
+            Без регистрации · Без кредитки · Бесплатно
+          </p>
+        </div>
+      </div>
+
+      <div class="moon-scene" aria-hidden="true">
+        <div class="moon-ring">
+          <div class="orbit"></div>
+          <div class="satellite"></div>
+          <div class="halo1"></div>
+          <div class="halo2"></div>
+          <div class="mstars" id="mstars"></div>
+          <svg class="moon-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="mg" cx="37%" cy="32%" r="66%">
+                <stop offset="0%"   stop-color="#f2e2b4"/>
+                <stop offset="38%"  stop-color="#c8a96e"/>
+                <stop offset="100%" stop-color="#5a3a0a"/>
+              </radialGradient>
+              <radialGradient id="c1" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="rgba(75,45,8,.38)"/>
+                <stop offset="100%" stop-color="rgba(75,45,8,0)"/>
+              </radialGradient>
+              <radialGradient id="c2" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="rgba(55,30,4,.26)"/>
+                <stop offset="100%" stop-color="rgba(55,30,4,0)"/>
+              </radialGradient>
+            </defs>
+            <circle cx="100" cy="100" r="84" fill="rgba(200,169,110,.06)"/>
+            <circle cx="100" cy="100" r="70" fill="rgba(200,169,110,.09)"/>
+            <circle cx="100" cy="100" r="56" fill="url(#mg)"/>
+            <ellipse cx="77" cy="88" rx="13" ry="15" fill="url(#c1)"/>
+            <ellipse cx="117" cy="73" rx="9"  ry="10" fill="url(#c2)"/>
+            <ellipse cx="95"  cy="118" rx="10" ry="11" fill="url(#c1)"/>
+            <ellipse cx="130" cy="104" rx="7" ry="8" fill="url(#c2)"/>
+            <ellipse cx="80" cy="77" rx="19" ry="22" fill="rgba(255,248,220,.17)" transform="rotate(-14 80 77)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── APP PREVIEW ──────────────────────────────────────────────── -->
+<section class="preview" id="preview">
+  <div class="wrap">
+    <div class="preview-hd r">
+      <p class="tag">Что внутри</p>
+      <h2 class="h2">Четыре раздела.<br>Всё что нужно на день.</h2>
+      <p class="sub">Полноценное приложение прямо в Telegram — без установки и регистрации.</p>
+    </div>
+    <div class="phones">
+      <!-- My Day -->
+      <div class="r d1">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="scr">
+            <div class="p-title">✨ Мой день</div>
+            <div class="p-hr"></div>
+            <div class="p-2">
+              <div class="p-card"><div class="p-emo">🏥</div><div class="p-lbl">Здоровье</div></div>
+              <div class="p-card"><div class="p-emo">💼</div><div class="p-lbl">Работа</div></div>
+            </div>
+            <div class="p-2">
+              <div class="p-card"><div class="p-emo">❤️</div><div class="p-lbl">Отношения</div></div>
+              <div class="p-card"><div class="p-emo">🧠</div><div class="p-lbl">Психология</div></div>
+            </div>
+            <div class="pill">🌙 Луна в Деве</div>
+            <div class="bar g m" style="margin-top:4px;"></div>
+            <div class="bar f"></div>
+            <div class="bar s"></div>
+            <div style="display:flex;gap:5px;margin-top:6px;">
+              <div class="pill" style="font-size:9px;">🎨 Зелёный</div>
+              <div class="pill" style="font-size:9px;">🔢 7</div>
+            </div>
+          </div>
+        </div>
+        <div class="ph-cap"><strong>✨ Мой день</strong><span>Что поддерживает сегодня</span></div>
+      </div>
+
+      <!-- Moon -->
+      <div class="r d2">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="scr">
+            <div class="p-title">🌙 Луна</div>
+            <div class="p-hr"></div>
+            <div class="p-circle">🌙</div>
+            <div class="p-cap p-cen">Растущая · 52%</div>
+            <div class="pill" style="display:block;text-align:center;margin-bottom:8px;">В знаке Девы · День 8</div>
+            <div class="bar f"></div>
+            <div class="bar m"></div>
+            <div class="p-hr" style="margin-top:8px;"></div>
+            <div class="p-cap" style="margin-bottom:5px;">АСПЕКТЫ</div>
+            <div class="bar f b"></div>
+            <div class="bar m g"></div>
+            <div class="bar s b"></div>
+          </div>
+        </div>
+        <div class="ph-cap"><strong>🌙 Луна</strong><span>Текущая фаза и лунный день</span></div>
+      </div>
+
+      <!-- Natal -->
+      <div class="r d3">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="scr">
+            <div class="p-title">🌟 Карта</div>
+            <div class="p-hr"></div>
+            <div class="p-2">
+              <div class="p-card p-cen"><div class="p-emo">☀️</div><div class="p-lbl">Солнце</div><div class="p-val">Овен</div></div>
+              <div class="p-card p-cen"><div class="p-emo">🌙</div><div class="p-lbl">Луна</div><div class="p-val">Близнецы</div></div>
+            </div>
+            <div class="p-card p-cen" style="margin-bottom:8px;">
+              <div class="p-emo">⬆️</div><div class="p-lbl">Асцендент</div><div class="p-val">Лев</div>
+            </div>
+            <div class="bar f"></div>
+            <div class="bar m"></div>
+            <div class="bar f"></div>
+            <div class="bar s"></div>
+          </div>
+        </div>
+        <div class="ph-cap"><strong>🌟 Карта</strong><span>Твоё личное начало</span></div>
+      </div>
+
+      <!-- Compat -->
+      <div class="r d4">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="scr">
+            <div class="p-title">💞 Пара</div>
+            <div class="p-hr"></div>
+            <div class="compat-row">
+              <div class="p-card p-cen" style="padding:7px 10px;"><div style="font-size:18px;">♈</div><div class="p-lbl">Овен</div></div>
+              <span style="font-size:14px;color:var(--gold);">💞</span>
+              <div class="p-card p-cen" style="padding:7px 10px;"><div style="font-size:18px;">♎</div><div class="p-lbl">Весы</div></div>
+            </div>
+            <div class="compat-big">87%</div>
+            <div class="compat-lbl">Совместимость</div>
+            <div class="compat-bg"></div>
+            <div class="bar f"></div>
+            <div class="bar m"></div>
+            <div class="bar s"></div>
+          </div>
+        </div>
+        <div class="ph-cap"><strong>💞 Совместимость</strong><span>Как вы дополняете друг друга</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── PAIN ──────────────────────────────────────────────────────── -->
+<section class="pain" id="pain">
+  <div class="wrap">
+    <div class="pain-grid">
+      <div class="rl">
+        <p class="tag">Почему Selenyx</p>
+        <h2 class="h2">Бывает так:</h2>
+        <div class="pain-items">
+          <div class="pain-row"><div class="dot"></div><p>Утро началось, а непонятно, в каком ты ритме и с чего начать</p></div>
+          <div class="pain-row"><div class="dot"></div><p>Хочется принять решение — нет ощущения подходящего момента</p></div>
+          <div class="pain-row"><div class="dot"></div><p>Откладываешь, начинаешь не с того, устаёшь от рассеянности</p></div>
+        </div>
+      </div>
+      <div class="rr d2">
+        <div class="quote-card">
+          <div class="qt">Selenyx не предсказывает будущее. Он показывает ритм дня и помогает понять — на что направить энергию.</div>
+          <div class="qa">🌙 Лунные циклы влияют на биоритмы.<br><span>Интерпретация — компас, не расписание.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── HOW ───────────────────────────────────────────────────────── -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="how-hd r">
+      <p class="tag">Как это работает</p>
+      <h2 class="h2">Три шага.<br>Первый прогноз — через минуту.</h2>
+    </div>
+    <div class="steps">
+      <div class="step r d1">
+        <div class="snum">1</div>
+        <h3>Открой бота в Telegram</h3>
+        <p>Нажми кнопку ниже — Telegram откроется с ботом Selenyx. Никакой установки, никакой регистрации.</p>
+        <span class="badge">⚡ 5 секунд</span>
+      </div>
+      <div class="step r d2">
+        <div class="snum">2</div>
+        <h3>Выбери знак зодиака</h3>
+        <p>Один тап — и приложение готово. Точная дата рождения не обязательна. Знак зодиака — достаточно.</p>
+        <span class="badge">⚡ 10 секунд</span>
+      </div>
+      <div class="step r d3">
+        <div class="snum">3</div>
+        <h3>Получай прогноз каждый день</h3>
+        <p>Selenyx покажет что поддерживает в работе, здоровье, отношениях. Включи уведомления и не пропускай ритм.</p>
+        <span class="badge">🌙 Каждое утро</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── FEATURES ──────────────────────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="features-hd r">
+      <p class="tag">Возможности</p>
+      <h2 class="h2">Всё для твоего дня — в одном месте</h2>
+      <p class="sub">Полноценный астрологический помощник. Работает без выхода из Telegram.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat r d1">
+        <span class="feat-ico" aria-hidden="true">⚡</span>
+        <h3>Энергия дня</h3>
+        <p>Начни утро в гармонии с ритмом — что поддерживает, на что направить силы в работе, здоровье и отношениях.</p>
+      </div>
+      <div class="feat r d2">
+        <span class="feat-ico" aria-hidden="true">🌙</span>
+        <h3>Лунный календарь</h3>
+        <p>Фаза Луны, лунный день и переходы фаз на 30 дней вперёд. Планируй важные дела осознанно.</p>
+      </div>
+      <div class="feat r d3">
+        <span class="feat-ico" aria-hidden="true">💞</span>
+        <h3>Совместимость</h3>
+        <p>Поймите друг друга глубже — не через конфликты, а через различия. 11 комбинаций по элементам.</p>
+      </div>
+      <div class="feat r d1">
+        <span class="feat-ico" aria-hidden="true">🌟</span>
+        <h3>Натальная карта</h3>
+        <p>Солнце, Луна, Асцендент — три аспекта твоей природы с расшифровкой. Узнай своё истинное начало.</p>
+      </div>
+      <div class="feat r d2">
+        <span class="feat-ico" aria-hidden="true">🎨</span>
+        <h3>Цвет и число дня</h3>
+        <p>Цвет дня по планете и знаку Луны. Число дня по нумерологии. Полная карта энергии в символах.</p>
+      </div>
+      <div class="feat r d3">
+        <span class="feat-ico" aria-hidden="true">🔔</span>
+        <h3>Уведомления</h3>
+        <p>Выбери удобное время от 7 до 11 утра. Один ежедневный сигнал, без спама — только нужное.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── SOCIAL PROOF ──────────────────────────────────────────────── -->
+<section class="social" id="social">
+  <div class="wrap">
+    <div class="social-hd r">
+      <p class="tag">Уже используют</p>
+      <h2 class="h2">Каждое утро — новый ориентир</h2>
+    </div>
+    <div style="text-align:center;" id="cntWrap">
+      <div class="counter r d1">
+        <div class="cnt-n" id="cnt" aria-live="polite">—</div>
+        <div class="cnt-l">
+          <strong>человек открыли приложение</strong>
+          <span>и получили первый прогноз</span>
+        </div>
+      </div>
+    </div>
+    <div class="reviews">
+      <div class="rev r d1">
+        <div class="stars" aria-label="5 звёзд">★★★★★</div>
+        <p class="rev-t">«Наконец-то утренняя рутина, которая не раздражает. Открываю каждое утро — занимает ровно минуту, но задаёт правильный настрой.»</p>
+        <div class="rev-a">
+          <div class="ava" aria-hidden="true">🌸</div>
+          <div><div class="rev-name">Мария</div><div class="rev-meta">29 лет, Москва</div></div>
+        </div>
+      </div>
+      <div class="rev r d2">
+        <div class="stars" aria-label="5 звёзд">★★★★★</div>
+        <p class="rev-t">«Удивительно, как точно попадает в настроение дня. Совет по работе на этой неделе был прямо в точку — и я не ожидал.»</p>
+        <div class="rev-a">
+          <div class="ava" aria-hidden="true">🌿</div>
+          <div><div class="rev-name">Алексей</div><div class="rev-meta">34 года, Санкт-Петербург</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="author r d3">
+      <div class="auth-ava" aria-hidden="true">👩</div>
+      <div>
+        <div class="auth-name">Анастасия, создатель Selenyx</div>
+        <p class="auth-text">Я создала Selenyx, потому что хотела простой ежедневный ориентир — без сложных таблиц и платных подписок. Selenyx объясняет всё человеческим языком.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── FAQ ───────────────────────────────────────────────────────── -->
+<section class="faq" id="faq">
+  <div class="wrap">
+    <div class="faq-hd r">
+      <p class="tag">Вопросы</p>
+      <h2 class="h2">Ответы на главные вопросы</h2>
+    </div>
+    <div class="faq-list r d1">
+
+      <div class="faq-item">
+        <button class="fq" aria-expanded="false">
+          Это гороскоп?
+          <span class="fq-ic" aria-hidden="true">+</span>
+        </button>
+        <div class="fa" role="region">
+          <div class="fa-in">Нет. Гороскоп говорит «тебя ждут перемены». Selenyx говорит <strong>«сегодня хорошее время для новых начинаний»</strong>. Ты сам решаешь, применять это или нет. Не предсказание — компас.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="fq" aria-expanded="false">
+          Это работает по науке?
+          <span class="fq-ic" aria-hidden="true">+</span>
+        </button>
+        <div class="fa" role="region">
+          <div class="fa-in">Лунные циклы влияют на сон и биоритмы — это подтверждено исследованиями. Астрономические расчёты Selenyx используют <strong>Swiss Ephemeris</strong> на основе данных NASA JPL. Точность ~1 угловая секунда. Интерпретация — психологический компас, а не прогноз.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="fq" aria-expanded="false">
+          Нужна точная дата рождения?
+          <span class="fq-ic" aria-hidden="true">+</span>
+        </button>
+        <div class="fa" role="region">
+          <div class="fa-in">Нет. Достаточно знака зодиака — это 10 секунд. <strong>Дата рождения</strong> добавляет глубину (натальная карта: Солнце, Луна, Асцендент), но для ежедневного прогноза не обязательна.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="fq" aria-expanded="false">
+          Сколько стоит?
+          <span class="fq-ic" aria-hidden="true">+</span>
+        </button>
+        <div class="fa" role="region">
+          <div class="fa-in"><strong>Бесплатно навсегда:</strong> энергия дня, Луна в знаке, фаза, лунный день, рекомендации, уведомления. Расширенный доступ (натальная карта, прогноз на год, детальная совместимость) — разовые покупки в Telegram Stars. Без авторекурринга.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="fq" aria-expanded="false">
+          Это безопасно для моих данных?
+          <span class="fq-ic" aria-hidden="true">+</span>
+        </button>
+        <div class="fa" role="region">
+          <div class="fa-in">Selenyx хранит только знак зодиака и время уведомлений. <strong>Авторизация через Telegram</strong> — никаких паролей и email. Данные не передаются третьим лицам.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── PRICING ───────────────────────────────────────────────────── -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="pricing-hd r">
+      <p class="tag">Честно о ценах</p>
+      <h2 class="h2">Прозрачно.<br>Без сюрпризов.</h2>
+      <p class="sub">Базовые функции — бесплатно навсегда. Расширенный доступ — только то, что нужно тебе.</p>
+    </div>
+    <div class="price-grid">
+      <div class="pc free r d1">
+        <span class="pbadge free">Бесплатно</span>
+        <h3 class="ptitle">Базовый доступ</h3>
+        <p class="psub">Навсегда. Без ограничений по времени.</p>
+        <ul class="plist">
+          <li><span class="ck" aria-hidden="true">✓</span> Энергия дня — ежедневно</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Луна в знаке · фаза · лунный день</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Персональная рекомендация</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Совместимость знаков</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Уведомления в удобное время</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Цвет дня и число дня</li>
+        </ul>
+        <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+           class="cta" aria-label="Начать бесплатно в Telegram" onclick="track('pricing-free')">
+          Начать бесплатно
+        </a>
+      </div>
+      <div class="pc premium r d2">
+        <span class="pbadge premium">⭐ Расширенный</span>
+        <h3 class="ptitle">Разовые покупки</h3>
+        <p class="psub">Платишь один раз за нужное. Оплата через Telegram Stars.</p>
+        <div>
+          <div class="prow"><span class="pname">🌟 Натальная карта</span><span class="pprice">690 ₽</span></div>
+          <div class="prow"><span class="pname">📅 Прогноз на год</span><span class="pprice">990 ₽</span></div>
+          <div class="prow"><span class="pname">💞 Детальная совместимость</span><span class="pprice">490 ₽</span></div>
+        </div>
+        <p class="pnote"><strong>Без подписки и авторекурринга.</strong> Telegram Stars — встроенная валюта Telegram. Покупки защищены стандартными гарантиями платформы.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── FINAL CTA ─────────────────────────────────────────────────── -->
+<section class="fcta" id="start">
+  <div class="wrap">
+    <div class="fcta-box r">
+      <span class="fcta-moon" aria-hidden="true">🌙</span>
+      <h2>Готова к первому прогнозу?</h2>
+      <p>За 30 секунд. Без регистрации.<br>Без кредитной карты.</p>
+      <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+         class="cta" style="display:inline-flex;" aria-label="Открыть Selenyx в Telegram" onclick="track('final')">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
+        </svg>
+        Открыть в Telegram
+      </a>
+      <p class="fcta-note">Уже работает. Нужен только Telegram.</p>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<!-- ── CONTACT ───────────────────────────────────────────────────── -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="contact-hd r">
+      <p class="tag">Обратная связь</p>
+      <h2 class="h2">Есть вопрос?<br>Пишите — ответим.</h2>
+      <p class="sub">Обычно отвечаем в течение дня.</p>
+    </div>
+    <div class="cf-wrap r d1">
+      <div class="cf-card" id="cfCard">
+        <div class="cf-row">
+          <div class="cf-group">
+            <label for="cfName">Имя</label>
+            <input id="cfName" name="name" type="text" class="cf-in"
+              placeholder="Анастасия…" autocomplete="name">
+          </div>
+          <div class="cf-group">
+            <label for="cfEmail">Email</label>
+            <input id="cfEmail" name="email" type="email" class="cf-in"
+              placeholder="hello@mail.ru" autocomplete="email" spellcheck="false">
+          </div>
+        </div>
+        <div class="cf-group">
+          <label for="cfMsg">Сообщение</label>
+          <textarea id="cfMsg" class="cf-in"
+            placeholder="Расскажи, что у тебя на уме…"></textarea>
+        </div>
+        <button class="cf-submit" id="cfSubmit" onclick="cfSend()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+            width="17" height="17" aria-hidden="true">
+            <path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/>
+          </svg>
+          Отправить
+        </button>
+        <!-- success overlay -->
+        <div class="cf-ok" id="cfOk" role="status" aria-live="polite">
+          <div class="cf-check-ring">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          </div>
+          <h3>Отправлено!</h3>
+          <p>Получили твоё сообщение и ответим на почту.</p>
+          <button class="cf-again" onclick="cfReset()">Отправить ещё</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BACK TO TOP ────────────────────────────────────────────────── -->
+<button class="btt" id="btt" aria-label="Прокрутить наверх" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M18 15l-6-6-6 6"/>
+  </svg>
+</button>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────── -->
+<footer>
+  <div class="wrap">
+    <div class="ft">
+      <div class="ft-logo">🌙 Selenyx</div>
+      <nav class="ft-links" aria-label="Ссылки footer">
+        <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer">Открыть в Telegram</a>
+        <a href="#">Политика конфиденциальности</a>
+        <a href="#">Условия использования</a>
+        <a href="mailto:hello@selenyx.app">Контакт</a>
+      </nav>
+      <p class="ft-disc">Для саморефлексии и вдохновения, не является астрологической консультацией. Астрономические расчёты: Swiss Ephemeris (kerykeion), данные NASA JPL.</p>
+      <p class="ft-copy">© 2026 Selenyx</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── STARS ─────────────────────────────────────────────────────── */
+(function(){
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  let S = [];
+
+  function resize(){
+    c.width  = window.innerWidth;
+    c.height = window.innerHeight;
+  }
+  function gen(n){
+    S = Array.from({length:n},()=>({
+      x: Math.random()*c.width,
+      y: Math.random()*c.height,
+      r: Math.random()*1.4+.2,
+      a: Math.random()*.75+.1,
+      sp: Math.random()*.004+.001,
+      ph: Math.random()*Math.PI*2,
+    }));
+  }
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    t+=.016;
+    S.forEach(s=>{
+      const a=s.a*(0.5+0.5*Math.sin(t*s.sp*100+s.ph));
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(240,228,205,${a})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  resize(); gen(220); draw();
+  let rt;
+  window.addEventListener('resize',()=>{
+    clearTimeout(rt);
+    rt=setTimeout(()=>{resize();gen(220);},200);
+  },{passive:true});
+})();
+
+/* ── MOON STARS ─────────────────────────────────────────────────── */
+(function(){
+  const w = document.getElementById('mstars');
+  if(!w) return;
+  const pts=[
+    [14,18,3,'2.2s','.4s'],[78,8,2,'3.1s','1.1s'],[8,58,2.2,'2.8s','0s'],
+    [88,42,2.8,'3.6s','1.6s'],[18,82,1.8,'2s','.9s'],[92,72,2,'3.2s','.3s'],
+    [52,4,2.3,'2.9s','1.3s'],[4,38,1.8,'4.1s','.2s'],[96,28,2,'2.6s','.8s'],
+    [62,92,1.8,'3.4s','1.9s'],[35,12,2,'2.4s','.6s'],[70,85,1.8,'3.8s','2s'],
+  ];
+  pts.forEach(([x,y,r,d,dl])=>{
+    const el=document.createElement('div');
+    el.className='ms';
+    el.style.cssText=`left:${x}%;top:${y}%;width:${r}px;height:${r}px;--d:${d};--dl:${dl};`;
+    w.appendChild(el);
+  });
+})();
+
+/* ── NAV SCROLL ─────────────────────────────────────────────────── */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('on',scrollY>50),{passive:true});
+
+/* ── SCROLL REVEAL ──────────────────────────────────────────────── */
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      requestAnimationFrame(()=>requestAnimationFrame(()=>e.target.classList.add('v')));
+      ro.unobserve(e.target);
+    }
+  });
+},{threshold:.07});
+document.querySelectorAll('.r,.rl,.rr,.rs').forEach(el=>ro.observe(el));
+
+/* ── HERO LOAD ANIMATION ─────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded',()=>{
+  const els=document.querySelectorAll('.hero-badge,.hero-h1,.hero-p,.cta-wrap');
+  els.forEach((el,i)=>{
+    el.style.cssText=
+      'opacity:0;transform:translateY(26px);'+
+      'transition:opacity .8s cubic-bezier(.22,1,.36,1) '+i*.16+'s,'+
+      'transform .8s cubic-bezier(.22,1,.36,1) '+i*.16+'s;';
+  });
+  /* setTimeout надёжнее двойного rAF на мобильных — даёт браузеру
+     полный цикл отрисовки до запуска анимации */
+  setTimeout(()=>{
+    els.forEach(el=>{ el.style.opacity='1'; el.style.transform='none'; });
+  }, 80);
+});
+
+/* ── FAQ ACCORDION ──────────────────────────────────────────────── */
+document.querySelectorAll('.fq').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const ans=btn.nextElementSibling;
+    const open=btn.classList.contains('open');
+    document.querySelectorAll('.fq.open').forEach(q=>{
+      q.classList.remove('open');
+      q.setAttribute('aria-expanded','false');
+      q.nextElementSibling.style.maxHeight='0';
+    });
+    if(!open){
+      btn.classList.add('open');
+      btn.setAttribute('aria-expanded','true');
+      ans.style.maxHeight=ans.scrollHeight+'px';
+    }
+  });
+});
+
+/* ── USER COUNTER — animates when element enters viewport ────────── */
+async function loadCount(){
+  const el=document.getElementById('cnt');
+  const wrap=document.getElementById('cntWrap');
+  if(!el) return;
+  let n=0;
+  try{
+    /* AbortController — лучшая совместимость с Android 8–9 */
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>ctrl.abort(),3000);
+    const r=await fetch('https://selenyx.up.railway.app/api/public/stats',
+      {signal:ctrl.signal});
+    clearTimeout(tid);
+    if(r.ok){ const d=await r.json(); n=d.total_users||0; }
+    else throw 0;
+  } catch{ n=0; }
+
+  /* Скрыть счётчик если нет реальных данных */
+  if(n<10){ if(wrap) wrap.style.display='none'; return; }
+
+  const animate=()=>{
+    const dur=5500;
+    const start=performance.now();
+    const card=el.closest('.counter');
+    if(card){ card.style.transition='box-shadow .5s'; card.style.boxShadow='0 0 80px rgba(200,169,110,.6)'; }
+    const tick=now=>{
+      const p=Math.min((now-start)/dur,1);
+      // easeInOut quart: медленный старт → разгон → плавное торможение
+      const eased=p<.5 ? 8*p*p*p*p : 1-Math.pow(-2*p+2,4)/2;
+      el.textContent=Math.floor(eased*n)+'+';
+      if(p<1) requestAnimationFrame(tick);
+      else if(card) setTimeout(()=>{ card.style.boxShadow=''; },800);
+    };
+    requestAnimationFrame(tick);
+  };
+
+  const obs=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){ obs.disconnect(); animate(); }
+  },{threshold:.3});
+  obs.observe(el);
+}
+loadCount();
+
+/* ── CTA TRACKING ────────────────────────────────────────────────── */
+function track(loc){
+  try{
+    if(typeof gtag!=='undefined') gtag('event','cta_click',{event_category:'conversion',event_label:loc});
+    if(typeof ym  !=='undefined') ym('reachGoal','cta_click',{location:loc});
+  }catch(e){}
+}
+
+/* ── PARALLAX ────────────────────────────────────────────────────── */
+/* moonParallaxY и moonTilt хранятся глобально — оба читаются при сборке transform */
+window._moonPY  = 0; // параллакс translateY
+window._moonTilt= ''; // гироскоп rotateX/Y
+
+function _applyMoon(){
+  const ring=document.querySelector('.moon-ring');
+  if(ring) ring.style.transform=
+    `translateY(${window._moonPY}px) ${window._moonTilt}`;
+}
+
+(function(){
+  const canvas=document.getElementById('stars');
+  let ticking=false;
+  window.addEventListener('scroll',()=>{
+    if(ticking) return;
+    ticking=true;
+    requestAnimationFrame(()=>{
+      const y=window.scrollY;
+      if(canvas) canvas.style.transform=`translateY(${y*.22}px)`;
+      window._moonPY=y*.08;
+      _applyMoon();
+      ticking=false;
+    });
+  },{passive:true});
+})();
+
+/* ── SMOOTH SCROLL for anchor links ─────────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href === '#') return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    const offset = target.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top: offset, behavior: 'smooth' });
+  });
+});
+
+/* ── CURSOR GLOW in hero ─────────────────────────────────────────── */
+(function(){
+  const hero = document.querySelector('.hero');
+  if (!hero || window.matchMedia('(hover: none)').matches) return;
+  const glow = document.createElement('div');
+  glow.style.cssText = `
+    position:absolute; width:500px; height:500px; border-radius:50%;
+    background:radial-gradient(circle, rgba(200,169,110,.06) 0%, transparent 70%);
+    transform:translate(-50%,-50%); pointer-events:none; z-index:0;
+    transition:left .7s ease, top .7s ease; left:50%; top:50%;
+  `;
+  hero.style.position = 'relative';
+  hero.style.overflow = 'hidden';
+  hero.appendChild(glow);
+  hero.addEventListener('mousemove', e => {
+    const r = hero.getBoundingClientRect();
+    glow.style.left = (e.clientX - r.left) + 'px';
+    glow.style.top  = (e.clientY - r.top)  + 'px';
+  });
+})();
+
+/* ── MAGNETIC CTA buttons ────────────────────────────────────────── */
+(function(){
+  if (window.matchMedia('(hover: none)').matches) return;
+  document.querySelectorAll('.cta').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width  / 2) * 0.18;
+      const y = (e.clientY - r.top  - r.height / 2) * 0.18;
+      btn.style.transform = `translateY(-3px) translate(${x}px, ${y}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+    });
+  });
+})();
+
+/* ── SHIMMER on premium card border ─────────────────────────────── */
+(function(){
+  const card = document.querySelector('.pc.premium');
+  if (!card) return;
+  const shimmer = document.createElement('div');
+  shimmer.style.cssText = `
+    position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(200,169,110,.35) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmerBorder 3s ease-in-out infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    padding: 1px;
+  `;
+  card.style.position = 'relative';
+  card.style.overflow = 'visible';
+  card.appendChild(shimmer);
+  const style = document.createElement('style');
+  style.textContent = '@keyframes shimmerBorder { 0%{background-position:-200% 0} 100%{background-position:200% 0} }';
+  document.head.appendChild(style);
+})();
+
+/* ── STAGGER reveal for .feat-grid and .steps children ──────────── */
+(function(){
+  ['.feat-grid .feat', '.steps .step', '.phones > div'].forEach(sel => {
+    document.querySelectorAll(sel).forEach((el, i) => {
+      if (!el.classList.contains('r')) el.classList.add('r');
+      el.style.transitionDelay = (i * 0.09) + 's';
+    });
+  });
+})();
+
+/* ── SCROLL: прогресс-бар + кнопка наверх (один listener) ───────── */
+(function(){
+  const btn=document.getElementById('btt');
+  const prog=document.getElementById('scrollProg');
+  window.addEventListener('scroll',()=>{
+    const y=window.scrollY;
+    if(btn) btn.classList.toggle('show', y > 420);
+    if(prog){
+      const total=document.body.scrollHeight-window.innerHeight;
+      prog.style.width=(total>0 ? y/total*100 : 0)+'%';
+    }
+  },{passive:true});
+})();
+
+/* ── GYROSCOPE — луна наклоняется вслед за телефоном ────────────── */
+(function(){
+  if(!window.DeviceOrientationEvent) return;
+  let baseB=null, baseG=null;
+
+  function handle(e){
+    // Калибровка по первому событию
+    if(baseB===null){ baseB=e.beta||0; baseG=e.gamma||0; return; }
+    const dx=Math.min(Math.max((e.gamma||0)-baseG,-35),35);
+    const dy=Math.min(Math.max((e.beta ||0)-baseB,-35),35);
+    // Множитель 1.4 — поворот до 49° при максимальном наклоне, хорошо видно
+    window._moonTilt=`rotateX(${dy*1.4}deg) rotateY(${-dx*1.4}deg)`;
+    _applyMoon();
+  }
+
+  function start(){
+    window.addEventListener('deviceorientation',handle,{passive:true});
+  }
+
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){
+    // iOS 13+ — нужен явный жест пользователя
+    document.addEventListener('touchend',function req(){
+      DeviceOrientationEvent.requestPermission()
+        .then(s=>{ if(s==='granted') start(); })
+        .catch(()=>{});
+      document.removeEventListener('touchend',req);
+    },{once:true, passive:true});
+  } else {
+    start(); // Android — без разрешения
+  }
+})();
+
+/* ── TOUCH RIPPLE — волна при касании кнопок и карточек ─────────── */
+(function(){
+  if(!window.matchMedia('(hover:none)').matches) return; // только touch-устройства
+
+  function ripple(e){
+    const el=e.currentTarget;
+    const rect=el.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    const x=t.clientX-rect.left, y=t.clientY-rect.top;
+    const size=Math.max(rect.width,rect.height)*2.2;
+    const r=document.createElement('span');
+    r.style.cssText=
+      `position:absolute;border-radius:50%;pointer-events:none;`+
+      `width:${size}px;height:${size}px;`+
+      `left:${x-size/2}px;top:${y-size/2}px;`+
+      `background:rgba(200,169,110,.35);`+
+      `transform:scale(0);animation:ripple .7s ease-out forwards;`;
+    const prev=el.style.cssText;
+    el.style.position='relative';
+    el.style.overflow='hidden';
+    el.appendChild(r);
+    r.addEventListener('animationend',()=>r.remove());
+  }
+
+  document.querySelectorAll('.cta,.btn-tg,.feat,.step,.rev,.cf-submit').forEach(el=>{
+    el.addEventListener('touchstart',ripple,{passive:true});
+  });
+})();
+
+/* ── MOBILE MENU ─────────────────────────────────────────────────── */
+(function(){
+  const burger=document.getElementById('navBurger');
+  const overlay=document.getElementById('mobOverlay');
+  if(!burger||!overlay) return;
+
+  function openMenu(){
+    burger.classList.add('open');
+    burger.setAttribute('aria-expanded','true');
+    overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeMenuFn(){
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded','false');
+    overlay.classList.remove('open');
+    document.body.style.overflow='';
+  }
+  window.closeMenu = closeMenuFn;
+
+  burger.addEventListener('click',()=>{
+    overlay.classList.contains('open') ? closeMenuFn() : openMenu();
+  });
+
+  /* close on Escape */
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && overlay.classList.contains('open')) closeMenuFn();
+  });
+
+  /* close on backdrop tap */
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay) closeMenuFn();
+  });
+})();
+
+/* ── CONTACT FORM ─────────────────────────────────────────────────── */
+function cfSend(){
+  const name  = document.getElementById('cfName');
+  const email = document.getElementById('cfEmail');
+  const msg   = document.getElementById('cfMsg');
+  let valid   = true;
+
+  [name, email, msg].forEach(el=>{
+    if(!el.value.trim()){
+      valid = false;
+      el.style.borderColor='rgba(255,100,100,.55)';
+      el.style.animation='shake .35s ease';
+      setTimeout(()=>{ el.style.animation=''; el.style.borderColor=''; }, 400);
+    }
+  });
+  if(!valid) return;
+
+  const btn=document.getElementById('cfSubmit');
+  btn.disabled=true;
+  btn.innerHTML='<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(10,10,26,.4);border-top-color:#0a0a1a;border-radius:50%;animation:spin .7s linear infinite"></span>&nbsp;Отправка…';
+
+  setTimeout(()=>{
+    document.getElementById('cfOk').classList.add('show');
+    track('contact-form');
+  }, 800);
+}
+
+function cfReset(){
+  document.getElementById('cfOk').classList.remove('show');
+  ['cfName','cfEmail','cfMsg'].forEach(id=>{ document.getElementById(id).value=''; });
+  const btn=document.getElementById('cfSubmit');
+  btn.disabled=false;
+  btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg> Отправить`;
+}
+</script>
+</body>
+</html>

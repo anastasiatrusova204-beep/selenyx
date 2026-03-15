@@ -1681,6 +1681,7 @@ async def main() -> None:
         BotCommand(command="start",    description="Начать / вернуться в главное меню"),
         BotCommand(command="help",     description="Что умеет бот"),
         BotCommand(command="feedback", description="Написать отзыв или предложение"),
+        BotCommand(command="resetme",  description="Сбросить мой профиль (для тестирования)"),
     ]
     if WEBAPP_URL:
         cmds.insert(1, BotCommand(command="app", description="Открыть приложение Selenyx"))

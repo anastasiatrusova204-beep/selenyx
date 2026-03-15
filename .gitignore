@@ -20,6 +20,11 @@ bot.pid
 *.db
 cache/
 
-# Сгенерированные файлы (кроме webapp)
+# Сгенерированные файлы (кроме webapp и landing)
 *.html
 !webapp/*.html
+!landing/*.html
+
+# SQLite WAL-файлы
+*.db-shm
+*.db-wal

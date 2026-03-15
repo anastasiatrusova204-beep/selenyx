@@ -785,6 +785,10 @@
     }
     .wc-btn:active { opacity: 0.85; transform: scale(0.98); }
     .wc-btn:disabled { opacity: 0.55; }
+    .wc-hint {
+      font-size: 12px; color: var(--hint); margin-bottom: 14px; min-height: 18px;
+      opacity: 0.7; letter-spacing: 0.2px;
+    }
     .wc-dots { display: flex; gap: 8px; align-items: center; justify-content: center; }
     .wc-dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -1042,13 +1046,14 @@
       <h2 class="wc-headline" id="wc-headline">Добро пожаловать!</h2>
       <p class="wc-desc" id="wc-desc"></p>
       <button class="wc-btn" id="wc-btn">Далее ›</button>
+      <div class="wc-hint" id="wc-hint"></div>
       <div class="wc-dots" id="wc-dots"></div>
     </div>
   </div>
 
   <div class="screen active" id="moon-screen">
     <div class="landing-inner">
-      <div class="landing-top-badge">✨ Персональная астрология</div>
+      <div class="landing-top-badge">✨ Ясность на день · 🌙 Лично · ⚡ 30 сек</div>
 
       <div class="landing-moon-wrap" id="sticker-wrap">
         <div class="landing-glow"></div>
@@ -1088,8 +1093,8 @@
         <div class="trial-countdown-timer" id="trial-countdown-timer">7 дн. 00:00:00</div>
       </div>
 
-      <button class="cta-btn" id="cta-btn">Попробовать бесплатно</button>
-      <div class="cta-hint-text">Автоматическая регистрация через Telegram</div>
+      <button class="cta-btn" id="cta-btn">Начну — получу прогноз</button>
+      <div class="cta-hint-text">Без кредитки · Без регистрации · Работает в Telegram</div>
       <div class="cta-tg-link" id="tg-link" style="display:none">
         <a href="https://t.me/Selenyx_mybot" target="_blank">Открыть в Telegram</a>
       </div>
@@ -1998,13 +2003,13 @@
   const WC_SLIDES = [
     { emoji:'🌙', label:'SELENYX',
       headline:'Живи в ритме с Луной',
-      desc:'Каждый день Луна формирует разную энергию. Selenyx читает реальное небо и переводит на язык конкретных советов — без сложной терминологии.' },
+      desc:'За 30 секунд узнаешь, что поддерживает тебя сегодня — в работе, здоровье и отношениях. Реальное положение Луны, без астро-терминологии.' },
     { emoji:'✨', label:'ЧТО ВНУТРИ',
       headline:'Всё для твоего дня',
-      desc:'Энергия по 4 сферам жизни · Реальное положение Луны · Натальная карта · Совместимость по знакам · Личное предсказание' },
+      desc:'Энергия по 4 сферам жизни · Фаза Луны и лунный день · Натальная карта · Совместимость по знакам · Личное предсказание' },
     { emoji:'🎁', label:'БЕСПЛАТНО',
-      headline:'7 дней — твои.',
-      desc:'Полный доступ ко всем разделам без оплаты. После пробного периода базовые функции остаются бесплатно.', isCta:true },
+      headline:'Попробуй 7 дней',
+      desc:'Полный доступ ко всем разделам. После пробного периода базовые функции остаются бесплатно навсегда.', isCta:true },
   ];
   let wcStep=0;
 
@@ -2022,7 +2027,8 @@
       document.getElementById('wc-label').textContent=s.label;
       document.getElementById('wc-headline').textContent=s.headline;
       document.getElementById('wc-desc').textContent=s.desc;
-      document.getElementById('wc-btn').textContent=isLast?'Попробовать бесплатно':'Далее ›';
+      document.getElementById('wc-btn').textContent=isLast?'Начну — получу прогноз':'Далее ›';
+      document.getElementById('wc-hint').textContent=isLast?'Без кредитки · Базовые функции — бесплатно навсегда':'';
       document.getElementById('wc-dots').innerHTML=WC_SLIDES.map((_,i)=>
         `<div class="wc-dot${i===step?' active':''}"></div>`).join('');
     }
@@ -2121,7 +2127,7 @@
   // Кнопка карусели
   document.getElementById('wc-btn')?.addEventListener('click', async()=>{
     if(wcStep<WC_SLIDES.length-1){ renderWcSlide(wcStep+1); return; }
-    await registerAndExplode(document.getElementById('wc-btn'),'Попробовать бесплатно');
+    await registerAndExplode(document.getElementById('wc-btn'),'Начну — получу прогноз');
   });
 
   // CTA: регистрация через Telegram → анимация → приложение
