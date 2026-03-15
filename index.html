@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f4f8">
+  <title>Selenyx</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+<!-- ── SPLASH ───────────────────────────────────────────────────────────────── -->
+<div id="splash-screen" class="screen">
+  <div class="splash-content">
+    <div class="splash-moon">🌙</div>
+    <h1 class="splash-title">Selenyx</h1>
+    <p class="splash-sub">Твой космический навигатор</p>
+  </div>
+</div>
+
+<!-- ── ONBOARDING ───────────────────────────────────────────────────────────── -->
+<div id="onboarding-screen" class="screen hidden">
+  <div class="ob-container">
+
+    <!-- Slide 0: Welcome -->
+    <div id="ob-slide-0" class="ob-slide">
+      <div class="ob-illustration">🌌</div>
+      <h2 class="ob-title">Добро пожаловать</h2>
+      <p class="ob-text">Selenyx помогает понять энергию каждого дня через положение Луны и астрологические ритмы.</p>
+    </div>
+
+    <!-- Slide 1: What you get -->
+    <div id="ob-slide-1" class="ob-slide hidden">
+      <div class="ob-illustration">✨</div>
+      <h2 class="ob-title">Что внутри</h2>
+      <ul class="ob-list">
+        <li>🌙 Положение и фаза Луны</li>
+        <li>🎨 Цвет и число дня</li>
+        <li>💞 Совместимость знаков</li>
+        <li>🥠 Предсказание оракула</li>
+      </ul>
+    </div>
+
+    <!-- Slide 2: Choose sign -->
+    <div id="ob-slide-2" class="ob-slide hidden">
+      <h2 class="ob-title">Выбери свой знак</h2>
+      <p class="ob-text">Это нужно для персональных подсказок</p>
+      <div class="sign-grid">
+        <button class="sign-btn" data-sign="aries">♈ Овен</button>
+        <button class="sign-btn" data-sign="taurus">♉ Телец</button>
+        <button class="sign-btn" data-sign="gemini">♊ Близнецы</button>
+        <button class="sign-btn" data-sign="cancer">♋ Рак</button>
+        <button class="sign-btn" data-sign="leo">♌ Лев</button>
+        <button class="sign-btn" data-sign="virgo">♍ Дева</button>
+        <button class="sign-btn" data-sign="libra">♎ Весы</button>
+        <button class="sign-btn" data-sign="scorpio">♏ Скорпион</button>
+        <button class="sign-btn" data-sign="sagittarius">♐ Стрелец</button>
+        <button class="sign-btn" data-sign="capricorn">♑ Козерог</button>
+        <button class="sign-btn" data-sign="aquarius">♒ Водолей</button>
+        <button class="sign-btn" data-sign="pisces">♓ Рыбы</button>
+      </div>
+    </div>
+
+    <!-- Dots -->
+    <div class="ob-dots">
+      <span class="ob-dot active"></span>
+      <span class="ob-dot"></span>
+      <span class="ob-dot"></span>
+    </div>
+
+    <!-- Buttons -->
+    <div class="ob-buttons">
+      <button id="ob-next" class="btn-primary">Далее →</button>
+      <button id="ob-start" class="btn-gold hidden">Начать ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN ──────────────────────────────────────────────────────────────────── -->
+<div id="main-screen" class="screen hidden">
+
+  <!-- Header -->
+  <header class="app-header">
+    <h1 class="app-logo">🌙 Selenyx</h1>
+    <div class="header-actions">
+      <button id="refresh-btn" class="icon-btn" aria-label="Обновить">↻</button>
+      <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Tab panes -->
+  <main class="tab-content">
+
+    <!-- TODAY -->
+    <section class="tab-pane" data-tab="today">
+      <div class="pane-scroll">
+
+        <!-- Moon tile row -->
+        <div id="today-moon-tile" class="tile-row"></div>
+
+        <!-- Phase tips -->
+        <div class="accent-card">
+          <p class="card-label">Сегодня хорошо</p>
+          <p id="today-good" class="card-text"></p>
+          <p class="card-label mt">Избегай</p>
+          <p id="today-avoid" class="card-text muted"></p>
+        </div>
+
+        <!-- Weekday hint -->
+        <div class="mini-card">
+          <p class="mini-label">Подсказка дня</p>
+          <p id="today-hint" class="mini-text"></p>
+        </div>
+
+        <!-- Color + Number row -->
+        <div class="mini-row">
+          <div class="mini-card half">
+            <p class="mini-label">🎨 Цвет дня</p>
+            <p id="today-color" class="mini-text"></p>
+          </div>
+          <div class="mini-card half">
+            <p class="mini-label">🔢 Число дня</p>
+            <p id="today-daynum" class="mini-text big-num"></p>
+            <p id="today-daynum-hint" class="mini-text muted small"></p>
+          </div>
+        </div>
+
+        <!-- Domain tabs -->
+        <div class="domain-buttons">
+          <button class="domain-btn active" data-domain="health">🏥 Здоровье</button>
+          <button class="domain-btn" data-domain="work">💼 Работа</button>
+          <button class="domain-btn" data-domain="love">❤️ Любовь</button>
+          <button class="domain-btn" data-domain="psyche">🧠 Психо</button>
+        </div>
+        <div id="domain-content" class="domain-content"></div>
+
+      </div>
+    </section>
+
+    <!-- MOON -->
+    <section class="tab-pane hidden" data-tab="moon">
+      <div class="pane-scroll">
+
+        <div class="moon-hero">
+          <div id="moon-phase-emoji" class="moon-big-emoji">🌙</div>
+          <h2 id="moon-phase-name" class="moon-phase-title"></h2>
+          <p id="moon-sign-name" class="moon-sign-sub"></p>
+        </div>
+
+        <div id="moon-tile-row" class="tile-row"></div>
+
+        <div class="accent-card">
+          <p id="moon-lunar-day" class="card-label"></p>
+          <p id="moon-energy-title" class="card-text bold"></p>
+          <p id="moon-energy-text" class="card-text muted"></p>
+        </div>
+
+        <div id="moon-lunar-info" class="mini-card"></div>
+
+      </div>
+    </section>
+
+    <!-- CHART -->
+    <section class="tab-pane hidden" data-tab="chart">
+      <div class="pane-scroll">
+
+        <!-- Form (shown when no birth data) -->
+        <div id="chart-form">
+          <div class="chart-intro">
+            <p class="ob-illustration">🌟</p>
+            <h2 class="ob-title">Натальная карта</h2>
+            <p class="ob-text">Введи дату и время рождения, чтобы узнать положение планет в момент твоего появления на свет.</p>
+          </div>
+          <div class="form-group">
+            <label for="birth-date" class="form-label">Дата рождения</label>
+            <input id="birth-date" class="form-input" type="text" inputmode="numeric"
+              placeholder="ДД.ММ.ГГГГ" maxlength="10" autocomplete="bday" spellcheck="false">
+          </div>
+          <div class="form-group">
+            <label for="birth-time" class="form-label">Время рождения <span class="optional">(необязательно)</span></label>
+            <input id="birth-time" class="form-input" type="text" inputmode="numeric"
+              placeholder="ЧЧ:ММ" maxlength="5" spellcheck="false">
+          </div>
+          <button id="chart-submit" class="btn-gold full-width">Рассчитать карту ✨</button>
+        </div>
+
+        <!-- Result (shown when birth data exists) -->
+        <div id="chart-result" class="hidden">
+          <h2 class="section-title">Твоя натальная карта</h2>
+
+          <div class="natal-card">
+            <p id="chart-sun" class="natal-planet"></p>
+            <p id="chart-sun-desc" class="natal-desc"></p>
+          </div>
+          <div class="natal-card">
+            <p id="chart-moon" class="natal-planet"></p>
+            <p id="chart-moon-desc" class="natal-desc"></p>
+          </div>
+          <div class="natal-card">
+            <p id="chart-asc" class="natal-planet"></p>
+            <p id="chart-asc-desc" class="natal-desc"></p>
+          </div>
+
+          <button class="btn-ghost full-width" onclick="localStorage.removeItem('userBirth'); location.reload();">
+            Ввести другую дату
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COMPAT -->
+    <section class="tab-pane hidden" data-tab="compat">
+      <div class="pane-scroll">
+
+        <h2 class="section-title">Совместимость</h2>
+        <p class="section-sub">Выбери знак партнёра</p>
+
+        <div id="compat-sign-grid" class="compat-grid"></div>
+
+        <div id="compat-result" class="hidden">
+          <div class="compat-result-card">
+            <p id="compat-pair" class="compat-pair-text"></p>
+            <p id="compat-stars" class="compat-stars"></p>
+            <p id="compat-title" class="compat-title"></p>
+            <p id="compat-text" class="compat-text"></p>
+          </div>
+          <button id="compat-share" class="btn-primary full-width">
+            📤 Поделиться с другом
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ORACLE -->
+    <section class="tab-pane hidden" data-tab="oracle">
+      <div class="pane-scroll oracle-pane">
+
+        <h2 class="section-title">Оракул</h2>
+        <p class="section-sub">Нажми на печеньку, чтобы получить послание</p>
+
+        <div id="oracle-cookie-wrap" class="oracle-cookie-wrap">
+          <button id="oracle-cookie" class="oracle-cookie" aria-label="Открыть предсказание">
+            🥠
+          </button>
+        </div>
+
+        <div id="oracle-text-block" class="oracle-result hidden">
+          <div class="oracle-card">
+            <p class="oracle-label">Послание дня</p>
+            <p id="oracle-prediction" class="oracle-text"></p>
+          </div>
+          <button class="btn-ghost full-width" onclick="renderOracle()">
+            ↻ Ещё одно послание
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Tab bar -->
+  <nav class="tab-bar" role="tablist">
+    <button class="tab-btn active" data-tab="today" role="tab" aria-label="Мой день">
+      <span class="tab-icon">✨</span>
+      <span class="tab-label">День</span>
+    </button>
+    <button class="tab-btn" data-tab="moon" role="tab" aria-label="Луна">
+      <span class="tab-icon">🌙</span>
+      <span class="tab-label">Луна</span>
+    </button>
+    <button class="tab-btn" data-tab="chart" role="tab" aria-label="Натальная карта">
+      <span class="tab-icon">🌟</span>
+      <span class="tab-label">Карта</span>
+    </button>
+    <button class="tab-btn" data-tab="compat" role="tab" aria-label="Совместимость">
+      <span class="tab-icon">💞</span>
+      <span class="tab-label">Пара</span>
+    </button>
+    <button class="tab-btn" data-tab="oracle" role="tab" aria-label="Оракул">
+      <span class="tab-icon">🥠</span>
+      <span class="tab-label">Оракул</span>
+    </button>
+  </nav>
+
+</div><!-- /main-screen -->
+
+<!-- ── SETTINGS OVERLAY ──────────────────────────────────────────────────────── -->
+<div id="settings-overlay" class="overlay hidden">
+  <div class="overlay-sheet">
+    <div class="overlay-header">
+      <h3 class="overlay-title">Настройки</h3>
+      <button id="settings-close" class="icon-btn" aria-label="Закрыть">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label for="settings-sign" class="form-label">Мой знак зодиака</label>
+      <select id="settings-sign" class="form-input">
+        <option value="aries">♈ Овен</option>
+        <option value="taurus">♉ Телец</option>
+        <option value="gemini">♊ Близнецы</option>
+        <option value="cancer">♋ Рак</option>
+        <option value="leo">♌ Лев</option>
+        <option value="virgo">♍ Дева</option>
+        <option value="libra">♎ Весы</option>
+        <option value="scorpio">♏ Скорпион</option>
+        <option value="sagittarius">♐ Стрелец</option>
+        <option value="capricorn">♑ Козерог</option>
+        <option value="aquarius">♒ Водолей</option>
+        <option value="pisces">♓ Рыбы</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="settings-notify" class="form-label">Время уведомлений</label>
+      <select id="settings-notify" class="form-input">
+        <option value="">Отключены</option>
+        <option value="07:00">07:00</option>
+        <option value="08:00">08:00</option>
+        <option value="09:00">09:00</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+      </select>
+    </div>
+
+    <button id="settings-save" class="btn-primary full-width">Сохранить</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
