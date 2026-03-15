@@ -336,6 +336,10 @@ ul { list-style: none; }
   background: var(--card); border-radius: var(--r); padding: 14px;
   border: 1px solid var(--card-border); box-shadow: var(--shadow);
   display: flex; flex-direction: column; gap: 4px;
+  transition: transform var(--t), box-shadow var(--t);
+}
+.mini-card[style*="cursor"]:active {
+  transform: scale(0.97); box-shadow: none;
 }
 
 .mini-label {
