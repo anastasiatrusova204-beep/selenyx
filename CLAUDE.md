@@ -1,203 +1,135 @@
-# CLAUDE.md — инструкции для Claude
+# tg-app/CLAUDE.md — документация Mini App Selenyx
 
-## О проекте
-Selenyx — Telegram-бот с ежедневными астрологическими подсказками (энергия дня, положение Луны).
-Аудитория: женщины и мужчины 20–45 лет, Россия и СНГ. Бюджет MVP: 5 000 ₽.
+## Файлы
 
-## Стиль общения
-- Всегда отвечать на **русском языке**
-- Объяснять как для новичка — просто, без терминологии
-- Делать всё самому, не перекладывать на пользователя если возможно
-- Ответы короткие и конкретные
+| Файл | Назначение |
+|------|-----------|
+| `index.html` | HTML-структура: сплэш, онбординг, 5 вкладок, оверлей настроек |
+| `style.css` | Все стили: CSS-переменные, компоненты, анимации, тёмная тема |
+| `data.js` | Контентные данные + вспомогательные функции расчётов |
+| `app.js` | Логика навигации, Telegram SDK, рендеринг вкладок |
 
-## Как запустить бота локально
-```bash
-# Убить старый процесс и запустить заново (sleep 6 обязателен — TelegramConflictError)
-pkill -9 -f "bot.py" 2>/dev/null; sleep 6
-venv/bin/python3 bot.py > bot.log 2>&1 &
-sleep 8 && cat bot.log
+---
+
+## Архитектура
+
+```
+index.html загружает data.js → app.js
+app.js инициализирует tg (Telegram Web App SDK)
+DOMContentLoaded → initSplash()
+  ├── если localStorage.userSign → showScreen('main') → initMain()
+  └── иначе → showScreen('onboarding') → initOnboarding()
 ```
 
-## Как задеплоить на Railway
-```bash
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway up --service selenyx-bot
+### Экраны (в index.html)
+- `#splash-screen` — логотип, 1.6 сек
+- `#onboarding-screen` — 3 слайда (приветствие, что внутри, выбор знака)
+- `#main-screen` — хедер + 5 вкладок + таббар
+
+### Оверлеи
+- `#settings-overlay` — выбор знака и времени уведомлений
+
+---
+
+## Вкладки
+
+| data-tab | Функция рендера | Кэш |
+|----------|-----------------|-----|
+| `today`  | `renderToday()` | `ssGet('td')` |
+| `moon`   | `renderMoon()` | `ssGet('md')` |
+| `chart`  | `renderChart()` | `localStorage.userBirth` |
+| `compat` | `renderCompat()` | нет (быстро) |
+| `oracle` | `renderOracle()` | нет (случайно) |
+
+---
+
+## Где менять контент
+
+### Знаки, фазы Луны, элементы
+→ `data.js`, массив `SIGNS` (строка ~5)
+
+### Советы по фазам (хорошо/избегай)
+→ `data.js`, объект `PHASE_TIPS` (~строка 70)
+
+### Подсказки по дням недели
+→ `data.js`, объект `WEEKDAY_HINTS` (~строка 140) — ключи 0–6 (0=воскресенье)
+
+### Энергия Луны в знаке
+→ `data.js`, объект `MOON_SIGN_ENERGY` (~строка 155)
+
+### Домены по знаку (здоровье/работа/любовь/психология)
+→ `data.js`, объект `DOMAINS` (~строка 180) — ключ = id знака
+
+### Предсказания оракула
+→ `data.js`, массив `PREDICTIONS` (~строка 100) — добавляй строки свободно
+
+### Совместимость
+→ `data.js`, объект `COMPAT` (~строка 120) — ключ = `${elem1}_${elem2}`
+
+### Лунные дни (символ, энергия, практика)
+→ `data.js`, объект `LUNAR_DAYS` (~строка 215) — ключи 1–30
+
+### Нумерология
+→ `data.js`, объект `NUMEROLOGY` (~строка 130) — ключи 1–9
+
+---
+
+## Сессионный кэш (sessionStorage)
+
+Ключи имеют дату-суффикс через `_dk(k)`:
+- `td_ДД.ММ.ГГГГ` — данные вкладки «День»
+- `md_ДД.ММ.ГГГГ` — данные вкладки «Луна»
+
+После полуночи ключ автоматически не совпадёт → свежий расчёт.
+
+---
+
+## localStorage (постоянное хранилище)
+
+- `userSign` — id знака зодиака (напр. `'aries'`)
+- `userBirth` — JSON `{date: 'ДД.ММ.ГГГГ', time: 'ЧЧ:ММ'}`
+- `notifyTime` — строка времени, напр. `'09:00'`
+
+---
+
+## Тёмная тема
+
+`style.css` использует класс `.dark` на `<html>`.
+В `app.js` функция `applyTheme()` добавляет/убирает класс по `tg.colorScheme`.
+
+---
+
+## Telegram SDK
+
+```javascript
+tg.ready()          // вызывается в app.js до всего
+tg.expand()         // разворачивает на весь экран
+tg.HapticFeedback.impactOccurred('light')   // лёгкая вибрация
+tg.HapticFeedback.notificationOccurred('success')
+tg.BackButton.show() / .hide() / .onClick()
+tg.showPopup({ message, buttons }, callback)
 ```
 
-## Откат на Railway (если деплой сломал что-то)
-1. Открыть https://railway.com/project/f53049ff-7cb8-43a4-bffd-d6dc455ec19a
-2. Сервис selenyx-bot → Deployments → найти последний рабочий → «Redeploy»
-3. Или через CLI: `~/bin/railway rollback --service selenyx-bot` (откатывает на предыдущий деплой)
+---
 
-## DEMO_MODE — тестирование Mini App в браузере
-Mini App в браузере вне Telegram не проходит HMAC-аутентификацию → 401.
-Чтобы открыть Mini App в браузере без Telegram:
-```bash
-# Добавить переменную на Railway (временно):
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway variables set DEMO_MODE=true --service selenyx-bot
-# После тестирования — отключить:
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway variables set DEMO_MODE=false --service selenyx-bot
-```
-В DEMO_MODE user = {id: 999999999, first_name: "Демо"} — реальных данных нет.
+## Как открыть в браузере (без Telegram)
 
-## Как посмотреть аналитику (воронку)
-```bash
-# Статистика через API (нужен Telegram initData пользователя из ADMIN_IDS)
-# Или напрямую через SQLite на Railway:
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway shell --service selenyx-bot
-# Внутри контейнера:
-sqlite3 /data/selenyx.db "SELECT event, COUNT(*) FROM event_log GROUP BY event ORDER BY 2 DESC;"
-sqlite3 /data/selenyx.db "SELECT COUNT(DISTINCT user_id) FROM event_log WHERE ts >= datetime('now','-7 days');"
-```
+1. Перейти в папку `tg-app/`
+2. Открыть `index.html` через live-server или Python:
+   ```bash
+   python3 -m http.server 8080 --directory tg-app/
+   # → http://localhost:8080
+   ```
+3. SDK-заглушка в `app.js` эмулирует `window.Telegram.WebApp` — всё работает.
 
-## Как остановить бота
-```bash
-pkill -9 -f "bot.py"
-```
+---
 
-## Стек
-- Python 3.9.6
-- aiogram 3.13.1 — фреймворк бота
-- kerykeion 4.26.3 — астро-расчёты (Swiss Ephemeris)
-- aiosqlite 0.20.0 — база данных
-- APScheduler 3.10.4 — планировщик уведомлений
-- python-dotenv 1.0.1
-- zoneinfo (стандартная библиотека) — часовой пояс Europe/Moscow
-- venv в папке проекта: `venv/bin/python3`
+## Что НЕ в первой версии
 
-## Структура
-```
-bot.py           — хендлеры бота + scheduler + main() (1545 строк)
-data.py          — все контентные константы (~1044 строк, из bot.py)
-astro.py         — астро-расчёты: get_moon_data, get_natal_chart, etc.
-db.py            — функции БД + таблицы users + event_log (аналитика)
-api.py           — aiohttp REST API для Mini App + HMAC-аутентификация
-webapp/
-  index.html     — полноценный SPA: 4 вкладки с реальным контентом из API
-.env             — токен BOT_TOKEN и ADMIN_IDS (не коммитить!)
-.env.example     — шаблон переменных окружения
-selenyx.db       — SQLite база данных (создаётся автоматически, на Railway в /data/)
-requirements.txt — зависимости
-Dockerfile       — сборка для Railway (python:3.11-slim + libsqlite3)
-railway.toml     — конфиг Railway (builder=dockerfile)
-Procfile         — резервный запуск для других платформ
-```
+- Реальные API-запросы к серверу (данные из data.js)
+- Push-уведомления через Railway
+- Авторизация через Telegram HMAC
+- Анимация взрыва частиц
+- Premium gates / Telegram Stars оплата
 
-## Mini App (SPA)
-- Вход: Telegram → кнопка «🌙 Перейти в приложение →» → Mini App
-- Поток (первый визит): карусель-онбординг (6 слайдов) → Луна → взрыв частиц → 4 карточки → тап → вкладки
-- Поток (повторный визит): сплэш → Луна → взрыв → 4 карточки → тап → вкладки
-- Вкладки: ✨ Мой день / 🌙 Луна / 🌟 Карта / 💞 Совместимость
-- API auth: `X-Telegram-Init-Data` (HMAC-подпись) на всех /api/* эндпоинтах
-- Premium gates: Прогноз на год / Детальная совместимость (заглушка, Шаг 12)
-- Кнопка «назад» убрана из header — приложение самодостаточно, нет навигации наружу
-- BackButton Telegram: только закрывает экран fortune cookie (предсказание)
-- Scroll-reveal: IntersectionObserver + двойной rAF для карточек при прокрутке
-- Tile-row: 2×2 grid (фаза + знак Луны) в renderToday() и renderMoon()
-- trial_ends передаётся из /api/me, на лендинге — живой обратный отсчёт (setInterval)
-- /resetme команда: пользователь удаляет свои данные (самосервис, без прав админа)
-
-## API эндпоинты (api.py)
-```
-GET  /webapp              → index.html
-GET  /health              → "ok"
-GET  /api/me              → {name, sign, streak, notify_time, has_birth, tier, trial_ends}  + log: app_open
-GET  /api/today           → {moon, phase_energy, domains, prediction, extras, color}  + log: today_view
-GET  /api/moon            → {phase, sign, degree, lunar_day, aspects, retrogrades}  + log: moon_view
-GET  /api/moon/calendar   → {text: ...}
-GET  /api/natal           → {has_data, sun, moon, asc}  + log: natal_view
-POST /api/natal           → body:{birth_date, birth_time}  + log: natal_submit
-GET  /api/compat?sign=leo → {rating, title, text, user_sign, target_sign}  + log: compat_check
-POST /api/notify          → body:{time}  + log: notify_set
-POST /api/sign            → body:{sign}  + log: sign_set
-GET  /api/admin/stats     → {total_users, active_7d, active_1d, today_views_7d, ...}  (только ADMIN_IDS)
-```
-
-## Статус разработки (план в PLAN.md)
-- [x] Шаг 1–5 — бот, онбординг, /moon, /today, меню
-- [x] Шаг 5.5 — UX: вкладки, fortune cookie full-screen, прогрессивное раскрытие
-- [x] Шаг 6.5 — персонализация: 96 предсказаний + 192 пункта вкладок
-- [x] Шаг 10.7 — 4 домена по знаку Луны + лунные дни + аспекты
-- [x] Шаг 6 — деплой на Railway ✅
-- [x] Шаг 8 — утренние уведомления (APScheduler, выбор времени 07–11)
-- [x] Шаг 7.5 — нумерология дня + число судьбы + личный год
-- [x] Шаг 7.7 — цвет дня (по планете дня + знаку Луны)
-- [x] Шаг 10 — лунный календарь (переходы фаз на 30 дней)
-- [x] Шаг 10.5 — совместимость знаков (11 комбинаций по элементам)
-- [x] Шаг 10.6 — ретроградные планеты (5 планет, показ в «Мой день»)
-- [x] Шаг 11 — натальная карта (Солнце + Луна + Асцендент)
-- [x] FAQ + Словарь в «О боте» (6 терминов, 6 вопросов)
-- [x] UX-сессия (март 2026) — карусель онбординга, scroll-reveal, tile-row 2×2, trial countdown, /resetme
-- [x] Виральность в совместимости — кнопка «Поделиться» (t.me/share/url)
-- [x] Итог недели — _weekly_summary_text() при streak кратном 7
-- [ ] Шаг 7 — закрытый тест с реальными пользователями **(СЛЕДУЮЩИЙ)**
-- [ ] Шаг 12 — монетизация (Telegram Stars)
-
-## Главное меню (актуальное)
-```
-      ✨ Мой день
-📅 Календарь    🔔 Уведомления
-🌟 Моя карта    💞 Совместимость
-✏️ Сменить знак  ℹ️ О боте
-```
-
-## Вкладки «Мой день»
-```
-🏥 Здоровье  |  💼 Работа
-❤️ Отношения  |  🧠 Психология
-┌──────────────────────────────┐  ← tile-row 2×2 (фаза + знак Луны)
-│ 🌙 Фаза  │  🌙 Луна         │
-└──────────────────────────────┘
-🎨 Цвет дня   🔢 Число   (карточки ниже домена)
-🥠 Предсказание дня  (отдельный full-screen экран)
-```
-
-## Ключевые константы в data.py
-- `LUNAR_DAYS` — 30 лунных дней × {symbol, energy, practice}
-- `MOON_ASPECT_HINTS` — 25 аспектов (5 планет × 5 видов)
-- `PHASE_ENERGY` — 8 фаз × {intro, good, avoid, tip}
-- `ZODIAC_PHASE_TIPS` — 96 предсказаний (12 знаков × 8 фаз)
-- `ZODIAC_PHASE_EXTRAS` — 192 пункта вкладок (12 × 8 × good/avoid)
-- `MOON_SIGN_DOMAINS` — 48 блоков (12 знаков × 4 домена)
-- `PHASE_DOMAIN_CONTEXT` — 32 контекста (8 фаз × 4 домена)
-- `NUMEROLOGY_DAY` — 9 чисел дня
-- `NUMEROLOGY_LIFE_PATH` — 9 чисел судьбы
-- `NUMEROLOGY_PERSONAL_YEAR` — 9 чисел личного года
-- `_COMPAT_TABLE` — 11 комбинаций совместимости по элементам
-- `_RETRO_HINTS` — 5 планет × {emoji, name, hint}
-- `SUN_SIGN_DESC`, `MOON_SIGN_DESC`, `ASC_SIGN_DESC` — 36 описаний для натальной карты
-
-## DB-схема (users)
-user_id, first_name, zodiac_sign, created_at, last_visit, streak, notify_time, birth_date, birth_time, tier
-
-## Railway Volume
-- DB_PATH автоопределяется: `/data/selenyx.db` на Railway, рядом с bot.py локально
-- Volume ID: 649e23c5, примонтирован в /data
-
-## Форматирование сообщений бота
-- HTML-разметка (ParseMode.HTML настроен в bot.py)
-- `<b>текст</b>` — жирный заголовок
-- `<tg-spoiler>текст</tg-spoiler>` — скрытый текст (fortune cookie, личный год)
-- Эмодзи как иконки пунктов, не как декор заголовков
-- Один эмодзи на экран в заголовке, не повторять
-- Никакой длинной линии `━━━━━━━━━` — вместо неё пустая строка
-- Тон: тёплый, поддерживающий. Не «предсказывает» — «помогает понять ритм дня»
-
-## Важные файлы документации
-- PROJECT.md — паспорт проекта (аудитория, функции, монетизация)
-- RESEARCH.md — исследование рынка (конкуренты, технологии, цены)
-- PLAN.md — пошаговый план разработки (12 шагов)
-- KNOWLEDGE.md — база знаний для контента (12 знаков Луны, 30 лунных дней)
-- ЗНАНИЯ.md — глоссарий для пользователей (без технической терминологии)
-- bot_brief.md — полное ТЗ по методологии трёх экспертов
-
-## Инсайты из UX-экспертизы (март 2026)
-- Главная проблема retention: на 7-й день нет нового крючка → нужен «итог недели»
-- Виральность не встроена: совместимость показывается, но не шарится
-- Пользователь не видит прогресса — нужна статистика использования
-- Меню перегружено — рассмотреть сокращение до 4–5 кнопок
-- Оффер через боль/результат, не через «астрологию»
-
-## Что НЕ делать
-- Не добавлять платную подписку до набора 100+ активных пользователей
-- Не усложнять: если можно проще — делать проще
-- Не коммитить .env — токен бота там
+Это standalone-версия для тестирования UX вне сервера.
