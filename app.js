@@ -272,7 +272,7 @@ function applyTodayData(data) {
 
   // Day number
   setText('today-daynum', dayNum);
-  setText('today-daynum-hint', NUMEROLOGY[dayNum]?.short || '');
+  setText('today-daynum-hint', NUMEROLOGY[dayNum]?.name || '');
 
   // Weekday hint
   setText('today-hint', hint);
@@ -281,11 +281,51 @@ function applyTodayData(data) {
   setText('today-good', phaseTips.good || '');
   setText('today-avoid', phaseTips.avoid || '');
 
-  // Domain buttons → открывают bottom sheet
+  // Color card → sheet
+  const colorCard = $('today-color')?.closest('.mini-card');
+  if (colorCard) {
+    colorCard.style.cursor = 'pointer';
+    colorCard.addEventListener('click', () => {
+      tg.HapticFeedback.impactOccurred('medium');
+      openSheet({
+        icon: `<span style="display:inline-block;width:40px;height:40px;background:${color.hex};border-radius:50%"></span>`,
+        title: color.name,
+        text: color.hint,
+        sections: [{ label: '🪐 Планета дня', sub: color.planet }],
+      });
+    });
+  }
+
+  // Day number card → sheet
+  const numCard = $('today-daynum')?.closest('.mini-card');
+  if (numCard) {
+    numCard.style.cursor = 'pointer';
+    numCard.addEventListener('click', () => {
+      tg.HapticFeedback.impactOccurred('medium');
+      const num = NUMEROLOGY[dayNum];
+      openSheet({
+        icon: `<span style="font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--gold)">${dayNum}</span>`,
+        title: num?.name || `Число ${dayNum}`,
+        text: num?.hint || '',
+        sections: [],
+      });
+    });
+  }
+
+  // Domain buttons → sheet
   document.querySelectorAll('.domain-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       tg.HapticFeedback.impactOccurred('medium');
-      openDomainSheet(btn.dataset.domain, domains, phaseTips);
+      const meta = DOMAIN_META[btn.dataset.domain] || { label: btn.dataset.domain, icon: '✨' };
+      openSheet({
+        icon: meta.icon,
+        title: meta.label,
+        text: domains[btn.dataset.domain] || '',
+        sections: [
+          { label: '✦ Сегодня хорошо', sub: phaseTips?.good  || '' },
+          { label: '✦ Избегай',        sub: phaseTips?.avoid || '', muted: true },
+        ],
+      });
     });
   });
 
@@ -314,30 +354,37 @@ const DOMAIN_META = {
   psych:  { label: 'Эмоции',    icon: '🧠' },
 };
 
-function openDomainSheet(domain, domains, phaseTips) {
-  const meta  = DOMAIN_META[domain] || { label: domain, icon: '✨' };
-  const text  = domains[domain] || '';
-  const good  = phaseTips?.good  || '';
-  const avoid = phaseTips?.avoid || '';
-
-  setText('sheet-domain-icon',  meta.icon);
-  setText('sheet-domain-title', meta.label);
+// { icon: html|text, title, text, sections: [{label, sub, muted?}] }
+function openSheet({ icon, title, text, sections }) {
+  setHTML('sheet-domain-icon',  icon);
+  setText('sheet-domain-title', title);
   setText('sheet-domain-text',  text);
-  setText('sheet-phase-good',   good);
-  setText('sheet-phase-avoid',  avoid);
+
+  // Динамические секции
+  const body = $('sheet-sections');
+  if (body) {
+    body.innerHTML = sections
+      .filter(s => s.sub)
+      .map(s => `
+        <div class="sheet-section">
+          <p class="sheet-label${s.muted ? ' muted' : ''}">${s.label}</p>
+          <p class="sheet-sub${s.muted ? ' muted' : ''}">${s.sub}</p>
+        </div>`)
+      .join('');
+  }
 
   const sheet = $('domain-sheet');
   sheet.classList.remove('hidden');
   requestAnimationFrame(() => sheet.classList.add('open'));
 
   tg.BackButton.show();
-  const close = () => closeDomainSheet();
+  const close = () => closeSheet();
   tg.BackButton.onClick(close);
   $('domain-sheet-close')?.addEventListener('click', close, { once: true });
   $('domain-sheet-backdrop')?.addEventListener('click', close, { once: true });
 }
 
-function closeDomainSheet() {
+function closeSheet() {
   const sheet = $('domain-sheet');
   sheet.classList.remove('open');
   tg.BackButton.hide();
