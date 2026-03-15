@@ -264,10 +264,9 @@ function applyTodayData(data) {
     </div>
   `);
 
-  // Color card
+  // Color card — название цветом дня
   setHTML('today-color', `
-    <span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle"></span>
-    ${color.name}
+    <span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span>
   `);
 
   // Day number
