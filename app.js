@@ -191,6 +191,24 @@ function finishOnboarding() {
   });
 }
 
+// ─── Bot CTA banner ───────────────────────────────────────────────────────────
+function initBotCta() {
+  if (localStorage.getItem('botCtaDismissed')) return;
+  const banner = $('bot-cta');
+  if (!banner) return;
+  banner.classList.remove('hidden');
+
+  $('bot-cta-connect')?.addEventListener('click', () => {
+    localStorage.setItem('botCtaDismissed', '1');
+    banner.classList.add('hidden');
+  });
+  $('bot-cta-close')?.addEventListener('click', () => {
+    localStorage.setItem('botCtaDismissed', '1');
+    banner.classList.add('hidden');
+    tg.HapticFeedback.impactOccurred('light');
+  });
+}
+
 // ─── Main / Tabs ──────────────────────────────────────────────────────────────
 function initMain() {
   // Tab buttons
@@ -202,6 +220,7 @@ function initMain() {
     });
   });
   switchTab('today');
+  initBotCta();
 }
 
 function switchTab(tab) {
