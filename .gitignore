@@ -24,6 +24,7 @@ cache/
 *.html
 !webapp/*.html
 !landing/*.html
+!tg-app/*.html
 
 # SQLite WAL-файлы
 *.db-shm
