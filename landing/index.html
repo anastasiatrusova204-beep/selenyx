@@ -634,7 +634,7 @@
       display: flex; flex-direction: column;
       align-items: center; gap: 20px; text-align: center;
     }
-    .ft-logo { font-family: var(--fd); font-size: 22px; font-weight: 600; color: var(--gold-l); letter-spacing: .05em; }
+    .ft-logo { font-family: var(--fd); font-size: 22px; font-weight: 600; color: var(--gold-l); letter-spacing: .05em; display:flex; align-items:center; gap:8px; }
     .ft-links { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; }
     .ft-links a { font-size: 13px; color: var(--dim); transition: color .2s; }
     .ft-links a:hover { color: var(--gold); }
@@ -702,7 +702,7 @@
 
     /* ── BACK TO TOP ─────────────────────────────────────────────── */
     .btt {
-      position:fixed; bottom:28px; right:28px; z-index:190;
+      position:fixed; bottom:calc(28px + env(safe-area-inset-bottom)); right:28px; z-index:190;
       width:46px; height:46px; border-radius:50%;
       background:rgba(200,169,110,.12); border:1px solid var(--border-g);
       backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
@@ -826,6 +826,35 @@
     }
     .cf-again:hover { background:rgba(200,169,110,.09); }
 
+    /* ── LEGAL MODAL ─────────────────────────────────────────────── */
+    .legal-overlay {
+      position:fixed; inset:0; z-index:900;
+      background:rgba(0,0,0,.72); backdrop-filter:blur(4px);
+      display:flex; align-items:center; justify-content:center;
+      padding:20px; opacity:0; pointer-events:none;
+      transition:opacity .3s;
+    }
+    .legal-overlay.open { opacity:1; pointer-events:auto; }
+    .legal-box {
+      background:var(--bg2); border:1px solid var(--border-g);
+      border-radius:var(--r); padding:36px 32px; max-width:580px; width:100%;
+      max-height:80vh; overflow-y:auto; position:relative;
+      transform:translateY(16px);
+      transition:transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    .legal-overlay.open .legal-box { transform:translateY(0); }
+    .legal-close {
+      position:absolute; top:16px; right:16px;
+      color:var(--dim); cursor:pointer;
+      padding:6px; border-radius:8px;
+      transition:color .2s, background .2s;
+    }
+    .legal-close:hover { color:var(--text); background:rgba(255,255,255,.07); }
+    .legal-title { font-family:var(--fd); font-size:26px; font-weight:600; color:var(--text); margin-bottom:20px; }
+    .legal-body { font-size:14px; color:var(--dim); line-height:1.8; }
+    .legal-body h3 { font-family:var(--fd); font-size:17px; color:var(--text); margin:20px 0 8px; }
+    .legal-body p { margin-bottom:12px; }
+
     /* ── SCROLL PROGRESS ─────────────────────────────────────────── */
     .scroll-prog {
       position:fixed; top:0; left:0; z-index:999;
@@ -860,6 +889,7 @@
     <a href="#features">Функции</a>
     <a href="#faq">FAQ</a>
     <a href="#pricing">Цены</a>
+    <a href="#contact">Контакт</a>
   </div>
   <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
      class="btn-tg" aria-label="Открыть Selenyx в Telegram" onclick="track('nav')">
@@ -913,7 +943,7 @@
             Открыть в Telegram
           </a>
           <p class="hero-hint">
-            Астрономические данные: <b>Swiss Ephemeris (NASA JPL)</b><br>
+            Реальное положение планет, не шаблоны<br>
             Без регистрации · Без кредитки · Бесплатно
           </p>
         </div>
@@ -1318,28 +1348,11 @@
           <div class="prow"><span class="pname">💞 Детальная совместимость</span><span class="pprice">490 ₽</span></div>
         </div>
         <p class="pnote"><strong>Без подписки и авторекурринга.</strong> Telegram Stars — встроенная валюта Telegram. Покупки защищены стандартными гарантиями платформы.</p>
+        <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+           class="cta" aria-label="Открыть Selenyx в Telegram" onclick="track('pricing-premium')">
+          Открыть в Telegram
+        </a>
       </div>
-    </div>
-  </div>
-</section>
-
-<div class="rule"></div>
-
-<!-- ── FINAL CTA ─────────────────────────────────────────────────── -->
-<section class="fcta" id="start">
-  <div class="wrap">
-    <div class="fcta-box r">
-      <span class="fcta-moon" aria-hidden="true">🌙</span>
-      <h2>Готова к первому прогнозу?</h2>
-      <p>За 30 секунд. Без регистрации.<br>Без кредитной карты.</p>
-      <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
-         class="cta" style="display:inline-flex;" aria-label="Открыть Selenyx в Telegram" onclick="track('final')">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
-        </svg>
-        Открыть в Telegram
-      </a>
-      <p class="fcta-note">Уже работает. Нужен только Telegram.</p>
     </div>
   </div>
 </section>
@@ -1397,6 +1410,38 @@
   </div>
 </section>
 
+<div class="rule"></div>
+
+<!-- ── FINAL CTA ─────────────────────────────────────────────────── -->
+<section class="fcta" id="start">
+  <div class="wrap">
+    <div class="fcta-box r">
+      <span class="fcta-moon" aria-hidden="true">🌙</span>
+      <h2>Готова к первому прогнозу?</h2>
+      <p>За 30 секунд. Без регистрации.<br>Без кредитной карты.</p>
+      <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+         class="cta" style="display:inline-flex;" aria-label="Открыть Selenyx в Telegram" onclick="track('final')">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
+        </svg>
+        Открыть в Telegram
+      </a>
+      <p class="fcta-note">Уже работает. Нужен только Telegram.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── LEGAL MODAL ───────────────────────────────────────────────── -->
+<div class="legal-overlay" id="legalOverlay" role="dialog" aria-modal="true" aria-labelledby="legalTitle" onclick="if(event.target===this)closeLegal()">
+  <div class="legal-box">
+    <button class="legal-close" onclick="closeLegal()" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="legalTitle" class="legal-title"></h2>
+    <div class="legal-body" id="legalBody"></div>
+  </div>
+</div>
+
 <!-- ── BACK TO TOP ────────────────────────────────────────────────── -->
 <button class="btt" id="btt" aria-label="Прокрутить наверх" onclick="window.scrollTo({top:0,behavior:'smooth'})">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1409,12 +1454,12 @@
 <footer>
   <div class="wrap">
     <div class="ft">
-      <div class="ft-logo">🌙 Selenyx</div>
+      <div class="ft-logo"><div class="logo-moon" style="width:20px;height:20px;" aria-hidden="true"></div>Selenyx</div>
       <nav class="ft-links" aria-label="Ссылки footer">
         <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer">Открыть в Telegram</a>
-        <a href="#">Политика конфиденциальности</a>
-        <a href="#">Условия использования</a>
-        <a href="mailto:hello@selenyx.app">Контакт</a>
+        <a href="#" onclick="openLegal('privacy');return false;">Политика конфиденциальности</a>
+        <a href="#" onclick="openLegal('terms');return false;">Условия использования</a>
+        <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
       </nav>
       <p class="ft-disc">Для саморефлексии и вдохновения, не является астрологической консультацией. Астрономические расчёты: Swiss Ephemeris (kerykeion), данные NASA JPL.</p>
       <p class="ft-copy">© 2026 Selenyx</p>
@@ -1804,7 +1849,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 })();
 
 /* ── CONTACT FORM ─────────────────────────────────────────────────── */
-function cfSend(){
+async function cfSend(){
   const name  = document.getElementById('cfName');
   const email = document.getElementById('cfEmail');
   const msg   = document.getElementById('cfMsg');
@@ -1818,16 +1863,44 @@ function cfSend(){
       setTimeout(()=>{ el.style.animation=''; el.style.borderColor=''; }, 400);
     }
   });
+  /* Валидация email */
+  if(email.value.trim() && (!email.value.includes('@') || !email.value.includes('.'))){
+    valid = false;
+    email.style.borderColor='rgba(255,100,100,.55)';
+    email.style.animation='shake .35s ease';
+    setTimeout(()=>{ email.style.animation=''; email.style.borderColor=''; }, 400);
+  }
   if(!valid) return;
 
   const btn=document.getElementById('cfSubmit');
   btn.disabled=true;
   btn.innerHTML='<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(10,10,26,.4);border-top-color:#0a0a1a;border-radius:50%;animation:spin .7s linear infinite"></span>&nbsp;Отправка…';
 
-  setTimeout(()=>{
-    document.getElementById('cfOk').classList.add('show');
-    track('contact-form');
-  }, 800);
+  try{
+    /* FormSubmit.co — замени EMAIL на свою почту (регистрация не нужна) */
+    const r = await fetch('https://formsubmit.co/ajax/selenyx.feedback@gmail.com',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({
+        name: name.value.trim(),
+        email: email.value.trim(),
+        message: msg.value.trim(),
+        _subject: 'Selenyx — новое сообщение с лендинга',
+        _captcha: 'false'
+      })
+    });
+    if(r.ok){
+      document.getElementById('cfOk').classList.add('show');
+      track('contact-form');
+    } else throw new Error('server');
+  } catch{
+    btn.disabled=false;
+    btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg> Отправить`;
+    /* Запасной вариант — прямой контакт в Telegram */
+    if(confirm('Не удалось отправить форму. Написать напрямую в Telegram?')){
+      window.open('https://t.me/Selenyx_mybot','_blank');
+    }
+  }
 }
 
 function cfReset(){
@@ -1837,6 +1910,54 @@ function cfReset(){
   btn.disabled=false;
   btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg> Отправить`;
 }
+
+/* ── LEGAL MODAL ─────────────────────────────────────────────────── */
+const _legal = {
+  privacy: {
+    title: 'Политика конфиденциальности',
+    body: `
+      <p>Последнее обновление: март 2026</p>
+      <h3>Какие данные мы собираем</h3>
+      <p>Selenyx хранит только: знак зодиака, дату рождения (опционально), время уведомлений и статистику использования. Авторизация происходит через Telegram — пароли и email не используются.</p>
+      <h3>Как мы используем данные</h3>
+      <p>Данные используются исключительно для формирования персональных астрологических рекомендаций. Данные не передаются третьим лицам и не используются в рекламных целях.</p>
+      <h3>Хранение данных</h3>
+      <p>Данные хранятся на серверах Railway (США). Вы можете удалить свои данные в любой момент командой /resetme в боте.</p>
+      <h3>Контакт</h3>
+      <p>Вопросы по конфиденциальности: <a href="https://t.me/Selenyx_mybot" style="color:var(--gold)">@Selenyx_mybot</a></p>
+    `
+  },
+  terms: {
+    title: 'Условия использования',
+    body: `
+      <p>Последнее обновление: март 2026</p>
+      <h3>О сервисе</h3>
+      <p>Selenyx предоставляет астрологические рекомендации для саморефлексии и вдохновения. Сервис не является астрологической консультацией и не предсказывает будущее.</p>
+      <h3>Использование</h3>
+      <p>Selenyx доступен бесплатно. Расширенный доступ приобретается через Telegram Stars. Все покупки финальны и не подлежат возврату, кроме случаев технической неисправности.</p>
+      <h3>Ограничение ответственности</h3>
+      <p>Рекомендации Selenyx носят информационный характер. Пользователь принимает решения самостоятельно. Selenyx не несёт ответственности за последствия решений, принятых на основе рекомендаций.</p>
+      <h3>Контакт</h3>
+      <p>Вопросы: <a href="https://t.me/Selenyx_mybot" style="color:var(--gold)">@Selenyx_mybot</a></p>
+    `
+  }
+};
+
+function openLegal(type){
+  const data = _legal[type];
+  if(!data) return;
+  document.getElementById('legalTitle').textContent = data.title;
+  document.getElementById('legalBody').innerHTML = data.body;
+  document.getElementById('legalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLegal(){
+  document.getElementById('legalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeLegal();
+});
 </script>
 </body>
 </html>
