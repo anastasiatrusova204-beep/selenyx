@@ -570,7 +570,7 @@ function showCompatResult(target) {
   if (shareBtn) {
     shareBtn.onclick = () => {
       const text = `${myS?.emoji} ${myS?.ru} + ${tgS?.emoji} ${tgS?.ru}: ${result.title} — ${result.rating}% совместимость!\nПроверь свою в @Selenyx_mybot`;
-      const url = `https://t.me/share/url?url=https://t.me/Selenyx_mybot&text=${encodeURIComponent(text)}`;
+      const url = `https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(text)}`;
       window.open(url, '_blank');
       tg.HapticFeedback.impactOccurred('medium');
     };
@@ -606,7 +606,7 @@ function revealFortune() {
     if (shareBtn) {
       shareBtn.onclick = () => {
         const text = `🥠 Оракул говорит:\n«${prediction}»\n\nУзнай своё послание → @Selenyx_mybot`;
-        window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot&text=${encodeURIComponent(text)}`, '_blank');
+        window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(text)}`, '_blank');
         tg.HapticFeedback.impactOccurred('medium');
       };
     }
