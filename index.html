@@ -29,27 +29,27 @@
 
     <!-- Slide 0: Welcome -->
     <div id="ob-slide-0" class="ob-slide">
-      <div class="ob-illustration">🌌</div>
-      <h2 class="ob-title">Добро пожаловать</h2>
-      <p class="ob-text">Selenyx помогает понять энергию каждого дня через положение Луны и астрологические ритмы.</p>
+      <div class="ob-illustration">🌙</div>
+      <h2 class="ob-title">Бывает: день начинается в рассеянности</h2>
+      <p class="ob-text">Selenyx за 30 секунд показывает, что поддерживает тебя сегодня. Реальные астрономические данные. Без терминологии.</p>
     </div>
 
     <!-- Slide 1: What you get -->
     <div id="ob-slide-1" class="ob-slide hidden">
       <div class="ob-illustration">✨</div>
-      <h2 class="ob-title">Что внутри</h2>
+      <h2 class="ob-title">Всё нужное — в одном месте</h2>
       <ul class="ob-list">
-        <li>🌙 Положение и фаза Луны</li>
-        <li>🎨 Цвет и число дня</li>
-        <li>💞 Совместимость знаков</li>
-        <li>🥠 Предсказание оракула</li>
+        <li>🌙 Фаза и знак Луны — каждый день</li>
+        <li>💼 Совет по работе, здоровью, отношениям</li>
+        <li>💞 Совместимость с любым знаком</li>
+        <li>🥠 Послание дня от оракула</li>
       </ul>
     </div>
 
     <!-- Slide 2: Choose sign -->
     <div id="ob-slide-2" class="ob-slide hidden">
       <h2 class="ob-title">Выбери свой знак</h2>
-      <p class="ob-text">Это нужно для персональных подсказок</p>
+      <p class="ob-text">Выбери — и сразу получишь персональный прогноз на сегодня</p>
       <div class="sign-grid">
         <button class="sign-btn" data-sign="aries">♈ Овен</button>
         <button class="sign-btn" data-sign="taurus">♉ Телец</button>
@@ -66,11 +66,14 @@
       </div>
     </div>
 
-    <!-- Dots -->
-    <div class="ob-dots">
-      <span class="ob-dot active"></span>
-      <span class="ob-dot"></span>
-      <span class="ob-dot"></span>
+    <!-- Dots + Skip -->
+    <div class="ob-nav">
+      <div class="ob-dots">
+        <span class="ob-dot active"></span>
+        <span class="ob-dot"></span>
+        <span class="ob-dot"></span>
+      </div>
+      <button id="ob-skip" class="ob-skip-btn">Пропустить</button>
     </div>
 
     <!-- Buttons -->
@@ -102,12 +105,13 @@
 
         <!-- Moon tile row -->
         <div id="today-moon-tile" class="tile-row"></div>
+        <p class="science-note">Данные: Swiss Ephemeris (NASA JPL)</p>
 
-        <!-- Phase tips -->
-        <div class="accent-card">
-          <p class="card-label">Сегодня хорошо</p>
+        <!-- Phase tips — главный блок дня -->
+        <div class="accent-card accent-card--gold">
+          <p class="card-label">✦ Сегодня хорошо</p>
           <p id="today-good" class="card-text"></p>
-          <p class="card-label mt">Избегай</p>
+          <p class="card-label mt">✦ Избегай</p>
           <p id="today-avoid" class="card-text muted"></p>
         </div>
 
@@ -128,6 +132,13 @@
             <p id="today-daynum" class="mini-text big-num"></p>
             <p id="today-daynum-hint" class="mini-text muted small"></p>
           </div>
+        </div>
+
+        <!-- Retention banner (показывается через 3с после первого просмотра) -->
+        <div id="retention-banner" class="retention-banner hidden">
+          <span>📲 Получай прогноз каждое утро</span>
+          <button id="retention-btn" class="retention-action">Включить</button>
+          <button id="retention-close" class="retention-dismiss" aria-label="Закрыть">✕</button>
         </div>
 
         <!-- Domain tabs -->
@@ -256,6 +267,9 @@
             <p class="oracle-label">Послание дня</p>
             <p id="oracle-prediction" class="oracle-text"></p>
           </div>
+          <button id="oracle-share" class="btn-primary full-width">
+            📤 Поделиться посланием
+          </button>
           <button class="btn-ghost full-width" onclick="renderOracle()">
             ↻ Ещё одно послание
           </button>

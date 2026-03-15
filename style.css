@@ -273,6 +273,56 @@ ul { list-style: none; }
   display: flex; flex-direction: column; gap: 6px;
 }
 
+.accent-card--gold {
+  border-left: 3px solid var(--gold);
+  background: linear-gradient(135deg, var(--card) 0%, rgba(200,169,110,0.05) 100%);
+}
+
+/* Дисклеймер под tile-row */
+.science-note {
+  font-size: 10px; color: var(--text-hint);
+  text-align: center; letter-spacing: 0.3px;
+  margin-top: -4px;
+}
+
+/* Retention banner */
+.retention-banner {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--accent-dim); border-radius: var(--r-sm);
+  padding: 12px 14px; border: 1.5px solid var(--accent);
+  animation: fadeInUp 300ms ease;
+}
+
+.retention-banner span { flex: 1; font-size: 13px; color: var(--text); }
+
+.retention-action {
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  background: none; padding: 4px 8px;
+  border: 1.5px solid var(--accent); border-radius: 20px;
+  white-space: nowrap;
+}
+
+.retention-dismiss {
+  font-size: 14px; color: var(--text-hint); padding: 4px;
+  flex-shrink: 0;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ob-nav: dots + skip в одной строке */
+.ob-nav {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; padding: 12px 24px 0;
+}
+
+.ob-skip-btn {
+  font-size: 13px; color: var(--text-hint);
+  text-decoration: underline; padding: 4px;
+}
+
 .card-label {
   font-size: 10px; color: var(--text-hint);
   text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
