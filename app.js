@@ -56,6 +56,9 @@ let userBirth  = null; // {date, time} or null
 let onboarded  = false;
 let moonCache  = null;
 let todayCache = null;
+let calYear    = new Date().getFullYear();
+let calMonth   = new Date().getMonth(); // 0-based
+let _calDaySheetDate = null; // дата открытой шторки
 
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -235,11 +238,10 @@ function switchTab(tab) {
   );
 
   switch (tab) {
-    case 'today':  renderToday();  break;
-    case 'moon':   renderMoon();   break;
-    case 'chart':  renderChart();  break;
-    case 'compat': renderCompat(); break;
-    case 'oracle': renderOracle(); break;
+    case 'today':  renderToday();    break;
+    case 'moon':   renderMoon();     break;
+    case 'cal':    renderCalendar(); break;
+    case 'oracle': renderOracle();   break;
   }
 }
 
@@ -677,6 +679,319 @@ function saveSettings() {
 }
 
 // ─── Header buttons ───────────────────────────────────────────────────────────
+// ─── Calendar tab ─────────────────────────────────────────────────────────────
+
+const _MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь',
+                    'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const _DAYS_RU   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+function _kpLevel(kp) {
+  if (kp == null) return null;
+  if (kp <= 2)    return { cls: 'kp-quiet',    label: 'Тихо' };
+  if (kp <= 4)    return { cls: 'kp-moderate', label: 'Умеренно' };
+  if (kp <= 6)    return { cls: 'kp-storm',    label: 'Буря' };
+  return               { cls: 'kp-severe',   label: 'Сильная буря' };
+}
+
+function _dateKey(y, m, d) {
+  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function _moodKey(y, m) {
+  return `calMoods_${y}-${String(m+1).padStart(2,'0')}`;
+}
+
+async function fetchAndCacheKIndex() {
+  try {
+    const r = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', { cache: 'no-store' });
+    const rows = await r.json();
+    const byDate = {};
+    for (const row of rows.slice(1)) {
+      const date = row[0]?.slice(0, 10);
+      const kp   = parseFloat(row[1]);
+      if (!date || isNaN(kp)) continue;
+      if (!byDate[date] || kp > byDate[date]) byDate[date] = kp;
+    }
+    for (const [d, kp] of Object.entries(byDate)) {
+      localStorage.setItem('kindex_' + d, kp.toFixed(1));
+    }
+  } catch { /* silent fail */ }
+}
+
+function renderKIndexBanner() {
+  const today = _dateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  const raw   = localStorage.getItem('kindex_' + today);
+  const banner = $('kindex-banner');
+  if (!banner) return;
+  if (raw == null) { banner.hidden = true; return; }
+  const kp  = parseFloat(raw);
+  const lvl = _kpLevel(kp);
+  banner.hidden = false;
+  const dot   = $('kindex-dot');
+  const label = $('kindex-label');
+  dot.className   = 'kindex-dot ' + (lvl?.cls || '');
+  label.textContent = `Магнитная обстановка: ${lvl?.label || '—'} (K=${kp.toFixed(1)})`;
+}
+
+function _getMoods() {
+  try { return JSON.parse(localStorage.getItem(_moodKey(calYear, calMonth)) || '{}'); }
+  catch { return {}; }
+}
+
+function saveMood(date, value) {
+  const key   = _moodKey(date.getFullYear(), date.getMonth());
+  const moods = (() => { try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; } })();
+  moods[date.getDate()] = value;
+  localStorage.setItem(key, JSON.stringify(moods));
+}
+
+function renderCalGrid() {
+  const grid  = $('cal-grid');
+  if (!grid) return;
+  const today = new Date();
+  const moods = _getMoods();
+
+  // Заголовки дней недели
+  let html = _DAYS_RU.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+
+  // Первый день месяца (getDay: 0=вс, адаптируем под Пн=0)
+  const first   = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+  let startDow  = first.getDay(); // 0=вс
+  startDow = (startDow === 0) ? 6 : startDow - 1; // вс→6, пн→0
+
+  // Пустые ячейки до начала месяца
+  for (let i = 0; i < startDow; i++) html += '<div class="cal-day cal-day--empty"></div>';
+
+  for (let d = 1; d <= lastDay; d++) {
+    const date    = new Date(calYear, calMonth, d);
+    const moon    = calcMoonData(date);
+    const dKey    = _dateKey(calYear, calMonth, d);
+    const kpRaw   = localStorage.getItem('kindex_' + dKey);
+    const kp      = kpRaw != null ? parseFloat(kpRaw) : null;
+    const lvl     = _kpLevel(kp);
+    const mood    = moods[d];
+    const isToday = (d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear());
+    const isFuture = date > today;
+
+    const moodStyle = mood ? `style="background:hsl(${(mood-1)*12},65%,88%)"` : '';
+    const moodClass = mood ? ' has-mood' : '';
+    const todayClass = isToday ? ' today' : '';
+    const kpDot  = lvl && !isFuture ? `<span class="day-kpt ${lvl.cls}"></span>` : '';
+
+    html += `<div class="cal-day${todayClass}${moodClass}" data-day="${d}" ${moodStyle}>
+      <span class="day-num">${d}</span>
+      <span class="day-moon">${moon.emoji}</span>
+      ${kpDot}
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+
+  // Клики по дням
+  grid.querySelectorAll('.cal-day[data-day]').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const d = parseInt(cell.dataset.day);
+      openDaySheet(new Date(calYear, calMonth, d));
+    });
+  });
+}
+
+function updateCalHeader() {
+  const el = $('cal-month-label');
+  if (el) el.textContent = `${_MONTHS_RU[calMonth]} ${calYear}`;
+}
+
+function openDaySheet(date) {
+  _calDaySheetDate = date;
+  const d  = date.getDate();
+  const mn = _MONTHS_RU[date.getMonth()];
+  setText('day-sheet-title', `${d} ${mn}`);
+
+  const moon = calcMoonData(date);
+  const dKey = _dateKey(date.getFullYear(), date.getMonth(), d);
+  const kpRaw = localStorage.getItem('kindex_' + dKey);
+  const kp = kpRaw != null ? parseFloat(kpRaw) : null;
+  const lvl = _kpLevel(kp);
+  const kpLine = lvl ? `<div class="day-kp-row"><span class="kindex-dot ${lvl.cls}"></span> <span>${lvl.label} (K=${kp.toFixed(1)})</span></div>` : '';
+
+  setHTML('day-sheet-body', `
+    <div class="day-moon-big">${moon.emoji}</div>
+    <p class="day-phase-name">${moon.phaseName}</p>
+    <p class="day-lunar-day">Лунный день: ${moon.lunarDay}</p>
+    <p class="day-sign">Луна в ${moon.signRu}</p>
+    ${kpLine}
+  `);
+
+  // Текущее значение настроения
+  const moods = _getMoods();
+  const curMood = moods[d] || 5;
+  const slider = $('mood-slider');
+  const valDisplay = $('mood-val');
+  if (slider) {
+    slider.value = curMood;
+    if (valDisplay) valDisplay.textContent = curMood;
+    slider.oninput = () => { if (valDisplay) valDisplay.textContent = slider.value; };
+  }
+
+  const sheet = $('day-sheet');
+  if (sheet) {
+    sheet.classList.remove('hidden');
+    sheet.classList.add('open');
+  }
+
+  // Кнопки
+  $('mood-save')?.addEventListener('click', _onMoodSave, { once: true });
+  $('day-sheet-close')?.addEventListener('click', closeDaySheet, { once: true });
+
+  tg.BackButton.show();
+  tg.BackButton.onClick(_closeDaySheetBack);
+}
+
+function _onMoodSave() {
+  if (!_calDaySheetDate) return;
+  const val = parseInt($('mood-slider')?.value || 5);
+  saveMood(_calDaySheetDate, val);
+  closeDaySheet();
+  renderCalGrid();
+  showToast('Сохранено ✓', '#34c759');
+  tg.HapticFeedback.notificationOccurred('success');
+}
+
+function _closeDaySheetBack() {
+  closeDaySheet();
+  tg.BackButton.offClick(_closeDaySheetBack);
+}
+
+function closeDaySheet() {
+  const sheet = $('day-sheet');
+  if (sheet) {
+    sheet.classList.remove('open');
+    setTimeout(() => sheet.classList.add('hidden'), 300);
+  }
+  tg.BackButton.hide();
+  _calDaySheetDate = null;
+}
+
+function renderCalChart() {
+  const container = $('cal-chart-view');
+  if (!container) return;
+  const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+  const moods   = _getMoods();
+  const today   = new Date();
+
+  const barW  = 26;
+  const barMaxH = 80;
+  const svgW  = lastDay * (barW + 2) + 20;
+  const svgH  = barMaxH + 50;
+
+  let bars = '';
+  for (let d = 1; d <= lastDay; d++) {
+    const date   = new Date(calYear, calMonth, d);
+    const moon   = calcMoonData(date);
+    const dKey   = _dateKey(calYear, calMonth, d);
+    const kpRaw  = localStorage.getItem('kindex_' + dKey);
+    const kp     = kpRaw != null ? parseFloat(kpRaw) : null;
+    const lvl    = _kpLevel(kp);
+    const mood   = moods[d];
+    const isFuture = date > today;
+
+    const x = (d - 1) * (barW + 2) + 10;
+    const barH = mood ? Math.round((mood / 10) * barMaxH) : 0;
+    const barY = barMaxH - barH + 12;
+
+    let fillColor = '#e0e0e0';
+    if (mood && lvl) {
+      const colors = { 'kp-quiet': '#34c759', 'kp-moderate': '#ffd60a', 'kp-storm': '#ff9f0a', 'kp-severe': '#ff3b30' };
+      fillColor = colors[lvl.cls] || '#2AABEE';
+    } else if (mood) {
+      fillColor = '#2AABEE';
+    }
+
+    const opacity = (isFuture || !mood) ? 0.3 : 1;
+    bars += `<g opacity="${opacity}">`;
+    if (mood) {
+      bars += `<rect x="${x}" y="${barY}" width="${barW}" height="${barH}" rx="4" fill="${fillColor}"/>`;
+    } else {
+      bars += `<rect x="${x}" y="${barMaxH - 4 + 12}" width="${barW}" height="4" rx="2" fill="#d0d0d0"/>`;
+    }
+    bars += `<text x="${x + barW/2}" y="${barY - 3}" text-anchor="middle" font-size="10">${moon.emoji}</text>`;
+    if (d === 1 || d % 5 === 0 || d === lastDay) {
+      bars += `<text x="${x + barW/2}" y="${svgH - 4}" text-anchor="middle" font-size="9" fill="#8e8e93">${d}</text>`;
+    }
+    bars += '</g>';
+  }
+
+  container.innerHTML = `
+    <p class="chart-legend">Бары: самочувствие 1–10 · Цвет: магнитная обстановка · Emoji: фаза Луны</p>
+    <div style="overflow-x:auto">
+      <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+        ${bars}
+      </svg>
+    </div>
+  `;
+}
+
+function initCalNav() {
+  // Убираем старые обработчики через замену узлов
+  const prev = $('cal-prev');
+  const next = $('cal-next');
+  if (prev) {
+    const newPrev = prev.cloneNode(true);
+    prev.replaceWith(newPrev);
+    newPrev.addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      updateCalHeader();
+      renderCalGrid();
+      tg.HapticFeedback.impactOccurred('light');
+    });
+  }
+  if (next) {
+    const newNext = next.cloneNode(true);
+    next.replaceWith(newNext);
+    newNext.addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      updateCalHeader();
+      renderCalGrid();
+      tg.HapticFeedback.impactOccurred('light');
+    });
+  }
+}
+
+function initViewToggle() {
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    const newBtn = btn.cloneNode(true);
+    btn.replaceWith(newBtn);
+    newBtn.addEventListener('click', () => {
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      newBtn.classList.add('active');
+      const view = newBtn.dataset.view;
+      if (view === 'grid') {
+        show('cal-grid');
+        hide('cal-chart-view');
+      } else {
+        hide('cal-grid');
+        show('cal-chart-view');
+        renderCalChart();
+      }
+      tg.HapticFeedback.impactOccurred('light');
+    });
+  });
+}
+
+async function renderCalendar() {
+  calYear  = calYear  || new Date().getFullYear();
+  calMonth = calMonth ?? new Date().getMonth();
+  updateCalHeader();
+  await fetchAndCacheKIndex();
+  renderKIndexBanner();
+  renderCalGrid();
+  initCalNav();
+  initViewToggle();
+}
+
 function initHeaderButtons() {
   $('settings-btn')?.addEventListener('click', openSettings);
   $('refresh-btn')?.addEventListener('click', () => {

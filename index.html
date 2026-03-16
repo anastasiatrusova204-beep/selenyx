@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -174,6 +174,32 @@
       </div>
     </section>
 
+    <!-- CALENDAR -->
+    <section class="tab-pane hidden" data-tab="cal">
+      <div class="pane-scroll">
+
+        <div class="cal-header">
+          <button class="cal-nav-btn" id="cal-prev" aria-label="Предыдущий месяц">‹</button>
+          <h2 class="cal-month-title" id="cal-month-label"></h2>
+          <button class="cal-nav-btn" id="cal-next" aria-label="Следующий месяц">›</button>
+        </div>
+
+        <div class="kindex-banner" id="kindex-banner" hidden>
+          <span class="kindex-dot" id="kindex-dot"></span>
+          <span id="kindex-label"></span>
+        </div>
+
+        <div class="cal-view-toggle">
+          <button class="view-btn active" data-view="grid">Календарь</button>
+          <button class="view-btn" data-view="chart">График</button>
+        </div>
+
+        <div id="cal-grid" class="cal-grid"></div>
+        <div id="cal-chart-view" class="cal-chart-view hidden"></div>
+
+      </div>
+    </section>
+
     <!-- CHART -->
     <section class="tab-pane hidden" data-tab="chart">
       <div class="pane-scroll">
@@ -288,13 +314,9 @@
       <span class="tab-icon">🌙</span>
       <span class="tab-label">Луна</span>
     </button>
-    <button class="tab-btn" data-tab="chart" role="tab" aria-label="Натальная карта">
-      <span class="tab-icon">🌟</span>
-      <span class="tab-label">Карта</span>
-    </button>
-    <button class="tab-btn" data-tab="compat" role="tab" aria-label="Совместимость">
-      <span class="tab-icon">💞</span>
-      <span class="tab-label">Пара</span>
+    <button class="tab-btn" data-tab="cal" role="tab" aria-label="Месяц">
+      <span class="tab-icon">📅</span>
+      <span class="tab-label">Месяц</span>
     </button>
     <button class="tab-btn" data-tab="oracle" role="tab" aria-label="Оракул">
       <span class="tab-icon">🥠</span>
@@ -315,6 +337,26 @@
   </div>
 
 </div><!-- /main-screen -->
+
+<!-- ── DAY DETAIL SHEET ──────────────────────────────────────────────────────── -->
+<div id="day-sheet" class="sheet-backdrop hidden">
+  <div class="overlay-sheet">
+    <div class="overlay-header">
+      <h3 class="overlay-title" id="day-sheet-title"></h3>
+      <button class="sheet-close" id="day-sheet-close" aria-label="Закрыть">✕</button>
+    </div>
+    <div id="day-sheet-body" class="day-sheet-body"></div>
+    <div class="mood-section">
+      <div class="mood-header">
+        <span class="mood-label">Самочувствие</span>
+        <span class="mood-val-display" id="mood-val">—</span>
+      </div>
+      <input type="range" id="mood-slider" min="1" max="10" step="1" class="mood-slider" aria-label="Оценка самочувствия 1-10">
+      <div class="mood-ticks"><span>1</span><span>5</span><span>10</span></div>
+      <button class="btn-gold full-width" id="mood-save">Сохранить</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── SETTINGS OVERLAY ──────────────────────────────────────────────────────── -->
 <div id="settings-overlay" class="overlay hidden">

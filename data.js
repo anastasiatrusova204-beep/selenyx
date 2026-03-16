@@ -318,8 +318,8 @@ const LUNAR_DAYS = {
  * Опорная точка: новолуние 29 янв 2025.
  * @returns {{ phase, phaseName, emoji, illumination, lunarDay, sign, signRu }}
  */
-function calcMoonData() {
-  const now      = new Date();
+function calcMoonData(date = new Date()) {
+  const now      = date;
   const refDate  = new Date('2025-01-29T00:00:00Z');
   const cycle    = 29.53058867; // дней в лунном цикле
   const elapsed  = (now - refDate) / 86400000; // прошло дней
