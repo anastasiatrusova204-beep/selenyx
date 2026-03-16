@@ -102,6 +102,9 @@
     <section class="tab-pane" data-tab="today">
       <div class="pane-scroll">
 
+        <!-- Today date -->
+        <p id="today-date" class="today-date"></p>
+
         <!-- Moon tile row -->
         <div id="today-moon-tile" class="tile-row"></div>
         <p class="science-note">Данные: Swiss Ephemeris (NASA JPL)</p>
@@ -187,6 +190,16 @@
         <div class="kindex-banner" id="kindex-banner" hidden>
           <span class="kindex-dot" id="kindex-dot"></span>
           <span id="kindex-label"></span>
+        </div>
+
+        <div class="cal-hint-card">
+          <p class="cal-hint-text">📅 Нажми на любой день — увидишь фазу Луны и магнитную обстановку, а также сможешь отметить самочувствие от 1 до 10.</p>
+          <div class="cal-legend">
+            <span class="legend-item"><span class="kindex-dot kp-quiet"></span> Тихо</span>
+            <span class="legend-item"><span class="kindex-dot kp-moderate"></span> Умеренно</span>
+            <span class="legend-item"><span class="kindex-dot kp-storm"></span> Буря</span>
+            <span class="legend-item"><span class="kindex-dot kp-severe"></span> Сильная</span>
+          </div>
         </div>
 
         <div class="cal-view-toggle">

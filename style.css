@@ -755,6 +755,16 @@ select.form-input { cursor: pointer; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
+/* ─── TODAY DATE ──────────────────────────────────────────── */
+.today-date {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 12px 16px 4px;
+  letter-spacing: 0.2px;
+}
+
 /* ─── DAY SHEET BACKDROP ──────────────────────────────────── */
 .sheet-backdrop {
   position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 90;
@@ -982,5 +992,37 @@ select.form-input { cursor: pointer; }
   color: var(--text-hint);
   margin-bottom: 12px;
   line-height: 1.4;
+}
+
+/* Calendar hint card */
+.cal-hint-card {
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  background: var(--card);
+  border-radius: var(--r-sm);
+  border: 0.5px solid var(--divider);
+}
+.cal-hint-text {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.cal-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+.legend-item .kindex-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
 }
 

@@ -273,6 +273,12 @@ let currentDomain = 'health';
 function applyTodayData(data) {
   const { moon, dayNum, color, phaseTips, domains, hint } = data;
 
+  // Today's date
+  const now = new Date();
+  const dayNames = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+  const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  setText('today-date', `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]}`);
+
   // Moon tile row
   setHTML('today-moon-tile', `
     <div class="tile">
@@ -332,9 +338,11 @@ function applyTodayData(data) {
     });
   }
 
-  // Domain buttons → sheet
+  // Domain buttons → active toggle + sheet
   document.querySelectorAll('.domain-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       tg.HapticFeedback.impactOccurred('medium');
       const meta = DOMAIN_META[btn.dataset.domain] || { label: btn.dataset.domain, icon: '✨' };
       openSheet({
