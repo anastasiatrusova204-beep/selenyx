@@ -1550,12 +1550,22 @@ async def handle_admin(message: Message) -> None:
     if message.from_user.id not in ADMIN_IDS:
         return
 
-    count = await get_user_count()
+    s = await get_stats()
     await message.answer(
         f"🛠 <b>Панель администратора</b>\n\n"
-        f"· Всего пользователей: <b>{count}</b>\n\n"
-        f"<b>Команды:</b>\n"
-        f"· /broadcast &lt;текст&gt; — разослать сообщение всем пользователям"
+        f"<b>Пользователи</b>\n"
+        f"· Всего: <b>{s.get('total_users', 0)}</b>\n"
+        f"· Выбрали знак: <b>{s.get('with_sign', 0)}</b>\n"
+        f"· С уведомлениями: <b>{s.get('with_notify', 0)}</b>\n"
+        f"· С натальной картой: <b>{s.get('with_birth', 0)}</b>\n\n"
+        f"<b>Активность</b>\n"
+        f"· Активны сегодня: <b>{s.get('active_1d', 0)}</b>\n"
+        f"· Активны за 7 дней: <b>{s.get('active_7d', 0)}</b>\n"
+        f"· Просмотров «Мой день» за 7 дней: <b>{s.get('today_views_7d', 0)}</b>\n"
+        f"· Открытий предсказания за 7 дней: <b>{s.get('pred_opens_7d', 0)}</b>\n\n"
+        f"<b>Команды</b>\n"
+        f"· /broadcast &lt;текст&gt; — разослать всем\n"
+        f"· /admin — обновить статистику"
     )
 
 
