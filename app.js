@@ -364,8 +364,8 @@ function showRetentionBanner() {
 const DOMAIN_META = {
   health: { label: 'Здоровье',  icon: '🏥' },
   work:   { label: 'Работа',    icon: '💼' },
-  love:   { label: 'Любовь',    icon: '❤️' },
-  psych:  { label: 'Эмоции',    icon: '🧠' },
+  love:   { label: 'Отношения', icon: '❤️' },
+  psych:  { label: 'Психология', icon: '🧠' },
 };
 
 // { icon: html|text, title, text, sections: [{label, sub, muted?}] }
