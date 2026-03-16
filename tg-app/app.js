@@ -397,6 +397,9 @@ function openSheet({ icon, title, text, sections }) {
       .join('');
   }
 
+  // Wrap astrology terms for tooltip
+  wrapTerms(document.querySelector('.domain-sheet-body'));
+
   const sheet = $('domain-sheet');
   sheet.classList.remove('hidden');
   requestAnimationFrame(() => sheet.classList.add('open'));
@@ -455,6 +458,10 @@ function applyMoonData(moon) {
     <p>${ld.energy || ''}</p>
     <p class="muted">${ld.practice || ''}</p>
   `);
+
+  // Wrap astrology terms
+  wrapTerms($('moon-energy-text'));
+  wrapTerms($('moon-lunar-info'));
 }
 
 // ─── Chart tab ────────────────────────────────────────────────────────────────
@@ -485,6 +492,8 @@ function renderChart() {
   setText('chart-sun-desc',  nSun.dates  || '');
   setText('chart-moon-desc', nMoon.dates || '');
   setText('chart-asc-desc',  nAsc.dates  || '');
+
+  wrapTerms($('chart-result'));
 }
 
 function initChartForm() {
@@ -610,6 +619,7 @@ function revealFortune() {
     show('oracle-text-block');
     const prediction = getRandomPrediction(userSign || 'aries');
     setText('oracle-prediction', prediction);
+    wrapTerms($('oracle-prediction'));
 
     // Кнопка шаринг
     const shareBtn = $('oracle-share');
@@ -1010,8 +1020,83 @@ function initHeaderButtons() {
   });
 }
 
+// ─── Term Tooltips ─────────────────────────────────────────────────────────────
+// Terms sorted longest-first so multi-word terms match before single words
+const _termKeys = Object.keys(typeof TOOLTIP_TERMS !== 'undefined' ? TOOLTIP_TERMS : {})
+  .sort((a, b) => b.length - a.length);
+
+function wrapTerms(container) {
+  if (!container || !_termKeys.length) return;
+  // Build combined alternation regex (longer terms first → correct priority)
+  const pattern = _termKeys
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+  const re = new RegExp(`(${pattern})`, 'gi');
+
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let n;
+  while ((n = walker.nextNode())) {
+    // Skip text already inside a term-link or non-content elements
+    if (n.parentElement?.closest('.term-link, script, style')) continue;
+    nodes.push(n);
+  }
+  nodes.forEach(textNode => {
+    if (!re.test(textNode.textContent)) { re.lastIndex = 0; return; }
+    re.lastIndex = 0;
+    const html = textNode.textContent.replace(re, match => {
+      const key = _termKeys.find(k => k.toLowerCase() === match.toLowerCase());
+      if (!key) return match;
+      return `<span class="term-link" data-term="${key}" role="button" tabindex="0" aria-label="${key}: нажмите для расшифровки">${match}</span>`;
+    });
+    const span = document.createElement('span');
+    span.innerHTML = html;
+    textNode.parentNode.replaceChild(span, textNode);
+  });
+}
+
+function _showTip(termKey) {
+  const def = (typeof TOOLTIP_TERMS !== 'undefined') ? TOOLTIP_TERMS[termKey.toLowerCase()] : null;
+  if (!def) return;
+  setText('term-tooltip-title', termKey);
+  setText('term-tooltip-text', def);
+  show('term-tooltip-bd');
+  const tip = $('term-tooltip');
+  if (tip) {
+    tip.classList.remove('hidden', 'tip-up');
+    requestAnimationFrame(() => requestAnimationFrame(() => tip.classList.add('tip-up')));
+  }
+  tg.HapticFeedback.impactOccurred('light');
+}
+
+function _hideTip() {
+  const tip = $('term-tooltip');
+  if (tip) {
+    tip.classList.remove('tip-up');
+    setTimeout(() => tip.classList.add('hidden'), 200);
+  }
+  hide('term-tooltip-bd');
+}
+
+function initTermTooltips() {
+  document.addEventListener('click', e => {
+    const link = e.target.closest('.term-link');
+    if (link) {
+      e.stopPropagation();
+      _showTip(link.dataset.term);
+      return;
+    }
+    // Close on tap outside
+    if (!e.target.closest('#term-tooltip')) _hideTip();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') _hideTip();
+  });
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initHeaderButtons();
+  initTermTooltips();
   initSplash();
 });

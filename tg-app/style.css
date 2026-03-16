@@ -1026,3 +1026,51 @@ select.form-input { cursor: pointer; }
   flex-shrink: 0;
 }
 
+/* ── TERM TOOLTIPS ─────────────────────────────────────────────────────────── */
+.term-link {
+  text-decoration: underline dotted var(--gold);
+  text-underline-offset: 3px;
+  cursor: pointer;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.term-tooltip-bd {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+.term-tooltip {
+  position: fixed;
+  bottom: 80px;
+  left: 16px;
+  right: 16px;
+  background: var(--card);
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+  z-index: 201;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, .45);
+  transform: translateY(10px);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+}
+.term-tooltip.tip-up {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.term-tooltip-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 6px;
+  text-transform: capitalize;
+}
+.term-tooltip-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
