@@ -492,8 +492,6 @@ function renderChart() {
   setText('chart-sun-desc',  nSun.dates  || '');
   setText('chart-moon-desc', nMoon.dates || '');
   setText('chart-asc-desc',  nAsc.dates  || '');
-
-  wrapTerms($('chart-result'));
 }
 
 function initChartForm() {
