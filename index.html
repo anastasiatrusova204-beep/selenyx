@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <div id="app">
@@ -432,10 +432,17 @@
   </div>
 </div>
 
+<!-- Term tooltip backdrop + card -->
+<div id="term-tooltip-bd" class="term-tooltip-bd hidden"></div>
+<div id="term-tooltip" class="term-tooltip hidden" role="tooltip" aria-live="polite">
+  <p class="term-tooltip-title" id="term-tooltip-title"></p>
+  <p class="term-tooltip-text"  id="term-tooltip-text"></p>
+</div>
+
 </div><!-- /app -->
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
-<script src="data.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="data.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
