@@ -355,6 +355,19 @@ function applyTodayData(data) {
     });
   });
 
+  // First-visit domain hint: пульс + автооткрытие «Здоровье»
+  if (!localStorage.getItem('domainHintShown')) {
+    localStorage.setItem('domainHintShown', '1');
+    document.querySelectorAll('.domain-btn').forEach(btn => {
+      btn.classList.add('hint-pulse');
+      btn.addEventListener('animationend', () => btn.classList.remove('hint-pulse'), { once: true });
+    });
+    setTimeout(() => {
+      const btn = document.querySelector('.domain-btn[data-domain="health"]');
+      if (btn) btn.click();
+    }, 650);
+  }
+
   // Retention hook: показать через 3с при первом визите
   if (!localStorage.getItem('retentionShown')) {
     setTimeout(showRetentionBanner, 3000);
