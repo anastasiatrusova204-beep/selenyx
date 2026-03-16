@@ -59,6 +59,7 @@ let todayCache = null;
 let calYear    = new Date().getFullYear();
 let calMonth   = new Date().getMonth(); // 0-based
 let _calDaySheetDate = null; // дата открытой шторки
+const _autoKnowledge = new URLSearchParams(window.location.search).get('page') === 'knowledge';
 
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -224,6 +225,7 @@ function initMain() {
   });
   switchTab('today');
   initBotCta();
+  if (_autoKnowledge) openKnowledge();
 }
 
 function switchTab(tab) {
@@ -1092,9 +1094,91 @@ function initTermTooltips() {
   });
 }
 
+// ─── Knowledge Base ───────────────────────────────────────────────────────────
+let _kbCurrentIdx = 0;
+
+function openKnowledge(idx) {
+  _kbCurrentIdx = (idx != null) ? idx : 0;
+  const overlay = $('knowledge-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  show('kb-list-view');
+  hide('kb-detail-view');
+  renderKbList();
+  tg.BackButton.show();
+  tg.BackButton.onClick(closeKnowledge);
+  tg.HapticFeedback.impactOccurred('light');
+}
+
+function closeKnowledge() {
+  hide('knowledge-overlay');
+  tg.BackButton.hide();
+  tg.BackButton.offClick(closeKnowledge);
+}
+
+function renderKbList() {
+  const list = $('kb-list');
+  if (!list || typeof KNOWLEDGE_BASE === 'undefined') return;
+  list.innerHTML = KNOWLEDGE_BASE.map((item, i) => `
+    <div class="kb-card" data-idx="${i}" role="listitem" tabindex="0" aria-label="${item.title}">
+      <span class="kb-card-icon" aria-hidden="true">${item.icon}</span>
+      <span class="kb-card-title">${item.title}</span>
+      <span class="kb-card-arrow" aria-hidden="true">›</span>
+    </div>
+  `).join('');
+  list.querySelectorAll('.kb-card').forEach(card => {
+    card.addEventListener('click', () => openKbDetail(+card.dataset.idx));
+  });
+}
+
+function openKbDetail(idx) {
+  if (typeof KNOWLEDGE_BASE === 'undefined') return;
+  _kbCurrentIdx = idx;
+  const item = KNOWLEDGE_BASE[idx];
+  if (!item) return;
+
+  setText('kb-detail-title', item.title);
+  setText('kb-detail-icon',  item.icon);
+  setHTML('kb-detail-body',  item.body);
+
+  // Prev / Next buttons
+  $('kb-prev').disabled = (idx === 0);
+  $('kb-next').disabled = (idx === KNOWLEDGE_BASE.length - 1);
+
+  // Scroll to top
+  const scroll = document.querySelector('.kb-detail-scroll');
+  if (scroll) scroll.scrollTop = 0;
+
+  hide('kb-list-view');
+  show('kb-detail-view');
+  tg.HapticFeedback.impactOccurred('light');
+}
+
+function initKnowledge() {
+  $('kb-close')?.addEventListener('click', closeKnowledge);
+  $('kb-back')?.addEventListener('click', () => {
+    hide('kb-detail-view');
+    show('kb-list-view');
+  });
+  $('kb-menu-btn')?.addEventListener('click', () => {
+    hide('kb-detail-view');
+    show('kb-list-view');
+  });
+  $('kb-prev')?.addEventListener('click', () => {
+    if (_kbCurrentIdx > 0) openKbDetail(_kbCurrentIdx - 1);
+  });
+  $('kb-next')?.addEventListener('click', () => {
+    if (typeof KNOWLEDGE_BASE !== 'undefined' && _kbCurrentIdx < KNOWLEDGE_BASE.length - 1) {
+      openKbDetail(_kbCurrentIdx + 1);
+    }
+  });
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initHeaderButtons();
   initTermTooltips();
+  initKnowledge();
+
   initSplash();
 });

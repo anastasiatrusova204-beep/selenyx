@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <div id="app">
@@ -439,10 +439,41 @@
   <p class="term-tooltip-text"  id="term-tooltip-text"></p>
 </div>
 
+<!-- ── Knowledge Base Overlay ───────────────────────────────────────── -->
+<div id="knowledge-overlay" class="knowledge-overlay hidden" role="dialog" aria-label="База знаний">
+
+  <!-- List view: all topics -->
+  <div id="kb-list-view" class="kb-view">
+    <div class="kb-header">
+      <h1 class="kb-heading">📚 База знаний</h1>
+      <button class="icon-btn" id="kb-close" aria-label="Закрыть">✕</button>
+    </div>
+    <div id="kb-list" class="kb-list" role="list"></div>
+  </div>
+
+  <!-- Detail view: single article -->
+  <div id="kb-detail-view" class="kb-view hidden">
+    <div class="kb-header">
+      <button class="icon-btn" id="kb-back" aria-label="К списку тем">←</button>
+      <h2 class="kb-detail-heading" id="kb-detail-title"></h2>
+      <button class="icon-btn" id="kb-menu-btn" aria-label="Список тем">☰</button>
+    </div>
+    <div class="kb-detail-scroll">
+      <p class="kb-detail-icon" id="kb-detail-icon" aria-hidden="true"></p>
+      <div class="kb-detail-body" id="kb-detail-body"></div>
+    </div>
+    <div class="kb-nav">
+      <button class="kb-nav-btn" id="kb-prev" aria-label="Предыдущая тема">‹ Назад</button>
+      <button class="kb-nav-btn" id="kb-next" aria-label="Следующая тема">Далее ›</button>
+    </div>
+  </div>
+
+</div>
+
 </div><!-- /app -->
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
-<script src="data.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script src="data.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

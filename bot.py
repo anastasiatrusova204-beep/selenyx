@@ -99,6 +99,10 @@ def main_menu() -> ReplyKeyboardMarkup:
         return ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text="🔔 Уведомления"), KeyboardButton(text="ℹ️ О боте")],
+                [KeyboardButton(
+                    text="📚 База знаний",
+                    web_app=WebAppInfo(url=f"{TG_APP_URL}?page=knowledge"),
+                )],
             ],
             resize_keyboard=True,
             persistent=True,
