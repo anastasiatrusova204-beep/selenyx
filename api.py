@@ -12,7 +12,6 @@ import time as _t
 import urllib.parse
 from collections import defaultdict
 from datetime import datetime
-from pathlib import Path
 from typing import Optional
 
 import aiohttp as _aiohttp
@@ -47,12 +46,6 @@ if DEMO_MODE:
         "Все /api/* запросы принимаются без проверки подписи. "
         "Установите DEMO_MODE=false в production."
     )
-_railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
-WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
-    f"https://{_railway_domain}/webapp" if _railway_domain else ""
-)
-WEBAPP_DIR = Path(__file__).resolve().parent / "webapp"
-
 logger = logging.getLogger(__name__)
 
 
@@ -219,15 +212,6 @@ def _build_today_payload(user: dict, moon: dict) -> dict:
         "color": color,
         "weekday_hint": weekday_hint,
     }
-
-
-# ─── Static ───────────────────────────────────────────────────────────────────
-
-
-async def serve_webapp(request: web.Request) -> web.Response:
-    index = WEBAPP_DIR / "index.html"
-    html = index.read_bytes() if index.exists() else b"Mini App not found"
-    return web.Response(body=html, content_type="text/html", charset="utf-8")
 
 
 async def handle_health(request: web.Request) -> web.Response:
@@ -474,8 +458,6 @@ async def start_api_server() -> None:
     port = int(os.getenv("PORT", "8080"))
 
     app = web.Application(middlewares=[auth_middleware])
-    app.router.add_get("/webapp",              serve_webapp)
-    app.router.add_get("/",                    serve_webapp)
     app.router.add_get("/health",              handle_health)
     app.router.add_get("/api/me",              api_me)
     app.router.add_post("/api/register",       api_register)

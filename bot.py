@@ -70,11 +70,7 @@ ADMIN_IDS: list[int] = [
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN не задан в .env файле")
 
-_railway_domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
-WEBAPP_URL: str = os.getenv("WEBAPP_URL") or (
-    f"https://{_railway_domain}/webapp" if _railway_domain else ""
-)
-# Новое standalone-приложение на GitHub Pages (tg-app/)
+# Mini App на GitHub Pages (tg-app/) — единственная точка входа
 TG_APP_URL: str = os.getenv("TG_APP_URL", "https://anastasiatrusova204-beep.github.io/selenyx/")
 
 # ─── FSM States ───────────────────────────────────────────────────────────────
@@ -94,26 +90,14 @@ class UserState(StatesGroup):
 
 
 def main_menu() -> ReplyKeyboardMarkup:
-    """Упрощённое меню: кнопка Selenyx уже есть в шапке чата Telegram."""
-    if WEBAPP_URL:
-        return ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="🔔 Уведомления"), KeyboardButton(text="ℹ️ О боте")],
-                [KeyboardButton(
-                    text="📚 База знаний",
-                    web_app=WebAppInfo(url=f"{TG_APP_URL}?page=knowledge"),
-                )],
-            ],
-            resize_keyboard=True,
-            persistent=True,
-        )
-    # Fallback — если Mini App недоступен (локальный запуск без WEBAPP_URL)
+    """Меню бота. Основной интерфейс — в Mini App (синяя кнопка «Selenyx»)."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="✨ Мой день")],
-            [KeyboardButton(text="📅 Календарь"), KeyboardButton(text="🔔 Уведомления")],
-            [KeyboardButton(text="🌟 Моя карта"), KeyboardButton(text="💞 Совместимость")],
-            [KeyboardButton(text="✏️ Сменить знак"), KeyboardButton(text="ℹ️ О боте")],
+            [KeyboardButton(text="🔔 Уведомления"), KeyboardButton(text="ℹ️ О боте")],
+            [KeyboardButton(
+                text="📚 База знаний",
+                web_app=WebAppInfo(url=f"{TG_APP_URL}?page=knowledge"),
+            )],
         ],
         resize_keyboard=True,
         persistent=True,
@@ -480,7 +464,6 @@ async def handle_app(message: Message) -> None:
 
 @router.message(Command("help"))
 async def handle_help(message: Message) -> None:
-    app_line = "· /app — открыть приложение\n" if WEBAPP_URL else ""
     await message.answer(
         "🌙 <b>Что умеет Selenyx:</b>\n\n"
         "· Энергия дня по 4 сферам жизни\n"
@@ -488,7 +471,7 @@ async def handle_help(message: Message) -> None:
         "· Натальная карта и совместимость\n"
         "· Ежедневные уведомления\n\n"
         "<b>Команды:</b>\n"
-        f"{app_line}"
+        "· /app — открыть приложение\n"
         "· /start — начать заново\n"
         "· /email — подписаться на прогнозы по почте\n"
         "· /feedback — написать отзыв\n"
@@ -1749,8 +1732,7 @@ async def main() -> None:
         BotCommand(command="feedback", description="Написать отзыв или предложение"),
         BotCommand(command="resetme",  description="Сбросить мой профиль (для тестирования)"),
     ]
-    if WEBAPP_URL:
-        cmds.insert(1, BotCommand(command="app", description="Открыть приложение Selenyx"))
+    cmds.insert(1, BotCommand(command="app", description="Открыть приложение Selenyx"))
     await bot.set_my_commands(cmds)
 
     # Кнопка меню (синяя, нижний левый угол) → новое tg-app на GitHub Pages
@@ -1777,8 +1759,7 @@ async def main() -> None:
     )
 
     logger.info("Selenyx запущен. Нажми Ctrl+C для остановки.")
-    if WEBAPP_URL:
-        logger.info(f"Mini App URL: {WEBAPP_URL}")
+    logger.info(f"Mini App URL: {TG_APP_URL}")
 
     async def _guarded(name: str, coro):
         """Изолирует корутину: при падении логирует, не отменяет соседнюю."""
