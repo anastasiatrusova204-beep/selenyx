@@ -248,6 +248,10 @@ function initMain() {
   calcStreak();
   switchTab('today');
   initBotCta();
+  $('kb-entry-btn')?.addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('light');
+    openKnowledge();
+  });
   if (_autoKnowledge) openKnowledge();
 }
 

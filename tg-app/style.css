@@ -543,6 +543,61 @@ ul { list-style: none; }
   font-size: 14px; color: var(--text-sub); line-height: 1.6;
 }
 
+/* ── KNOWLEDGE BASE ENTRY ───────────────────────────────── */
+.kb-entry {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 4px;
+  background: none; border: none; cursor: pointer;
+  text-align: left; touch-action: manipulation;
+  position: relative;
+  transition: opacity var(--t);
+}
+
+.kb-entry:active { opacity: 0.65; }
+
+.kb-entry-line {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 30%, var(--gold) 50%, var(--gold-dim) 70%, transparent 100%);
+}
+
+.kb-entry-content {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+}
+
+.kb-entry-icon {
+  position: absolute; left: 4px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px; opacity: 0.7;
+}
+
+.kb-entry-content {
+  padding-left: 28px;
+}
+
+.kb-entry-text {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 600; font-style: italic;
+  color: var(--gold); letter-spacing: 0.3px;
+}
+
+.kb-entry-sub {
+  font-size: 11px; color: var(--text-hint);
+  letter-spacing: 0.4px;
+}
+
+.kb-entry-arrow {
+  font-size: 18px; color: var(--gold);
+  opacity: 0.5; flex-shrink: 0;
+  transition: transform var(--t), opacity var(--t);
+}
+
+.kb-entry:hover .kb-entry-arrow,
+.kb-entry:focus .kb-entry-arrow {
+  transform: translateX(3px); opacity: 1;
+}
+
 /* ─── 14. ВКЛАДКА ЛУНА ──────────────────────────────────── */
 .moon-hero {
   display: flex; flex-direction: column;
