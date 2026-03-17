@@ -126,14 +126,22 @@
 
         <!-- Color + Number row -->
         <div class="mini-row">
-          <div class="mini-card half">
-            <p class="mini-label">🎨 Цвет дня</p>
+          <div class="mini-card half expandable">
+            <div class="mini-card-head">
+              <p class="mini-label">🎨 Цвет дня</p>
+              <span class="mini-caret">›</span>
+            </div>
             <p id="today-color" class="mini-text"></p>
+            <div class="mini-card-body" hidden></div>
           </div>
-          <div class="mini-card half">
-            <p class="mini-label">🔢 Число дня</p>
+          <div class="mini-card half expandable">
+            <div class="mini-card-head">
+              <p class="mini-label">🔢 Число дня</p>
+              <span class="mini-caret">›</span>
+            </div>
             <p id="today-daynum" class="mini-text big-num"></p>
             <p id="today-daynum-hint" class="mini-text muted small"></p>
+            <div class="mini-card-body" hidden></div>
           </div>
         </div>
 
