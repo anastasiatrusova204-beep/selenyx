@@ -1320,3 +1320,88 @@ select.form-input { cursor: pointer; }
   pointer-events: none;
 }
 
+/* ─── ПРАКТИКА ЛУННОГО ДНЯ ──────────────────────────────── */
+.practice-card {
+  background: var(--bg2);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  margin: 0 16px 12px;
+}
+.practice-day {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.practice-text {
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.55;
+}
+
+/* ─── ЕЖЕНЕДЕЛЬНЫЙ ИТОГ ─────────────────────────────────── */
+.weekly-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 24px;
+}
+.weekly-overlay.visible { opacity: 1; }
+.weekly-modal {
+  background: var(--bg2);
+  border-radius: 24px;
+  padding: 32px 24px 24px;
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+  transform: translateY(20px);
+  transition: transform 0.35s ease;
+  box-shadow: var(--shadow-lg);
+}
+.weekly-overlay.visible .weekly-modal { transform: translateY(0); }
+.weekly-stars { font-size: 48px; margin-bottom: 12px; }
+.weekly-heading {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.weekly-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin-bottom: 24px;
+}
+.weekly-stats {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.weekly-stat {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 12px 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.ws-icon { font-size: 22px; }
+.ws-label {
+  font-size: 10px;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.3;
+}
+
