@@ -371,35 +371,26 @@ ul { list-style: none; }
   display: flex; flex-direction: column; gap: 6px;
   transition: transform var(--t), box-shadow var(--t), border-color var(--t);
 }
-.mini-card.expandable {
+.mini-card[style*="cursor"] {
   cursor: pointer;
   position: relative;
 }
-.mini-card.expandable:hover {
+.mini-card[style*="cursor"]:hover {
   border-color: var(--gold);
   box-shadow: var(--shadow), 0 4px 16px var(--gold-dim);
   transform: translateY(-1px);
 }
-.mini-card.expandable:active {
+.mini-card[style*="cursor"]::after {
+  content: '›';
+  position: absolute; right: 14px; bottom: 14px;
+  font-size: 14px; color: var(--gold); opacity: 0.5;
+  transition: opacity var(--t), transform var(--t);
+}
+.mini-card[style*="cursor"]:hover::after {
+  opacity: 1; transform: translateX(2px);
+}
+.mini-card[style*="cursor"]:active {
   transform: scale(0.97); box-shadow: none;
-}
-
-.mini-card-head {
-  display: flex; justify-content: space-between; align-items: center;
-}
-.mini-caret {
-  font-size: 18px; color: var(--gold); opacity: 0.5;
-  display: inline-block; line-height: 1;
-  transition: transform var(--t), opacity var(--t);
-}
-.mini-card.expandable.open .mini-caret {
-  transform: rotate(90deg); opacity: 1;
-}
-.mini-card-body {
-  margin-top: 8px;
-  font-size: 13px; color: var(--text); line-height: 1.55;
-  border-top: 1px solid var(--card-border);
-  padding-top: 8px;
 }
 
 .mini-label {
@@ -416,7 +407,6 @@ ul { list-style: none; }
 }
 
 .mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.mini-row .mini-card.expandable.open { grid-column: 1 / -1; }
 
 /* ─── 12. TILE-ROW ──────────────────────────────────────── */
 .tile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
