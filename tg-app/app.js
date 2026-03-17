@@ -59,7 +59,14 @@ let todayCache = null;
 let calYear    = new Date().getFullYear();
 let calMonth   = new Date().getMonth(); // 0-based
 let _calDaySheetDate = null; // дата открытой шторки
-const _autoKnowledge = new URLSearchParams(window.location.search).get('page') === 'knowledge';
+const _params = new URLSearchParams(window.location.search);
+const _autoKnowledge = _params.get('page') === 'knowledge';
+// ?new=1 — сбросить данные пользователя (для тестирования флоу нового пользователя)
+if (_params.get('new') === '1') {
+  ['userSign','userEmail','userBirth','streakDate','streakCount','retentionShown','natalNotifySet'].forEach(k => localStorage.removeItem(k));
+  sessionStorage.clear();
+  history.replaceState(null, '', window.location.pathname);
+}
 
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
