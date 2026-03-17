@@ -431,6 +431,12 @@ ul { list-style: none; }
   box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px var(--domain-color);
 }
 
+.domain-card:not(.open):hover {
+  border-color: color-mix(in srgb, var(--domain-color) 40%, transparent);
+  box-shadow: var(--shadow), 0 4px 16px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
 .domain-card-header {
   width: 100%; display: flex; align-items: center;
   gap: 12px; padding: 16px 18px;
@@ -441,7 +447,20 @@ ul { list-style: none; }
   position: relative;
 }
 
-.domain-card-header:active { background: var(--gold-dim); }
+.domain-card:not(.open):hover .domain-card-header {
+  background: color-mix(in srgb, var(--domain-color) 10%, transparent);
+}
+
+.domain-card:not(.open):hover .domain-card-caret {
+  transform: translateX(3px);
+  color: var(--domain-color); opacity: 1;
+}
+
+.domain-card:not(.open):hover .domain-card-label {
+  color: var(--domain-color);
+}
+
+.domain-card-header:active { background: var(--gold-dim); transform: scale(0.99); }
 
 .domain-card-icon {
   font-size: 22px; flex-shrink: 0;
