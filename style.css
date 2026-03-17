@@ -1320,6 +1320,55 @@ select.form-input { cursor: pointer; }
   pointer-events: none;
 }
 
+/* ─── EMAIL GATE ────────────────────────────────────────── */
+.email-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 28px 32px;
+  min-height: 100%;
+  text-align: center;
+}
+.email-gate-icon { font-size: 52px; margin-bottom: 20px; }
+.email-gate-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.email-gate-sub {
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.55;
+  max-width: 280px;
+  margin-bottom: 28px;
+}
+.email-gate .form-group { width: 100%; margin-bottom: 8px; }
+.email-gate .form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--card-border);
+  background: var(--bg2);
+  font-size: 16px;
+  color: var(--text);
+  transition: border-color var(--t);
+}
+.email-gate .form-input:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+.email-error {
+  font-size: 12px;
+  color: #c0392b;
+  margin-bottom: 12px;
+  width: 100%;
+  text-align: left;
+}
+.email-gate .btn-gold { margin-top: 8px; }
+
 /* ─── ПРАКТИКА ЛУННОГО ДНЯ ──────────────────────────────── */
 .practice-card {
   background: var(--bg2);
