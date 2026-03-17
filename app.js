@@ -238,6 +238,12 @@ function initEmailScreen() {
     showScreen('main');
     initMain();
   });
+
+  $('email-skip')?.addEventListener('click', () => {
+    localStorage.setItem('userEmail', 'skipped');
+    showScreen('main');
+    initMain();
+  }, { once: true });
 }
 
 // ─── Bot CTA banner ───────────────────────────────────────────────────────────
