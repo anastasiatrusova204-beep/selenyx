@@ -221,6 +221,13 @@ ul { list-style: none; }
 
 .header-actions { display: flex; gap: 4px; }
 
+.streak-badge {
+  font-size: 12px; font-weight: 600; color: var(--gold);
+  background: var(--gold-dim); border-radius: 20px;
+  padding: 3px 10px; letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
 .icon-btn {
   width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
@@ -380,54 +387,71 @@ ul { list-style: none; }
 .tile-label { font-size: 12px; color: var(--text-sub); font-weight: 500; line-height: 1.3; }
 
 /* ─── 13. ДОМЕНЫ ────────────────────────────────────────── */
-.domain-buttons {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+/* ── DOMAIN ACCORDION ───────────────────────────────── */
+.domain-accordion {
+  display: flex; flex-direction: column; gap: 8px;
 }
 
-.domain-btn {
-  min-height: 44px; border-radius: 22px;
-  background: var(--bg2); border: 0.5px solid var(--divider);
-  font-size: 13px; font-weight: 500; color: var(--text-sub);
-  transition: all var(--t); padding: 0 12px;
+.domain-card {
+  background: var(--card);
+  border: 0.5px solid var(--divider);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition: border-color var(--t);
 }
 
-.domain-btn:active { transform: scale(0.97); }
-
-.domain-btn.active {
-  background: var(--accent); border-color: var(--accent);
-  color: #fff; font-weight: 600;
+.domain-card.open {
+  border-color: var(--gold);
 }
 
-.domain-hint {
-  font-size: 13px; color: var(--text-sub); text-align: center; padding: 6px 0 10px;
-  animation: fadeInUp 0.4s ease both;
+.domain-card-header {
+  width: 100%; display: flex; align-items: center;
+  gap: 10px; padding: 14px 16px;
+  background: none; border: none; cursor: pointer;
+  text-align: left; touch-action: manipulation;
+  transition: background var(--t);
 }
 
-@keyframes domainPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(42,171,238,0.45); }
-  60%  { box-shadow: 0 0 0 8px rgba(42,171,238,0); }
-  100% { box-shadow: 0 0 0 0 rgba(42,171,238,0); }
-}
-.domain-btn.hint-pulse {
-  animation: domainPulse 0.75s ease-out;
+.domain-card-header:active { background: var(--bg3); }
+
+.domain-card-icon { font-size: 20px; flex-shrink: 0; }
+
+.domain-card-label {
+  font-size: 15px; font-weight: 500; color: var(--text); flex: 1;
+  transition: color var(--t);
 }
 
-/* ── DOMAIN BOTTOM SHEET ────────────────────────────── */
+.domain-card.open .domain-card-label {
+  color: var(--gold); font-weight: 600;
+}
+
+.domain-card-caret {
+  font-size: 18px; color: var(--text-hint);
+  transition: transform var(--t); display: inline-block;
+}
+
+.domain-card.open .domain-card-caret { transform: rotate(90deg); }
+
+.domain-card-body {
+  padding: 0 16px 16px;
+}
+
+.domain-card-text {
+  font-size: 15px; color: var(--text); line-height: 1.7;
+  border-top: 0.5px solid var(--divider); padding-top: 12px;
+}
+
+/* ── MINI SHEET (Цвет дня + Число дня) ──────────────── */
 .domain-sheet {
   position: fixed; top: 0; right: 0; bottom: 0; left: 0;
   z-index: 200;
   display: flex; flex-direction: column; justify-content: flex-end;
 }
-
 .domain-sheet-backdrop {
   position: absolute; top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(0,0,0,0); transition: background 0.3s ease;
 }
-
-.domain-sheet.open .domain-sheet-backdrop {
-  background: rgba(0,0,0,0.45);
-}
-
+.domain-sheet.open .domain-sheet-backdrop { background: rgba(0,0,0,0.45); }
 .domain-sheet-card {
   position: relative; z-index: 1;
   background: var(--card);
@@ -435,20 +459,18 @@ ul { list-style: none; }
   padding: 12px 20px calc(28px + env(safe-area-inset-bottom));
   transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-  max-height: 80vh; overflow-y: auto;
+  max-height: 70vh; overflow-y: auto;
 }
-
 .domain-sheet.open .domain-sheet-card { transform: translateY(0); }
-
 .domain-sheet-handle {
   width: 36px; height: 4px; border-radius: 2px;
   background: var(--bg3); margin: 0 auto 20px;
 }
-
 .domain-sheet-header {
   display: flex; align-items: flex-start;
   justify-content: space-between; margin-bottom: 16px;
 }
+.domain-sheet-body { display: flex; flex-direction: column; gap: 14px; }
 
 .sheet-icon { font-size: 36px; line-height: 1; margin-bottom: 6px; }
 
@@ -456,8 +478,6 @@ ul { list-style: none; }
   font-family: var(--font-display); font-size: 26px;
   font-weight: 600; color: var(--text);
 }
-
-.domain-sheet-body { display: flex; flex-direction: column; gap: 14px; }
 
 .sheet-text {
   font-size: 16px; color: var(--text); line-height: 1.7;

@@ -213,6 +213,28 @@ function initBotCta() {
   });
 }
 
+// ─── Streak tracker ───────────────────────────────────────────────────────────
+function calcStreak() {
+  const today = new Date().toISOString().slice(0, 10);
+  const last  = localStorage.getItem('streakDate');
+  let streak  = parseInt(localStorage.getItem('streakCount') || '0', 10);
+
+  if (last === today) {
+    // уже открывали сегодня — ничего не меняем
+  } else {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    streak = (last === yesterday) ? streak + 1 : 1;
+    localStorage.setItem('streakCount', streak);
+    localStorage.setItem('streakDate', today);
+  }
+
+  const badge = $('streak-badge');
+  if (badge && streak >= 2) {
+    badge.textContent = `🔥 ${streak}`;
+    badge.classList.remove('hidden');
+  }
+}
+
 // ─── Main / Tabs ──────────────────────────────────────────────────────────────
 function initMain() {
   // Tab buttons
@@ -223,6 +245,7 @@ function initMain() {
       switchTab(tab);
     });
   });
+  calcStreak();
   switchTab('today');
   initBotCta();
   if (_autoKnowledge) openKnowledge();
@@ -340,29 +363,35 @@ function applyTodayData(data) {
     });
   }
 
-  // Domain buttons → active toggle + sheet
-  document.querySelectorAll('.domain-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      tg.HapticFeedback.impactOccurred('medium');
-      const meta = DOMAIN_META[btn.dataset.domain] || { label: btn.dataset.domain, icon: '✨' };
-      openSheet({
-        icon: meta.icon,
-        title: meta.label,
-        text: domains[btn.dataset.domain] || '',
+  // Domain accordion — inline expandable cards
+  document.querySelectorAll('.domain-card').forEach(card => {
+    const header = card.querySelector('.domain-card-header');
+    header.addEventListener('click', () => {
+      const domain = card.dataset.domain;
+      const isOpen = card.classList.contains('open');
+
+      // Закрыть все
+      document.querySelectorAll('.domain-card').forEach(c => {
+        c.classList.remove('open');
+        c.querySelector('.domain-card-header').setAttribute('aria-expanded', 'false');
+        c.querySelector('.domain-card-body').hidden = true;
       });
+
+      // Открыть текущий если был закрыт
+      if (!isOpen) {
+        tg.HapticFeedback.impactOccurred('light');
+        card.classList.add('open');
+        header.setAttribute('aria-expanded', 'true');
+        const body = card.querySelector('.domain-card-body');
+        body.hidden = false;
+        if (!body.dataset.rendered) {
+          body.innerHTML = `<p class="domain-card-text">${domains[domain] || ''}</p>`;
+          wrapTerms(body);
+          body.dataset.rendered = '1';
+        }
+      }
     });
   });
-
-  // First-visit domain hint: пульс на кнопках
-  if (!localStorage.getItem('domainHintShown')) {
-    localStorage.setItem('domainHintShown', '1');
-    document.querySelectorAll('.domain-btn').forEach(btn => {
-      btn.classList.add('hint-pulse');
-      btn.addEventListener('animationend', () => btn.classList.remove('hint-pulse'), { once: true });
-    });
-  }
 
   // Retention hook: показать через 3с при первом визите
   if (!localStorage.getItem('retentionShown')) {

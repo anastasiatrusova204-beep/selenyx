@@ -89,6 +89,7 @@
   <!-- Header -->
   <header class="app-header">
     <h1 class="app-logo">🌙 Selenyx</h1>
+    <span id="streak-badge" class="streak-badge hidden"></span>
     <div class="header-actions">
       <button id="refresh-btn" class="icon-btn" aria-label="Обновить">↻</button>
       <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
@@ -143,14 +144,41 @@
           <button id="retention-close" class="retention-dismiss" aria-label="Закрыть">✕</button>
         </div>
 
-        <!-- Domain tabs -->
-        <div class="domain-buttons">
-          <button class="domain-btn active" data-domain="health">🏥 Здоровье</button>
-          <button class="domain-btn" data-domain="work">💼 Работа</button>
-          <button class="domain-btn" data-domain="love">❤️ Отношения</button>
-          <button class="domain-btn" data-domain="psych">🧠 Психология</button>
+        <!-- Domain accordion -->
+        <div class="domain-accordion" id="domain-accordion">
+          <div class="domain-card" data-domain="health">
+            <button class="domain-card-header" aria-expanded="false">
+              <span class="domain-card-icon">🏥</span>
+              <span class="domain-card-label">Здоровье</span>
+              <span class="domain-card-caret">›</span>
+            </button>
+            <div class="domain-card-body" hidden></div>
+          </div>
+          <div class="domain-card" data-domain="work">
+            <button class="domain-card-header" aria-expanded="false">
+              <span class="domain-card-icon">💼</span>
+              <span class="domain-card-label">Работа</span>
+              <span class="domain-card-caret">›</span>
+            </button>
+            <div class="domain-card-body" hidden></div>
+          </div>
+          <div class="domain-card" data-domain="love">
+            <button class="domain-card-header" aria-expanded="false">
+              <span class="domain-card-icon">❤️</span>
+              <span class="domain-card-label">Отношения</span>
+              <span class="domain-card-caret">›</span>
+            </button>
+            <div class="domain-card-body" hidden></div>
+          </div>
+          <div class="domain-card" data-domain="psych">
+            <button class="domain-card-header" aria-expanded="false">
+              <span class="domain-card-icon">🧠</span>
+              <span class="domain-card-label">Психология</span>
+              <span class="domain-card-caret">›</span>
+            </button>
+            <div class="domain-card-body" hidden></div>
+          </div>
         </div>
-        <p class="domain-hint">Нажми на раздел — получи развёрнутый совет</p>
 
       </div>
     </section>
@@ -413,7 +441,8 @@
   </div>
 </div>
 
-<!-- ── DOMAIN SHEET ──────────────────────────────────────────────────────────── -->
+
+<!-- ── MINI SHEET (Цвет дня, Число дня) ─────────────────────────────────────── -->
 <div id="domain-sheet" class="domain-sheet hidden">
   <div id="domain-sheet-backdrop" class="domain-sheet-backdrop"></div>
   <div class="domain-sheet-card">
@@ -474,6 +503,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=5"></script>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
