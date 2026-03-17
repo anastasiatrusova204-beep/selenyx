@@ -84,7 +84,7 @@ function showToast(msg, color) {
 }
 
 // ─── Screen navigation ────────────────────────────────────────────────────────
-const screens = ['splash', 'onboarding', 'main'];
+const screens = ['splash', 'onboarding', 'email', 'main'];
 
 function showScreen(id) {
   screens.forEach(s => {
@@ -114,8 +114,13 @@ function initSplash() {
         onboarded = true;
         const savedBirth = localStorage.getItem('userBirth');
         if (savedBirth) { try { userBirth = JSON.parse(savedBirth); } catch {} }
-        showScreen('main');
-        initMain();
+        if (!localStorage.getItem('userEmail')) {
+          showScreen('email');
+          initEmailScreen();
+        } else {
+          showScreen('main');
+          initMain();
+        }
       } else {
         showScreen('onboarding');
         initOnboarding();
@@ -189,10 +194,50 @@ function finishOnboarding() {
   tg.CloudStorage?.setItem('userSign', userSign, () => {});
   onboarded = true;
   tg.HapticFeedback.notificationOccurred('success');
-  tg.showPopup({ message: 'Знак сохранён ✓\nПрогноз на сегодня готов!', buttons: [{ id: 'ok', type: 'ok' }] }, () => {
+  tg.showPopup({ message: 'Знак сохранён ✓\nПочти готово!', buttons: [{ id: 'ok', type: 'ok' }] }, () => {
+    if (!localStorage.getItem('userEmail')) {
+      showScreen('email');
+      initEmailScreen();
+    } else {
+      showScreen('main');
+      initMain();
+    }
+  });
+}
+
+// ─── Email Gate ───────────────────────────────────────────────────────────────
+const _EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function initEmailScreen() {
+  const input  = $('email-input');
+  const submit = $('email-submit');
+  const error  = $('email-error');
+  if (!input || !submit) return;
+
+  // Очистить предыдущее состояние
+  input.value = '';
+  error.classList.add('hidden');
+
+  input.focus();
+
+  // Скрыть ошибку при вводе
+  input.addEventListener('input', () => error.classList.add('hidden'));
+
+  // Enter → submit
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit.click(); });
+
+  submit.addEventListener('click', () => {
+    const val = input.value.trim();
+    if (!_EMAIL_RE.test(val)) {
+      error.classList.remove('hidden');
+      tg.HapticFeedback.notificationOccurred('error');
+      return;
+    }
+    localStorage.setItem('userEmail', val);
+    tg.HapticFeedback.notificationOccurred('success');
     showScreen('main');
     initMain();
-  });
+  }, { once: true });
 }
 
 // ─── Bot CTA banner ───────────────────────────────────────────────────────────

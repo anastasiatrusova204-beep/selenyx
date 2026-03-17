@@ -112,8 +112,7 @@ def start_cta_keyboard() -> InlineKeyboardMarkup:
 
 def email_ask_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📧 Оставить email", callback_data="cb_email_ask")],
-        [InlineKeyboardButton(text="Пропустить →",      callback_data="cb_email_skip")],
+        [InlineKeyboardButton(text="📧 Указать email →", callback_data="cb_email_ask")],
     ])
 
 
@@ -318,8 +317,9 @@ async def handle_start(message: Message, state: FSMContext) -> None:
                 "🎁 <b>7 дней — бесплатно.</b> Нажми кнопку <b>Selenyx</b> внизу чата.",
             )
         await message.answer(
-            "📬 Хочешь получать лунные прогнозы на почту?\n"
-            "Оставь email — пришлю, когда Луна войдёт в твой знак и в особые дни.",
+            "📬 <b>Последний шаг.</b>\n\n"
+            "Укажи email — открою полный доступ к приложению и буду присылать прогноз, "
+            "когда Луна войдёт в твой знак.",
             reply_markup=email_ask_keyboard(),
         )
 
