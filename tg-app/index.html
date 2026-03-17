@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 <div id="app">
@@ -119,12 +120,14 @@
     <section class="tab-pane" data-tab="today">
       <div class="pane-scroll">
 
-        <!-- Today date -->
-        <p id="today-date" class="today-date"></p>
-
-        <!-- Moon tile row -->
-        <div id="today-moon-tile" class="tile-row"></div>
-        <p class="science-note">Данные: Swiss Ephemeris (NASA JPL)</p>
+        <!-- Today date + moon inline + share -->
+        <div class="today-header-row">
+          <div class="today-header-left">
+            <p id="today-date" class="today-date"></p>
+            <p id="today-moon-inline" class="today-moon-inline"></p>
+          </div>
+          <button id="today-share" class="today-share-btn" aria-label="Поделиться энергией дня">📤</button>
+        </div>
 
         <!-- Phase tips — главный блок дня -->
         <div class="accent-card accent-card--gold">
@@ -165,7 +168,10 @@
           <div class="domain-card" data-domain="health">
             <button class="domain-card-header" aria-expanded="false">
               <span class="domain-card-icon">🏥</span>
-              <span class="domain-card-label">Здоровье</span>
+              <div class="domain-card-header-content">
+                <span class="domain-card-label">Здоровье</span>
+                <span class="domain-card-preview"></span>
+              </div>
               <span class="domain-card-caret">›</span>
             </button>
             <div class="domain-card-body" hidden></div>
@@ -173,7 +179,10 @@
           <div class="domain-card" data-domain="work">
             <button class="domain-card-header" aria-expanded="false">
               <span class="domain-card-icon">💼</span>
-              <span class="domain-card-label">Работа</span>
+              <div class="domain-card-header-content">
+                <span class="domain-card-label">Работа</span>
+                <span class="domain-card-preview"></span>
+              </div>
               <span class="domain-card-caret">›</span>
             </button>
             <div class="domain-card-body" hidden></div>
@@ -181,7 +190,10 @@
           <div class="domain-card" data-domain="love">
             <button class="domain-card-header" aria-expanded="false">
               <span class="domain-card-icon">❤️</span>
-              <span class="domain-card-label">Отношения</span>
+              <div class="domain-card-header-content">
+                <span class="domain-card-label">Отношения</span>
+                <span class="domain-card-preview"></span>
+              </div>
               <span class="domain-card-caret">›</span>
             </button>
             <div class="domain-card-body" hidden></div>
@@ -189,7 +201,10 @@
           <div class="domain-card" data-domain="psych">
             <button class="domain-card-header" aria-expanded="false">
               <span class="domain-card-icon">🧠</span>
-              <span class="domain-card-label">Психология</span>
+              <div class="domain-card-header-content">
+                <span class="domain-card-label">Психология</span>
+                <span class="domain-card-preview"></span>
+              </div>
               <span class="domain-card-caret">›</span>
             </button>
             <div class="domain-card-body" hidden></div>
@@ -200,6 +215,18 @@
         <div class="practice-card">
           <p id="today-practice-day" class="practice-day"></p>
           <p id="today-practice-text" class="practice-text"></p>
+        </div>
+
+        <!-- Soft paywall: natal chart teaser -->
+        <div class="paywall-card" id="natal-teaser">
+          <div class="paywall-card-left">
+            <span class="paywall-icon">🔐</span>
+            <div>
+              <p class="paywall-title">Натальная карта</p>
+              <p class="paywall-sub">Солнце, Луна и Асцендент по дате рождения</p>
+            </div>
+          </div>
+          <button id="natal-notify-btn" class="paywall-btn">Уведомить</button>
         </div>
 
         <!-- Knowledge base entry -->
@@ -536,6 +563,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=5"></script>
-<script src="app.js?v=13"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>
