@@ -336,34 +336,59 @@ function applyTodayData(data) {
   setText('today-good', phaseTips.good || '');
   setText('today-avoid', phaseTips.avoid || '');
 
-  // Color card → sheet
+  // Color card → inline expand (как domain cards)
   const colorCard = $('today-color')?.closest('.mini-card');
+  const numCard   = $('today-daynum')?.closest('.mini-card');
+
   if (colorCard) {
-    colorCard.style.cursor = 'pointer';
     colorCard.addEventListener('click', () => {
-      tg.HapticFeedback.impactOccurred('medium');
-      openSheet({
-        icon: `<span style="display:inline-block;width:40px;height:40px;background:${color.hex};border-radius:50%"></span>`,
-        title: color.name,
-        text: color.hint,
-        sections: [{ label: '🪐 Планета дня', sub: color.planet }],
-      });
+      const isOpen = colorCard.classList.contains('open');
+      if (numCard) {
+        numCard.classList.remove('open');
+        const nb = numCard.querySelector('.mini-card-body');
+        if (nb) nb.hidden = true;
+      }
+      if (isOpen) {
+        colorCard.classList.remove('open');
+        colorCard.querySelector('.mini-card-body').hidden = true;
+      } else {
+        tg.HapticFeedback.impactOccurred('light');
+        colorCard.classList.add('open');
+        const body = colorCard.querySelector('.mini-card-body');
+        body.hidden = false;
+        if (!body.dataset.rendered) {
+          body.innerHTML = `
+            <p style="margin-bottom:6px">${color.hint}</p>
+            <p style="opacity:0.6;font-size:12px">🪐 Планета дня: ${color.planet}</p>`;
+          body.dataset.rendered = '1';
+        }
+      }
     });
   }
 
-  // Day number card → sheet
-  const numCard = $('today-daynum')?.closest('.mini-card');
+  // Day number card → inline expand (как domain cards)
   if (numCard) {
-    numCard.style.cursor = 'pointer';
     numCard.addEventListener('click', () => {
-      tg.HapticFeedback.impactOccurred('medium');
-      const num = NUMEROLOGY[dayNum];
-      openSheet({
-        icon: `<span style="font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--gold)">${dayNum}</span>`,
-        title: num?.name || `Число ${dayNum}`,
-        text: num?.hint || '',
-        sections: [],
-      });
+      const isOpen = numCard.classList.contains('open');
+      if (colorCard) {
+        colorCard.classList.remove('open');
+        const cb = colorCard.querySelector('.mini-card-body');
+        if (cb) cb.hidden = true;
+      }
+      if (isOpen) {
+        numCard.classList.remove('open');
+        numCard.querySelector('.mini-card-body').hidden = true;
+      } else {
+        tg.HapticFeedback.impactOccurred('light');
+        numCard.classList.add('open');
+        const body = numCard.querySelector('.mini-card-body');
+        body.hidden = false;
+        if (!body.dataset.rendered) {
+          const num = NUMEROLOGY[dayNum];
+          body.innerHTML = `<p>${num?.hint || ''}</p>`;
+          body.dataset.rendered = '1';
+        }
+      }
     });
   }
 
