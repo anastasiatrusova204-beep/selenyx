@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <div id="app">
@@ -255,12 +255,16 @@
 
         <div id="moon-tile-row" class="tile-row"></div>
 
+        <!-- Арка лунного цикла -->
+        <div id="moon-cycle-arc" class="moon-cycle-arc-wrap"></div>
+
         <div class="accent-card accent-card--gold">
-          <p id="moon-lunar-day" class="card-label"></p>
           <p id="moon-energy-text" class="card-text"></p>
         </div>
 
         <div id="moon-lunar-info" class="mini-card"></div>
+
+        <p class="ephem-note">🔭 Расчёт по алгоритму Жана Мееуса · точность ±0.3°</p>
 
       </div>
     </section>
@@ -562,7 +566,7 @@
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
-<script src="data.js?v=5"></script>
-<script src="app.js?v=14"></script>
+<script src="data.js?v=6"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

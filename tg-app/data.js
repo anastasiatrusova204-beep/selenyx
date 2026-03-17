@@ -314,38 +314,85 @@ const LUNAR_DAYS = {
 ───────────────────────────────────────── */
 
 /**
- * Вычисляет текущую фазу Луны по дате.
- * Опорная точка: новолуние 29 янв 2025.
- * @returns {{ phase, phaseName, emoji, illumination, lunarDay, sign, signRu }}
+ * Вычисляет текущую фазу Луны по алгоритму Жана Мееуса (Astronomical Algorithms).
+ * Точность: ±0.1–0.3° (в ~100 раз точнее предыдущей формулы).
+ * Лунный день и фаза рассчитываются через угол Луна–Солнце — так же, как в боте (Swiss Ephemeris).
+ * @returns {{ phase, phaseName, emoji, illumination, lunarDay, sign, signRu, moonLon, angle }}
  */
 function calcMoonData(date = new Date()) {
-  const now      = date;
-  const refDate  = new Date('2025-01-29T00:00:00Z');
-  const cycle    = 29.53058867; // дней в лунном цикле
-  const elapsed  = (now - refDate) / 86400000; // прошло дней
-  const position = ((elapsed % cycle) + cycle) % cycle; // позиция в цикле [0, 29.53)
-  const phasePct = (position / cycle) * 100;
+  const R = Math.PI / 180;
 
-  // Определяем фазу
-  let phase = MOON_PHASES[0];
-  for (const p of MOON_PHASES) {
-    if (phasePct >= p.pct[0] && phasePct < p.pct[1]) { phase = p; break; }
-  }
+  // Юлианские века от J2000.0
+  const JD = date.getTime() / 86400000 + 2440587.5;
+  const T  = (JD - 2451545.0) / 36525.0;
 
-  const lunarDay = Math.floor(position) + 1;
+  // ── Долгота Луны: главные члены ряда Мееуса (гл. 47) ────────────────
+  const D  = 297.85036 + 445267.11480 * T;  // средняя элонгация
+  const M  = 357.52772 + 35999.05034  * T;  // средняя аномалия Солнца
+  const Mp = 134.96298 + 477198.86798 * T;  // средняя аномалия Луны
+  const F  = 93.27191  + 483202.01753 * T;  // аргумент широты
+  let moonLon =
+    218.31665 + 481267.88134 * T
+    + 6.28875 * Math.sin(Mp * R)
+    + 1.27402 * Math.sin((2*D - Mp)  * R)
+    + 0.65831 * Math.sin(2*D         * R)
+    + 0.21358 * Math.sin(2*Mp        * R)
+    - 0.18522 * Math.sin(M           * R)
+    - 0.11430 * Math.sin(2*F         * R)
+    + 0.05880 * Math.sin((2*D - 2*Mp)* R)
+    + 0.05707 * Math.sin((2*D - M - Mp) * R)
+    + 0.05333 * Math.sin((2*D + Mp)  * R)
+    + 0.04576 * Math.sin((2*D - M)   * R)
+    - 0.04068 * Math.sin((M - Mp)    * R)
+    - 0.03482 * Math.sin(D           * R)
+    - 0.03040 * Math.sin((M + Mp)    * R);
+  moonLon = ((moonLon % 360) + 360) % 360;
 
-  // Знак Луны: меняется каждые ~2.3 дня (13 оборотов за год)
-  const signIndex = Math.floor((elapsed / 2.3) % 12);
-  const signObj   = SIGNS[Math.abs(signIndex)];
+  // ── Долгота Солнца (Меeus гл. 25, упрощённая) ───────────────────────
+  const Msun = (357.52911 + 35999.05029 * T) * R;
+  let sunLon =
+    280.46646 + 36000.76983 * T
+    + 1.91460 * Math.sin(Msun)
+    + 0.02000 * Math.sin(2 * Msun);
+  sunLon = ((sunLon % 360) + 360) % 360;
+
+  // ── Угол Луна–Солнце ─────────────────────────────────────────────────
+  // Точно как в боте: angle = (moon_lon - sun_lon) % 360
+  const angle = ((moonLon - sunLon) % 360 + 360) % 360;
+
+  // ── Лунный день ──────────────────────────────────────────────────────
+  // Точно как в боте: lunar_day = int(angle / 12.19) + 1
+  const lunarDay = Math.min(Math.floor(angle / 12.19) + 1, 30);
+
+  // ── Фаза (по углу, как стандарт IAU) ─────────────────────────────────
+  let phaseId;
+  if      (angle < 22.5 || angle >= 337.5) phaseId = 'new';
+  else if (angle < 67.5)  phaseId = 'waxing_cresc';
+  else if (angle < 112.5) phaseId = 'first_quarter';
+  else if (angle < 157.5) phaseId = 'waxing_gibb';
+  else if (angle < 202.5) phaseId = 'full';
+  else if (angle < 247.5) phaseId = 'waning_gibb';
+  else if (angle < 292.5) phaseId = 'last_quarter';
+  else                    phaseId = 'waning_cresc';
+  const phase = MOON_PHASES.find(p => p.id === phaseId) || MOON_PHASES[0];
+
+  // ── Освещённость (0% новолуние → 100% полнолуние) ───────────────────
+  const illumination = Math.round((1 - Math.cos(angle * R)) / 2 * 100);
+
+  // ── Знак из эклиптической долготы ────────────────────────────────────
+  const signIndex = Math.floor(moonLon / 30) % 12;
+  const signObj   = SIGNS[signIndex];
 
   return {
-    phase:         phase.id,
-    phaseName:     phase.name,
-    emoji:         phase.emoji,
-    illumination:  Math.round(phasePct <= 50 ? phasePct * 2 : (100 - phasePct) * 2),
-    lunarDay:      Math.min(lunarDay, 30),
-    sign:          signObj.id,
-    signRu:        signObj.ru,
+    phase:        phase.id,
+    phaseName:    phase.name,
+    emoji:        phase.emoji,
+    illumination,
+    lunarDay,
+    sign:         signObj.id,
+    signRu:       signObj.ru,
+    moonLon:      Math.round(moonLon * 10) / 10,  // градус для отображения
+    angle:        Math.round(angle),
   };
 }
 

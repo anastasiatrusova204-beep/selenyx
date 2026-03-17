@@ -26,11 +26,11 @@ tg.onEvent?.('viewportChanged', ({ isStateStable }) => {
 });
 
 // Глобальный перехватчик ошибок
-window.onerror = (msg, src, line, _col, err) => {
-  const text = `Ошибка: ${msg}\n${src}:${line}`;
-  console.error(text, err);
-  if (typeof tg.showAlert === 'function') tg.showAlert(text);
-  else alert(text);
+window.onerror = (msg, _src, _line, _col, err) => {
+  console.error(msg, err);
+  // Пользователю показываем дружелюбное сообщение без технических деталей
+  showToast('Что-то пошло не так. Попробуй обновить страницу.');
+  return true; // предотвращает показ браузерного диалога
 };
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -364,7 +364,8 @@ function applyTodayData(data) {
   const dayNames = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
   const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   setText('today-date', `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]}`);
-  setText('today-moon-inline', `${moon.emoji} ${moon.phaseName} · Луна в ${moon.signRu}`);
+  const deg = moon.moonLon != null ? ` ${Math.floor(moon.moonLon % 30)}°` : '';
+  setText('today-moon-inline', `${moon.emoji} ${moon.phaseName} · Луна в ${moon.signRu}${deg}`);
 
   // Domain card previews
   document.querySelectorAll('.domain-card').forEach(card => {
@@ -603,15 +604,13 @@ function renderMoon() {
 function applyMoonData(moon) {
   setText('moon-phase-name', moon.phaseName);
   setText('moon-phase-emoji', moon.emoji);
-  setText('moon-sign-name', `Луна в ${moon.signRu}`);
-  setText('moon-lunar-day', `${moon.lunarDay} лунный день`);
-  setText('moon-illumination', `${moon.illumination}%`);
+  const deg = moon.moonLon != null ? ` · ${Math.floor(moon.moonLon % 30)}° ${moon.signRu.slice(0,3)}.` : '';
+  setText('moon-sign-name', `Луна в ${moon.signRu}${deg}`);
 
   const energyText = MOON_SIGN_ENERGY[moon.sign] || '';
-  setText('moon-lunar-day', `Луна в ${moon.signRu}`);
   setText('moon-energy-text', energyText);
 
-  // Tile row
+  // Tile row: фаза + освещённость
   setHTML('moon-tile-row', `
     <div class="tile">
       <span class="tile-icon">${moon.emoji}</span>
@@ -622,6 +621,9 @@ function applyMoonData(moon) {
       <span class="tile-label">${moon.illumination}% света</span>
     </div>
   `);
+
+  // Арка лунного цикла
+  setHTML('moon-cycle-arc', _buildCycleArc(moon.lunarDay, moon.angle));
 
   // Lunar day info
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
@@ -634,6 +636,34 @@ function applyMoonData(moon) {
   // Wrap astrology terms
   wrapTerms($('moon-energy-text'));
   wrapTerms($('moon-lunar-info'));
+}
+
+/** Строит SVG-арку лунного цикла (1–30 дней, угол 0–360°) */
+function _buildCycleArc(lunarDay, angle) {
+  const r = 54, cx = 70, cy = 70, stroke = 5;
+  const total = 360;
+  const circ  = 2 * Math.PI * r;
+  // Угол 0° = новолуние (верхушка), по часовой
+  const pct   = (angle != null ? angle : ((lunarDay - 1) / 29.53) * 360) / total;
+  const arcLen = pct * circ;
+  const dash   = `${arcLen.toFixed(1)} ${(circ - arcLen).toFixed(1)}`;
+  // Точка положения луны на окружности
+  const rad    = (angle != null ? angle : pct * 360) * Math.PI / 180 - Math.PI / 2;
+  const dotX   = (cx + r * Math.cos(rad)).toFixed(1);
+  const dotY   = (cy + r * Math.sin(rad)).toFixed(1);
+  // Метки новолуния (верх) и полнолуния (низ)
+  return `<svg class="cycle-arc" viewBox="0 0 140 140" aria-label="Лунный цикл: день ${lunarDay} из 29">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="${stroke}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+      stroke="var(--gold)" stroke-width="${stroke}" stroke-linecap="round"
+      stroke-dasharray="${dash}" stroke-dashoffset="${(circ * 0.25).toFixed(1)}"
+      transform="rotate(-90 ${cx} ${cy})"/>
+    <circle cx="${dotX}" cy="${dotY}" r="7" fill="var(--gold)" opacity="0.9"/>
+    <text x="${cx}" y="${cy - 6}" text-anchor="middle" class="arc-day-num">${lunarDay}</text>
+    <text x="${cx}" y="${cy + 14}" text-anchor="middle" class="arc-day-sub">лунный день</text>
+    <text x="${cx}" y="10" text-anchor="middle" class="arc-label">🌑</text>
+    <text x="${cx}" y="136" text-anchor="middle" class="arc-label">🌕</text>
+  </svg>`;
 }
 
 // ─── Chart tab ────────────────────────────────────────────────────────────────
