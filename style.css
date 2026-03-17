@@ -492,7 +492,7 @@ ul { list-style: none; }
 .domain-card-label {
   font-family: var(--font-display);
   font-size: 18px; font-weight: 600; font-style: italic;
-  color: var(--text); flex: 1;
+  color: var(--text);
   transition: color 200ms ease;
   letter-spacing: 0.3px;
 }
@@ -876,14 +876,65 @@ select.form-input { cursor: pointer; }
 
 
 /* ─── TODAY DATE ──────────────────────────────────────────── */
+.today-header-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 4px 0 0; gap: 8px;
+}
+.today-header-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .today-date {
   font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--text);
-  padding: 4px 0 0;
+  font-size: 22px; font-weight: 600; color: var(--text);
   letter-spacing: 0.2px;
 }
+.today-moon-inline {
+  font-size: 13px; color: var(--text-hint);
+}
+.today-share-btn {
+  flex-shrink: 0; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; border-radius: 50%;
+  background: var(--gold-dim); border: 1px solid var(--card-border);
+  transition: background var(--t), transform var(--t);
+  touch-action: manipulation;
+}
+.today-share-btn:active { background: var(--gold-dim); transform: scale(0.92); }
+
+/* ─── DOMAIN CARD PREVIEW ─────────────────────────────────── */
+.domain-card-header-content {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;
+}
+.domain-card-preview {
+  font-size: 12px; color: var(--text-hint); line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: opacity 200ms, max-height 200ms;
+  max-height: 20px;
+}
+.domain-card.open .domain-card-preview {
+  opacity: 0; max-height: 0; pointer-events: none;
+}
+
+/* ─── SOFT PAYWALL CARD ───────────────────────────────────── */
+.paywall-card {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 16px;
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--r); box-shadow: var(--shadow);
+}
+.paywall-card-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.paywall-icon { font-size: 24px; flex-shrink: 0; }
+.paywall-title {
+  font-family: var(--font-display); font-size: 16px; font-weight: 600;
+  color: var(--text);
+}
+.paywall-sub { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+.paywall-btn {
+  flex-shrink: 0; padding: 7px 14px; border-radius: 20px;
+  background: var(--gold-dim); border: 1px solid var(--gold);
+  color: var(--gold); font-size: 13px; font-weight: 500;
+  touch-action: manipulation; transition: background var(--t);
+}
+.paywall-btn:disabled { opacity: 0.55; }
+.paywall-btn:not(:disabled):active { background: rgba(176,125,44,0.25); }
 
 /* ─── DAY SHEET BACKDROP ──────────────────────────────────── */
 .sheet-backdrop {

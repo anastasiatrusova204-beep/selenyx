@@ -359,23 +359,22 @@ let _pendingWeeklySummary = 0; // streak milestone для weekly overlay
 function applyTodayData(data) {
   const { moon, dayNum, color, phaseTips, domains, hint } = data;
 
-  // Today's date
+  // Today's date + moon inline
   const now = new Date();
   const dayNames = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
   const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   setText('today-date', `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]}`);
+  setText('today-moon-inline', `${moon.emoji} ${moon.phaseName} · Луна в ${moon.signRu}`);
 
-  // Moon tile row
-  setHTML('today-moon-tile', `
-    <div class="tile">
-      <span class="tile-icon">${moon.emoji}</span>
-      <span class="tile-label">${moon.phaseName}</span>
-    </div>
-    <div class="tile">
-      <span class="tile-icon">🌙</span>
-      <span class="tile-label">Луна в ${moon.signRu}</span>
-    </div>
-  `);
+  // Domain card previews
+  document.querySelectorAll('.domain-card').forEach(card => {
+    const domain = card.dataset.domain;
+    const preview = card.querySelector('.domain-card-preview');
+    if (preview) {
+      const text = domains[domain] || '';
+      preview.textContent = text.length > 72 ? text.slice(0, 72) + '…' : text;
+    }
+  });
 
   // Color card — название цветом дня
   setHTML('today-color', `<span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span><span style="color:var(--text-hint);font-size:12px;margin-left:5px">· ${color.planet}</span>`);
@@ -469,6 +468,34 @@ function applyTodayData(data) {
       }
     });
   });
+
+  // Share button — энергия дня
+  $('today-share')?.addEventListener('click', () => {
+    const text =`${moon.emoji} Луна в ${moon.signRu} · ${moon.lunarDay}-й лунный день · ${moon.phaseName}\n«${phaseTips.good || ''}»\n✨ Selenyx — личный навигатор`;
+    tg.HapticFeedback.impactOccurred('light');
+    if (tg.openTelegramLink) {
+      tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Selenyx_mybot&text=${encodeURIComponent(text)}`);
+    } else {
+      navigator.share?.({ text }) || navigator.clipboard?.writeText(text).then(() => showToast('Скопировано ✓'));
+    }
+  });
+
+  // Natal teaser — «Уведомить меня»
+  const natalBtn = $('natal-notify-btn');
+  if (natalBtn) {
+    const notified = localStorage.getItem('natalNotifySet');
+    if (notified) {
+      natalBtn.textContent = 'Буду ✓';
+      natalBtn.disabled = true;
+    }
+    natalBtn.addEventListener('click', () => {
+      localStorage.setItem('natalNotifySet', '1');
+      natalBtn.textContent = 'Буду ✓';
+      natalBtn.disabled = true;
+      tg.HapticFeedback.notificationOccurred('success');
+      showToast('Уведомим, когда появится 🌟');
+    }, { once: true });
+  }
 
   // Retention hook: показать через 3с при первом визите (если уведомления не включены)
   if (!localStorage.getItem('retentionShown') && !localStorage.getItem('notifyTime')) {
