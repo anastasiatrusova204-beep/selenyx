@@ -175,7 +175,7 @@ ul { list-style: none; }
 .sign-btn:active { transform: scale(0.95); }
 
 .sign-btn.active {
-  background: var(--accent); border-color: var(--accent);
+  background: var(--gold); border-color: var(--gold);
   color: #fff; font-weight: 600;
 }
 
@@ -189,7 +189,7 @@ ul { list-style: none; }
 }
 
 .ob-dot.active {
-  background: var(--accent); transform: scale(1.2);
+  background: var(--gold); transform: scale(1.2);
   width: 20px; border-radius: 4px;
 }
 
@@ -320,17 +320,17 @@ ul { list-style: none; }
 /* Retention banner */
 .retention-banner {
   display: flex; align-items: center; gap: 8px;
-  background: var(--accent-dim); border-radius: var(--r-sm);
-  padding: 12px 14px; border: 1.5px solid var(--accent);
+  background: var(--gold-dim); border-radius: var(--r-sm);
+  padding: 12px 14px; border: 1.5px solid var(--gold);
   animation: fadeInUp 300ms ease;
 }
 
 .retention-banner span { flex: 1; font-size: 13px; color: var(--text); }
 
 .retention-action {
-  font-size: 12px; font-weight: 600; color: var(--accent);
+  font-size: 12px; font-weight: 600; color: var(--gold);
   background: none; padding: 4px 8px;
-  border: 1.5px solid var(--accent); border-radius: 20px;
+  border: 1.5px solid var(--gold); border-radius: 20px;
   white-space: nowrap;
 }
 
@@ -601,16 +601,13 @@ ul { list-style: none; }
 
 .kb-entry-content {
   flex: 1; display: flex; flex-direction: column; gap: 2px;
+  padding-left: 28px;
 }
 
 .kb-entry-icon {
   position: absolute; left: 4px; top: 50%;
   transform: translateY(-50%);
   font-size: 18px; opacity: 0.7;
-}
-
-.kb-entry-content {
-  padding-left: 28px;
 }
 
 .kb-entry-text {
@@ -673,7 +670,7 @@ ul { list-style: none; }
   transition: border-color var(--t); -webkit-appearance: none;
 }
 
-.form-input:focus { border-color: var(--accent); outline: none; }
+.form-input:focus { border-color: var(--gold); outline: none; }
 
 select.form-input { cursor: pointer; }
 
@@ -711,7 +708,7 @@ select.form-input { cursor: pointer; }
 .compat-sign-btn:active { transform: scale(0.92); }
 
 .compat-sign-btn.active {
-  background: var(--accent-dim); border-color: var(--accent);
+  background: var(--gold-dim); border-color: var(--gold);
 }
 
 .compat-sign-btn .sign-emoji { font-size: 22px; }
@@ -877,51 +874,6 @@ select.form-input { cursor: pointer; }
   }
 }
 
-/* ─── 23. Bot CTA banner ─────────────────────────────────── */
-.bot-cta {
-  position: sticky;
-  bottom: 0;
-  left: 0; right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 13px;
-  z-index: 50;
-  animation: slideUp 0.3s ease;
-}
-.bot-cta.hidden { display: none; }
-.bot-cta-text { display: flex; align-items: center; gap: 8px; flex: 1; color: var(--text); }
-.bot-cta-icon { font-size: 18px; flex-shrink: 0; }
-.bot-cta-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.bot-cta-btn {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.bot-cta-dismiss {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 4px;
-  line-height: 1;
-}
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
 
 /* ─── TODAY DATE ──────────────────────────────────────────── */
 .today-date {
@@ -929,7 +881,7 @@ select.form-input { cursor: pointer; }
   font-size: 22px;
   font-weight: 600;
   color: var(--text);
-  padding: 12px 16px 4px;
+  padding: 4px 0 0;
   letter-spacing: 0.2px;
 }
 
@@ -973,7 +925,7 @@ select.form-input { cursor: pointer; }
   display: flex; align-items: center; justify-content: center;
   transition: background var(--t);
 }
-.cal-nav-btn:active { background: var(--accent-dim); }
+.cal-nav-btn:active { background: var(--gold-dim); }
 .cal-month-title {
   font-family: var(--font-display);
   font-size: 20px;
@@ -1027,7 +979,7 @@ select.form-input { cursor: pointer; }
   transition: background var(--t), color var(--t);
 }
 .view-btn.active {
-  background: var(--accent);
+  background: var(--gold);
   color: #fff;
   border-color: transparent;
 }
@@ -1061,7 +1013,7 @@ select.form-input { cursor: pointer; }
 .cal-day:active { opacity: 0.7; }
 .cal-day--empty { cursor: default; }
 .cal-day.today {
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--gold);
 }
 .cal-day .day-num {
   font-size: 12px;
