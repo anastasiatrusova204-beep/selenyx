@@ -233,6 +233,11 @@ function calcStreak() {
     badge.textContent = `🔥 ${streak}`;
     badge.classList.remove('hidden');
   }
+
+  // Еженедельный итог: каждые 7 дней, только один раз за milestone
+  if (streak >= 7 && streak % 7 === 0 && !localStorage.getItem(`weeklyShown_${streak}`)) {
+    _pendingWeeklySummary = streak;
+  }
 }
 
 // ─── Main / Tabs ──────────────────────────────────────────────────────────────
@@ -298,6 +303,7 @@ function renderToday() {
 
 let currentDomain = 'health';
 let _todayInited = false; // guard против дублирования listeners
+let _pendingWeeklySummary = 0; // streak milestone для weekly overlay
 
 function applyTodayData(data) {
   const { moon, dayNum, color, phaseTips, domains, hint } = data;
@@ -336,9 +342,21 @@ function applyTodayData(data) {
   setText('today-good', phaseTips.good || '');
   setText('today-avoid', phaseTips.avoid || '');
 
+  // Практика лунного дня
+  const ld = LUNAR_DAYS[moon.lunarDay] || {};
+  setText('today-practice-day', `${ld.symbol || '🌙'} ${moon.lunarDay}-й лунный день · ${ld.name || ''}`);
+  setText('today-practice-text', ld.hint || '');
+
   // Listeners добавляются только один раз
   if (_todayInited) return;
   _todayInited = true;
+
+  // Еженедельный итог (показываем после рендера, 1.5с)
+  if (_pendingWeeklySummary) {
+    const s = _pendingWeeklySummary;
+    _pendingWeeklySummary = 0;
+    setTimeout(() => showWeeklySummary(s, moon), 1500);
+  }
 
   // Color card → sheet
   const colorCard = $('today-color')?.closest('.mini-card');
@@ -407,6 +425,34 @@ function applyTodayData(data) {
   if (!localStorage.getItem('retentionShown') && !localStorage.getItem('notifyTime')) {
     setTimeout(showRetentionBanner, 3000);
   }
+}
+
+function showWeeklySummary(streak, moon) {
+  localStorage.setItem(`weeklyShown_${streak}`, '1');
+  const ld = LUNAR_DAYS[moon.lunarDay] || {};
+  setText('weekly-title', `${streak} дней подряд!`);
+  setHTML('weekly-stats', `
+    <div class="weekly-stat">
+      <span class="ws-icon">${moon.emoji}</span>
+      <span class="ws-label">${moon.phaseName}</span>
+    </div>
+    <div class="weekly-stat">
+      <span class="ws-icon">${ld.symbol || '🌙'}</span>
+      <span class="ws-label">${moon.lunarDay}-й лунный день</span>
+    </div>
+    <div class="weekly-stat">
+      <span class="ws-icon">🔥</span>
+      <span class="ws-label">${streak} дней подряд</span>
+    </div>
+  `);
+  const overlay = $('weekly-overlay');
+  overlay.classList.remove('hidden');
+  requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('visible')));
+  tg.HapticFeedback.notificationOccurred('success');
+  $('weekly-close')?.addEventListener('click', () => {
+    overlay.classList.remove('visible');
+    setTimeout(() => overlay.classList.add('hidden'), 300);
+  }, { once: true });
 }
 
 function showRetentionBanner() {
