@@ -416,6 +416,7 @@ ul { list-style: none; }
 }
 
 .mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mini-row .mini-card.expandable.open { grid-column: 1 / -1; }
 
 /* ─── 12. TILE-ROW ──────────────────────────────────────── */
 .tile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
