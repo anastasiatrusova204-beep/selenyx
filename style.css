@@ -369,7 +369,27 @@ ul { list-style: none; }
   border: 1px solid var(--card-border);
   box-shadow: var(--shadow);
   display: flex; flex-direction: column; gap: 6px;
-  transition: transform var(--t), box-shadow var(--t);
+  transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+}
+.mini-card[style*="cursor"] {
+  cursor: pointer;
+}
+.mini-card[style*="cursor"]:hover {
+  border-color: var(--gold);
+  box-shadow: var(--shadow), 0 4px 16px var(--gold-dim);
+  transform: translateY(-1px);
+}
+.mini-card[style*="cursor"]::after {
+  content: '›';
+  position: absolute; right: 14px; bottom: 14px;
+  font-size: 14px; color: var(--gold); opacity: 0.5;
+  transition: opacity var(--t), transform var(--t);
+}
+.mini-card[style*="cursor"] {
+  position: relative;
+}
+.mini-card[style*="cursor"]:hover::after {
+  opacity: 1; transform: translateX(2px);
 }
 .mini-card[style*="cursor"]:active {
   transform: scale(0.97); box-shadow: none;
