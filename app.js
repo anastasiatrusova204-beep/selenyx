@@ -237,7 +237,7 @@ function initEmailScreen() {
     tg.HapticFeedback.notificationOccurred('success');
     showScreen('main');
     initMain();
-  }, { once: true });
+  });
 }
 
 // ─── Bot CTA banner ───────────────────────────────────────────────────────────
