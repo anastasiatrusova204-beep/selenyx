@@ -247,7 +247,6 @@ function initMain() {
   });
   calcStreak();
   switchTab('today');
-  initBotCta();
   $('kb-entry-btn')?.addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('light');
     openKnowledge();
@@ -298,6 +297,7 @@ function renderToday() {
 }
 
 let currentDomain = 'health';
+let _todayInited = false; // guard против дублирования listeners
 
 function applyTodayData(data) {
   const { moon, dayNum, color, phaseTips, domains, hint } = data;
@@ -336,6 +336,10 @@ function applyTodayData(data) {
   setText('today-good', phaseTips.good || '');
   setText('today-avoid', phaseTips.avoid || '');
 
+  // Listeners добавляются только один раз
+  if (_todayInited) return;
+  _todayInited = true;
+
   // Color card → inline expand (как domain cards)
   const colorCard = $('today-color')?.closest('.mini-card');
   const numCard   = $('today-daynum')?.closest('.mini-card');
@@ -362,6 +366,7 @@ function applyTodayData(data) {
             <p style="opacity:0.6;font-size:12px">🪐 Планета дня: ${color.planet}</p>`;
           body.dataset.rendered = '1';
         }
+        setTimeout(() => colorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
       }
     });
   }
@@ -388,6 +393,7 @@ function applyTodayData(data) {
           body.innerHTML = `<p>${num?.hint || ''}</p>`;
           body.dataset.rendered = '1';
         }
+        setTimeout(() => numCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
       }
     });
   }
@@ -418,12 +424,13 @@ function applyTodayData(data) {
           wrapTerms(body);
           body.dataset.rendered = '1';
         }
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
       }
     });
   });
 
-  // Retention hook: показать через 3с при первом визите
-  if (!localStorage.getItem('retentionShown')) {
+  // Retention hook: показать через 3с при первом визите (если уведомления не включены)
+  if (!localStorage.getItem('retentionShown') && !localStorage.getItem('notifyTime')) {
     setTimeout(showRetentionBanner, 3000);
   }
 }
@@ -1081,6 +1088,7 @@ function initHeaderButtons() {
   $('settings-btn')?.addEventListener('click', openSettings);
   $('refresh-btn')?.addEventListener('click', () => {
     sessionStorage.clear();
+    _todayInited = false;
     renderToday();
     showToast('Обновлено', '#2AABEE');
     tg.HapticFeedback.impactOccurred('light');
