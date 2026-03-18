@@ -408,6 +408,42 @@ ul { list-style: none; }
 
 .mini-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+/* ─── Ретроградные планеты ─────────────────────────────── */
+.retro-card {
+  background: var(--bg2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.retro-card.hidden { display: none; }
+.retro-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-hint);
+  margin: 0 0 10px;
+}
+.retro-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.retro-item:last-child { margin-bottom: 0; }
+.retro-planet {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.retro-hint {
+  font-size: 12px;
+  color: var(--text-hint);
+  line-height: 1.4;
+}
+
 /* ─── 12. TILE-ROW ──────────────────────────────────────── */
 .tile-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 

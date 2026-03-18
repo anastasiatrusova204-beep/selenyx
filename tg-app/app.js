@@ -384,6 +384,24 @@ function applyTodayData(data) {
     }
   });
 
+  // Retrograde planets
+  const retros = getTodayRetrogrades();
+  const retroEl = $('today-retro');
+  if (retroEl) {
+    if (retros.length > 0) {
+      retroEl.classList.remove('hidden');
+      retroEl.innerHTML = `<p class="retro-card-title">↩️ Ретроград</p>` +
+        retros.map(r =>
+          `<div class="retro-item">
+            <span class="retro-planet">${r.emoji} ${r.name}</span>
+            <span class="retro-hint">${r.hint}</span>
+          </div>`
+        ).join('');
+    } else {
+      retroEl.classList.add('hidden');
+    }
+  }
+
   // Color card — название цветом дня
   setHTML('today-color', `<span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span><span style="color:var(--text-hint);font-size:12px;margin-left:5px">· ${color.planet}</span>`);
 
