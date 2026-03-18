@@ -799,6 +799,10 @@ select.form-input { cursor: pointer; }
   font-size: 22px; font-style: italic; color: var(--text); line-height: 1.55;
 }
 
+.oracle-context {
+  font-size: 12px; color: var(--text-hint); letter-spacing: 0.04em;
+}
+
 /* ─── 18. ОВЕРЛЕЙ НАСТРОЙКИ ─────────────────────────────── */
 .overlay {
   position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 100;

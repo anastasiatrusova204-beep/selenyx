@@ -348,13 +348,11 @@ function renderToday() {
   const dayNum = calcDayNumber(new Date());
   const color  = getTodayColor();
 
-  const phase  = moon.phase;
+  const phase     = moon.phase;
   const phaseTips = PHASE_TIPS[phase] || {};
   const domains   = DOMAINS[sign] || {};
-  const weekday = new Date().getDay(); // 0=вс
-  const hint = WEEKDAY_HINTS[weekday] || '';
 
-  const data = { moon, sign, dayNum, color, phaseTips, domains, hint };
+  const data = { moon, sign, dayNum, color, phaseTips, domains };
   ssSet('td', data);
   applyTodayData(data);
 }
@@ -364,7 +362,7 @@ let _todayInited = false; // guard против дублирования listene
 let _pendingWeeklySummary = 0; // streak milestone для weekly overlay
 
 function applyTodayData(data) {
-  const { moon, dayNum, color, phaseTips, domains, hint } = data;
+  const { moon, dayNum, color, phaseTips, domains } = data;
 
   // Today's date + moon inline
   const now = new Date();
@@ -408,9 +406,6 @@ function applyTodayData(data) {
   // Day number
   setText('today-daynum', dayNum);
   setText('today-daynum-hint', NUMEROLOGY[dayNum]?.name || '');
-
-  // Weekday hint
-  setText('today-hint', hint);
 
   // Phase tip
   setText('today-good', phaseTips.good || '');
@@ -497,7 +492,7 @@ function applyTodayData(data) {
 
   // Share button — энергия дня
   $('today-share')?.addEventListener('click', () => {
-    const text =`${moon.emoji} Луна в ${moon.signRu} · ${moon.lunarDay}-й лунный день · ${moon.phaseName}\n«${phaseTips.good || ''}»\n✨ Selenyx — личный навигатор`;
+    const text = `${moon.emoji} Луна в ${moon.signRu} · ${moon.lunarDay}-й лунный день · ${moon.phaseName}\nСегодня хорошо: ${phaseTips.good || ''}\n✨ Selenyx — личный навигатор`;
     tg.HapticFeedback.impactOccurred('light');
     if (tg.openTelegramLink) {
       tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Selenyx_mybot&text=${encodeURIComponent(text)}`);
@@ -842,16 +837,25 @@ function revealFortune() {
   setTimeout(() => {
     hide('oracle-cookie-wrap');
     show('oracle-text-block');
-    const prediction = getRandomPrediction(userSign || 'aries');
-    setText('oracle-prediction', prediction);
+
+    const moon    = calcMoonData();
+    const weekday = new Date().getDay();
+    const oracle  = getDailyOracle(userSign || 'aries', moon.phase, weekday, moon.lunarDay);
+
+    setText('oracle-prediction', oracle.text);
+    setText('oracle-context', oracle.context);
     wrapTerms($('oracle-prediction'));
 
     // Кнопка шаринг
     const shareBtn = $('oracle-share');
     if (shareBtn) {
       shareBtn.onclick = () => {
-        const text = `🥠 Оракул говорит:\n«${prediction}»\n\nУзнай своё послание → @Selenyx_mybot`;
-        window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(text)}`, '_blank');
+        const shareText = `✨ Послание дня:\n«${oracle.text}»\n${oracle.context}\n\nSеленyx — личный навигатор → @Selenyx_mybot`;
+        if (tg.openTelegramLink) {
+          tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(shareText)}`);
+        } else {
+          window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(shareText)}`, '_blank');
+        }
         tg.HapticFeedback.impactOccurred('medium');
       };
     }
