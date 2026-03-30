@@ -121,7 +121,8 @@ function initSplash() {
         onboarded = true;
         const savedBirth = localStorage.getItem('userBirth');
         if (savedBirth) { try { userBirth = JSON.parse(savedBirth); } catch {} }
-        if (!localStorage.getItem('userEmail')) {
+        const streak3 = parseInt(localStorage.getItem('streakCount') || '0', 10) >= 3;
+        if (!localStorage.getItem('userEmail') && streak3) {
           showScreen('email');
           initEmailScreen();
         } else {
@@ -249,13 +250,10 @@ function initOnboarding() {
   showObSlide(0);
 
   // Telegram BackButton — «Назад» между слайдами
-  tg.BackButton.onClick(() => {
-    if (obSlide > 0) {
-      obSlide--;
-      showObSlide(obSlide);
-      tg.HapticFeedback.impactOccurred('light');
-    }
-  });
+  tg.BackButton.onClick(prevObSlide);
+
+  // HTML кнопка «Назад» внутри онбординга
+  $('ob-back')?.addEventListener('click', prevObSlide);
 
   // Goal cards
   document.querySelectorAll('.goal-card').forEach(btn => {
@@ -361,11 +359,21 @@ function showObSlide(idx) {
   const nextBtn  = $('ob-next');
   const startBtn = $('ob-start');
   const skipBtn  = $('ob-skip');
+  const backBtn  = $('ob-back');
   if (nextBtn)  nextBtn.classList.toggle('hidden', idx === OB_COUNT - 1);
   if (startBtn) startBtn.classList.toggle('hidden', idx !== OB_COUNT - 1);
   if (skipBtn)  skipBtn.classList.toggle('hidden', idx === OB_COUNT - 1);
+  if (backBtn)  backBtn.classList.toggle('hidden', idx === 0);
   // Telegram BackButton: показываем со слайда 1
   if (idx > 0) tg.BackButton.show(); else tg.BackButton.hide();
+}
+
+function prevObSlide() {
+  if (obSlide > 0) {
+    obSlide--;
+    showObSlide(obSlide);
+    tg.HapticFeedback.impactOccurred('light');
+  }
 }
 
 function nextObSlide() {
@@ -585,6 +593,22 @@ function applyTodayData(data) {
   const deg = moon.moonLon != null ? ` ${Math.floor(moon.moonLon % 30)}°` : '';
   setText('today-moon-inline', `${moon.emoji} ${moon.phaseName} · Луна в ${moon.signRu}${deg}`);
 
+  // Goal line
+  const _GOAL_FOCUS = {
+    relationships: '❤️ Фокус: Отношения',
+    career:        '💼 Фокус: Карьера',
+    selfknowledge: '🔮 Фокус: Самопознание',
+    health:        '🏥 Фокус: Здоровье',
+  };
+  const savedGoal = localStorage.getItem('obGoal') || _quiz.goal;
+  const goalEl = $('today-goal-line');
+  if (goalEl && savedGoal && _GOAL_FOCUS[savedGoal]) {
+    goalEl.textContent = _GOAL_FOCUS[savedGoal];
+    goalEl.classList.remove('hidden');
+  } else if (goalEl) {
+    goalEl.classList.add('hidden');
+  }
+
   // Domain card previews
   document.querySelectorAll('.domain-card').forEach(card => {
     const domain = card.dataset.domain;
@@ -594,6 +618,19 @@ function applyTodayData(data) {
       preview.textContent = text.length > 72 ? text.slice(0, 72) + '…' : text;
     }
   });
+
+  // Sort domains by goal: relevant domain goes first
+  const _GOAL_DOMAIN = { relationships: 'love', career: 'work', health: 'health', selfknowledge: 'psych' };
+  const primaryDomain = _GOAL_DOMAIN[savedGoal];
+  if (primaryDomain) {
+    const accordion = $('domain-accordion');
+    if (accordion) {
+      const primary = accordion.querySelector(`.domain-card[data-domain="${primaryDomain}"]`);
+      if (primary && accordion.firstElementChild !== primary) {
+        accordion.insertBefore(primary, accordion.firstElementChild);
+      }
+    }
+  }
 
   // Retrograde planets
   const retros = getTodayRetrogrades();
