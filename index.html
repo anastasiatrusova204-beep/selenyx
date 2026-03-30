@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 <div id="app">
@@ -30,25 +30,64 @@
     <!-- Slide 0: Welcome -->
     <div id="ob-slide-0" class="ob-slide">
       <div class="ob-illustration">🌙</div>
-      <h2 class="ob-title">Бывает: день начинается в рассеянности</h2>
-      <p class="ob-text">Selenyx за 30 секунд показывает, что поддерживает тебя сегодня. Реальные астрономические данные. Без терминологии.</p>
+      <h2 class="ob-title">Каждое утро — один ответ</h2>
+      <p class="ob-text">Куда направить силы сегодня. Без гаданий — на основе реального положения Луны прямо сейчас.</p>
     </div>
 
-    <!-- Slide 1: What you get -->
+    <!-- Slide 1: Goal -->
     <div id="ob-slide-1" class="ob-slide hidden">
-      <div class="ob-illustration">✨</div>
-      <h2 class="ob-title">Всё нужное — в одном месте</h2>
-      <ul class="ob-list">
-        <li>🌙 Фаза и знак Луны — каждый день</li>
-        <li>💼 Совет по работе, здоровью, отношениям</li>
-        <li>💞 Совместимость с любым знаком</li>
-        <li>🥠 Послание дня от оракула</li>
-      </ul>
+      <h2 class="ob-title">Что привело тебя сюда?</h2>
+      <p class="ob-text">Выбери главное — от этого зависит твой маршрут</p>
+      <div class="goal-cards">
+        <button class="goal-card" data-goal="relationships">❤️ Отношения и любовь</button>
+        <button class="goal-card" data-goal="career">💼 Карьера и деньги</button>
+        <button class="goal-card" data-goal="selfknowledge">🔮 Самопознание</button>
+        <button class="goal-card" data-goal="health">🌿 Здоровье и баланс</button>
+      </div>
     </div>
 
-    <!-- Slide 2: Choose sign -->
+    <!-- Slide 2: Current state -->
     <div id="ob-slide-2" class="ob-slide hidden">
-      <h2 class="ob-title">Выбери свой знак</h2>
+      <h2 class="ob-title">Одним словом — как ты сейчас?</h2>
+      <p class="ob-text">Напиши первое, что приходит в голову</p>
+      <input id="ob-state-input" class="ob-text-input"
+        type="text" maxlength="40"
+        placeholder="тревога, усталость, надежда…"
+        autocomplete="off" spellcheck="true" lang="ru">
+      <div id="ob-state-insight" class="ob-insight hidden" aria-live="polite"></div>
+    </div>
+
+    <!-- Slide 3: Birth date -->
+    <div id="ob-slide-3" class="ob-slide hidden">
+      <h2 class="ob-title">Когда ты появилась на свет?</h2>
+      <p class="ob-text">Дата рождения открывает твою личную карту</p>
+      <div class="birth-row">
+        <input id="ob-birth-day" class="ob-text-input birth-field" type="number"
+          inputmode="numeric" min="1" max="31" placeholder="ДД" aria-label="День">
+        <select id="ob-birth-month" class="ob-text-input birth-field birth-month">
+          <option value="" disabled selected>Месяц</option>
+          <option value="01">Январь</option>
+          <option value="02">Февраль</option>
+          <option value="03">Март</option>
+          <option value="04">Апрель</option>
+          <option value="05">Май</option>
+          <option value="06">Июнь</option>
+          <option value="07">Июль</option>
+          <option value="08">Август</option>
+          <option value="09">Сентябрь</option>
+          <option value="10">Октябрь</option>
+          <option value="11">Ноябрь</option>
+          <option value="12">Декабрь</option>
+        </select>
+        <input id="ob-birth-year" class="ob-text-input birth-field" type="number"
+          inputmode="numeric" min="1950" max="2010" placeholder="ГГГГ" aria-label="Год">
+      </div>
+      <div id="ob-birth-insight" class="ob-insight hidden" aria-live="polite"></div>
+    </div>
+
+    <!-- Slide 4: Sign -->
+    <div id="ob-slide-4" class="ob-slide hidden">
+      <h2 class="ob-title">Твой знак зодиака</h2>
       <p class="ob-text">Выбери — и сразу получишь персональный прогноз на сегодня</p>
       <div class="sign-grid">
         <button class="sign-btn" data-sign="aries">♈ Овен</button>
@@ -72,6 +111,8 @@
         <span class="ob-dot active"></span>
         <span class="ob-dot"></span>
         <span class="ob-dot"></span>
+        <span class="ob-dot"></span>
+        <span class="ob-dot"></span>
       </div>
       <button id="ob-skip" class="ob-skip-btn">Пропустить</button>
     </div>
@@ -81,6 +122,44 @@
       <button id="ob-next" class="btn-primary">Далее →</button>
       <button id="ob-start" class="btn-gold hidden">Начать ✨</button>
     </div>
+  </div>
+</div>
+
+<!-- ── ROADMAP ────────────────────────────────────────────────────────────── -->
+<div id="roadmap-screen" class="screen hidden">
+  <div class="roadmap-container">
+    <div class="roadmap-header">
+      <div class="roadmap-moon">✨</div>
+      <h2 class="roadmap-title">Твой маршрут на 90 дней</h2>
+      <p id="roadmap-goal-line" class="roadmap-sub">Мы построим его вместе — день за днём</p>
+    </div>
+    <div class="roadmap-phases">
+      <div class="roadmap-phase roadmap-phase--active">
+        <div class="roadmap-phase-num">01</div>
+        <div class="roadmap-phase-info">
+          <h3>Очищение</h3>
+          <p>Дни 1–30 · Осознанность и базовые практики</p>
+        </div>
+        <span class="roadmap-phase-badge">Сейчас</span>
+      </div>
+      <div class="roadmap-phase roadmap-phase--locked">
+        <div class="roadmap-phase-num">02</div>
+        <div class="roadmap-phase-info">
+          <h3>Поиск ресурсов</h3>
+          <p>Дни 31–60 · Психология и паттерны</p>
+        </div>
+        <span class="roadmap-phase-badge roadmap-phase-badge--locked">🔒 День 31</span>
+      </div>
+      <div class="roadmap-phase roadmap-phase--locked">
+        <div class="roadmap-phase-num">03</div>
+        <div class="roadmap-phase-info">
+          <h3>Реализация</h3>
+          <p>Дни 61–90 · Продвинутые практики</p>
+        </div>
+        <span class="roadmap-phase-badge roadmap-phase-badge--locked">🔒 День 61</span>
+      </div>
+    </div>
+    <button id="roadmap-start" class="btn-gold full-width">Начать первый день →</button>
   </div>
 </div>
 
@@ -108,8 +187,10 @@
     <h1 class="app-logo">🌙 Selenyx</h1>
     <span id="streak-badge" class="streak-badge hidden"></span>
     <div class="header-actions">
-      <button id="refresh-btn" class="icon-btn" aria-label="Обновить">🔄</button>
-      <button id="settings-btn" class="icon-btn" aria-label="Настройки">⚙️</button>
+      <button id="settings-btn" class="header-profile-btn" aria-label="Профиль">
+        <span id="header-name" class="header-profile-name"></span>
+        <span class="header-profile-icon">☽</span>
+      </button>
     </div>
   </header>
 
@@ -135,6 +216,12 @@
           <p id="today-good" class="card-text"></p>
           <p class="card-label mt">✦ Избегай</p>
           <p id="today-avoid" class="card-text muted"></p>
+          <!-- Feedback row — внутри карточки, к которой относится -->
+          <div id="today-feedback" class="feedback-row">
+            <span class="feedback-label">Прогноз точный?</span>
+            <button id="fb-hit"  class="feedback-btn" data-reaction="hit"  aria-label="В точку">🎯 В точку</button>
+            <button id="fb-miss" class="feedback-btn" data-reaction="miss" aria-label="Не про меня">↩ Не про меня</button>
+          </div>
         </div>
 
         <!-- Retrograde planets (показывается только если есть активные) -->
@@ -208,34 +295,6 @@
           </div>
         </div>
 
-        <!-- Практика лунного дня -->
-        <div class="practice-card">
-          <p id="today-practice-day" class="practice-day"></p>
-          <p id="today-practice-text" class="practice-text"></p>
-        </div>
-
-        <!-- Soft paywall: natal chart teaser -->
-        <div class="paywall-card" id="natal-teaser">
-          <div class="paywall-card-left">
-            <span class="paywall-icon">🔐</span>
-            <div>
-              <p class="paywall-title">Натальная карта</p>
-              <p class="paywall-sub">Солнце, Луна и Асцендент по дате рождения</p>
-            </div>
-          </div>
-          <button id="natal-notify-btn" class="paywall-btn">Уведомить</button>
-        </div>
-
-        <!-- Knowledge base entry -->
-        <button id="kb-entry-btn" class="kb-entry" aria-label="Открыть базу знаний">
-          <span class="kb-entry-line"></span>
-          <span class="kb-entry-content">
-            <span class="kb-entry-icon">📚</span>
-            <span class="kb-entry-text">Глоссарий астрологии</span>
-            <span class="kb-entry-sub">15 понятий с объяснениями</span>
-          </span>
-          <span class="kb-entry-arrow">›</span>
-        </button>
 
       </div>
     </section>
@@ -471,6 +530,16 @@
         <option value="aquarius">♒ Водолей</option>
         <option value="pisces">♓ Рыбы</option>
       </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Мой фокус</label>
+      <div class="goal-cards goal-cards--compact" id="settings-goal-cards">
+        <button class="goal-card" data-goal="relationships">❤️ Отношения и любовь</button>
+        <button class="goal-card" data-goal="career">💼 Карьера и деньги</button>
+        <button class="goal-card" data-goal="selfknowledge">🔮 Самопознание</button>
+        <button class="goal-card" data-goal="health">🌿 Здоровье и баланс</button>
+      </div>
     </div>
 
     <div class="form-group">
