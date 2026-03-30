@@ -63,7 +63,7 @@ const _params = new URLSearchParams(window.location.search);
 const _autoKnowledge = _params.get('page') === 'knowledge';
 // ?new=1 — сбросить данные пользователя (для тестирования флоу нового пользователя)
 if (_params.get('new') === '1') {
-  ['userSign','userEmail','userBirth','streakDate','streakCount','retentionShown','natalNotifySet'].forEach(k => localStorage.removeItem(k));
+  ['userSign','userEmail','userBirth','streakDate','streakCount','retentionShown','obGoal','obBirth'].forEach(k => localStorage.removeItem(k));
   sessionStorage.clear();
   history.replaceState(null, '', window.location.pathname);
 }
@@ -91,7 +91,7 @@ function showToast(msg, color) {
 }
 
 // ─── Screen navigation ────────────────────────────────────────────────────────
-const screens = ['splash', 'onboarding', 'email', 'main'];
+const screens = ['splash', 'onboarding', 'roadmap', 'email', 'main'];
 
 function showScreen(id) {
   screens.forEach(s => {
@@ -141,13 +141,163 @@ function initSplash() {
   $('splash-screen')?.addEventListener('click', advance, { once: true });
 }
 
-// ─── Onboarding ───────────────────────────────────────────────────────────────
+// ─── Onboarding quiz ──────────────────────────────────────────────────────────
 let obSlide = 0;
-const OB_COUNT = 3;
+const OB_COUNT = 5;
+
+// Квиз-состояние
+const _quiz = { goal: '', currentState: '', birthDate: '' };
+
+// Микро-инсайты по слову состояния
+const _STATE_INSIGHTS = {
+  'тревога':       'Тревога — это компас. Она указывает на что-то важное для тебя.',
+  'тревожность':   'Тревога — это компас. Она указывает на что-то важное для тебя.',
+  'страх':         'Страх и рост всегда рядом. Ты здесь — значит, выбираешь рост.',
+  'усталость':     'Тело просит паузы. Сейчас самое время услышать себя.',
+  'устала':        'Тело просит паузы. Сейчас самое время услышать себя.',
+  'потерянность':  'Ощущение потерянности часто предшествует новому направлению.',
+  'потеряна':      'Ощущение потерянности часто предшествует новому направлению.',
+  'одиночество':   'В одиночестве мы встречаем себя. Это не так страшно, как кажется.',
+  'злость':        'Злость — это энергия. Когда поймёшь её источник, она станет силой.',
+  'грусть':        'Грусть очищает. Позволь себе прожить её — за ней идёт ясность.',
+  'апатия':        'Апатия — пауза перед движением. Твоя энергия копится.',
+  'неуверенность': 'Неуверенность — признак роста. Уверены только те, кто не развивается.',
+  'радость':       'Радость — твоя природа. Хорошее время укрепить это ощущение.',
+  'спокойствие':   'Спокойствие — редкий дар. Луна поддерживает твоё равновесие.',
+  'надежда':       'Надежда — начало перемен. Ты уже на пути.',
+  'любопытство':   'Любопытство — лучший навигатор. Ты в нужном месте.',
+  'вдохновение':   'Поймай этот момент. Луна сейчас поддерживает твои начинания.',
+  'растерянность': 'Растерянность — точка выбора. Именно здесь начинается новый путь.',
+  'пустота':       'Пустота — это пространство для чего-то нового. Хорошее начало.',
+  'сила':          'Эта сила — твоя. Сейчас важно направить её осознанно.',
+  'беспокойство':  'Беспокойство — сигнал о чём-то важном. Давай разберёмся вместе.',
+};
+
+// Инсайт по фазе Луны на дату рождения
+const _BIRTH_PHASE_INSIGHTS = [
+  'Ты родилась в Новолуние — фазу начал. В тебе сильна интуиция и способность к обновлению.',
+  'Рождена в Растущий серп — фаза роста. Ты умеешь строить с нуля и чувствовать момент.',
+  'Первая четверть — фаза действия. Ты рождена преодолевать препятствия и двигаться вперёд.',
+  'Растущая Луна — фаза развития. Ты стремишься к совершенству и умеешь завершать дела.',
+  'Ты родилась в Полнолуние — максимум энергии. Твои эмоции глубоки, а интуиция обострена.',
+  'Убывающая Луна — фаза осмысления. Ты умеешь делиться знаниями и видеть суть.',
+  'Последняя четверть — фаза переоценки. В тебе сильна мудрость и способность отпускать.',
+  'Старый серп — фаза завершения. Ты умеешь освобождаться от лишнего и видеть главное.',
+];
+
+function _getBirthPhaseInsight(dateStr) {
+  if (!dateStr) return null;
+  try {
+    const d = new Date(dateStr);
+    // Простое приближение: синодический месяц ~29.53 дней, опорная дата новолуния 2000-01-06
+    const ref = new Date('2000-01-06');
+    const days = (d - ref) / 86400000;
+    const phase = ((days % 29.53) + 29.53) % 29.53;
+    const idx = Math.floor(phase / (29.53 / 8));
+    return _BIRTH_PHASE_INSIGHTS[Math.min(idx, 7)];
+  } catch { return null; }
+}
+
+function _levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => Array.from({ length: n + 1 }, (__, j) => j === 0 ? i : 0));
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function _getStateInsight(word) {
+  if (!word) return null;
+  const key = word.trim().toLowerCase().replace(/[^а-яёa-z]/gi, '');
+  if (!key || key.length < 3) return null;
+  // Точное совпадение
+  if (_STATE_INSIGHTS[key]) return _STATE_INSIGHTS[key];
+  // Fuzzy: ищем ближайший ключ с расстоянием ≤ 2
+  let best = null, bestDist = Infinity;
+  for (const k of Object.keys(_STATE_INSIGHTS)) {
+    const d = _levenshtein(key, k);
+    if (d < bestDist && d <= 2) { bestDist = d; best = k; }
+  }
+  return best ? _STATE_INSIGHTS[best] : null;
+}
 
 function initOnboarding() {
   obSlide = 0;
+  _quiz.goal = '';
+  _quiz.currentState = '';
+  _quiz.birthDate = '';
   showObSlide(0);
+
+  // Telegram BackButton — «Назад» между слайдами
+  tg.BackButton.onClick(() => {
+    if (obSlide > 0) {
+      obSlide--;
+      showObSlide(obSlide);
+      tg.HapticFeedback.impactOccurred('light');
+    }
+  });
+
+  // Goal cards
+  document.querySelectorAll('.goal-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.goal-card').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _quiz.goal = btn.dataset.goal;
+      tg.HapticFeedback.impactOccurred('light');
+    });
+  });
+
+  // State input → micro-insight
+  const stateInput = $('ob-state-input');
+  const stateInsight = $('ob-state-insight');
+  if (stateInput && stateInsight) {
+    stateInput.addEventListener('input', () => {
+      const insight = _getStateInsight(stateInput.value);
+      if (insight) {
+        stateInsight.textContent = insight;
+        stateInsight.classList.remove('hidden');
+      } else {
+        stateInsight.classList.add('hidden');
+      }
+      _quiz.currentState = stateInput.value.trim();
+    });
+  }
+
+  // Birth date — три поля → moon phase insight
+  const birthDay   = $('ob-birth-day');
+  const birthMonth = $('ob-birth-month');
+  const birthYear  = $('ob-birth-year');
+  const birthInsight = $('ob-birth-insight');
+
+  function _onBirthChange() {
+    const d = birthDay?.value?.padStart(2, '0');
+    const m = birthMonth?.value;
+    const y = birthYear?.value;
+    if (!d || !m || !y || y.length < 4) return;
+    const iso = `${y}-${m}-${d}`;
+    const insight = _getBirthPhaseInsight(iso);
+    if (insight && birthInsight) {
+      birthInsight.textContent = insight;
+      birthInsight.classList.remove('hidden');
+      tg.HapticFeedback.impactOccurred('light');
+    }
+    _quiz.birthDate = iso;
+  }
+
+  // Auto-advance: после ввода дня — фокус на месяц, после месяца — на год
+  birthDay?.addEventListener('input', () => {
+    if (birthDay.value.length >= 2) birthMonth?.focus();
+    _onBirthChange();
+  });
+  birthMonth?.addEventListener('change', () => {
+    birthYear?.focus();
+    _onBirthChange();
+  });
+  birthYear?.addEventListener('input', () => {
+    if (birthYear.value.length >= 4) _onBirthChange();
+  });
 
   // Sign buttons
   document.querySelectorAll('.sign-btn').forEach(btn => {
@@ -180,13 +330,23 @@ function showObSlide(idx) {
   if (nextBtn)  nextBtn.classList.toggle('hidden', idx === OB_COUNT - 1);
   if (startBtn) startBtn.classList.toggle('hidden', idx !== OB_COUNT - 1);
   if (skipBtn)  skipBtn.classList.toggle('hidden', idx === OB_COUNT - 1);
+  // Telegram BackButton: показываем со слайда 1
+  if (idx > 0) tg.BackButton.show(); else tg.BackButton.hide();
 }
 
 function nextObSlide() {
+  // Слайд 1: цель обязательна
+  if (obSlide === 1 && !_quiz.goal) {
+    showToast('Выбери одну из целей', '#b07d2c');
+    tg.HapticFeedback.notificationOccurred('warning');
+    return;
+  }
   if (obSlide < OB_COUNT - 1) {
     obSlide++;
     showObSlide(obSlide);
     tg.HapticFeedback.impactOccurred('light');
+    // Фокус на текстовое поле при переходе на слайд 2
+    if (obSlide === 2) setTimeout(() => $('ob-state-input')?.focus(), 300);
   }
 }
 
@@ -197,11 +357,31 @@ function finishOnboarding() {
     return;
   }
   localStorage.setItem('userSign', userSign);
-  // Также сохраняем в CloudStorage (если доступен)
   tg.CloudStorage?.setItem('userSign', userSign, () => {});
+  // Сохраняем квиз-данные локально
+  localStorage.setItem('obGoal', _quiz.goal);
+  localStorage.setItem('obBirth', _quiz.birthDate);
   onboarded = true;
   tg.HapticFeedback.notificationOccurred('success');
-  tg.showPopup({ message: 'Знак сохранён ✓\nПочти готово!', buttons: [{ id: 'ok', type: 'ok' }] }, () => {
+  showScreen('roadmap');
+  initRoadmap();
+}
+
+// ─── Roadmap screen ────────────────────────────────────────────────────────────
+const _GOAL_LABELS = {
+  relationships: 'отношениям',
+  career:        'карьере',
+  selfknowledge: 'самопознанию',
+  health:        'здоровью и балансу',
+};
+
+function initRoadmap() {
+  const goalLine = $('roadmap-goal-line');
+  if (goalLine && _quiz.goal) {
+    goalLine.textContent = `Твой маршрут настроен по ${_GOAL_LABELS[_quiz.goal] || 'твоей цели'} — день за днём`;
+  }
+  $('roadmap-start')?.addEventListener('click', () => {
+    tg.HapticFeedback.notificationOccurred('success');
     if (!localStorage.getItem('userEmail')) {
       showScreen('email');
       initEmailScreen();
@@ -209,7 +389,7 @@ function finishOnboarding() {
       showScreen('main');
       initMain();
     }
-  });
+  }, { once: true });
 }
 
 // ─── Email Gate ───────────────────────────────────────────────────────────────
@@ -310,10 +490,6 @@ function initMain() {
   });
   calcStreak();
   switchTab('today');
-  $('kb-entry-btn')?.addEventListener('click', () => {
-    tg.HapticFeedback.impactOccurred('light');
-    openKnowledge();
-  });
   if (_autoKnowledge) openKnowledge();
 }
 
@@ -416,6 +592,40 @@ function applyTodayData(data) {
   setText('today-practice-day', `${ld.symbol || '🌙'} ${moon.lunarDay}-й лунный день · ${ld.name || ''}`);
   setText('today-practice-text', ld.hint || '');
 
+  // Feedback buttons — сбрасываем состояние каждый день
+  const fbToday = new Date().toISOString().slice(0, 10);
+  const fbSaved = localStorage.getItem('feedbackDate');
+  const fbHit   = $('fb-hit');
+  const fbMiss  = $('fb-miss');
+  if (fbHit && fbMiss) {
+    if (fbSaved === fbToday) {
+      const saved = localStorage.getItem('feedbackReaction');
+      if (saved === 'hit')  fbHit.classList.add('feedback-btn--active');
+      if (saved === 'miss') fbMiss.classList.add('feedback-btn--active');
+    }
+    [fbHit, fbMiss].forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (localStorage.getItem('feedbackDate') === fbToday) return;
+        const reaction = btn.dataset.reaction;
+        localStorage.setItem('feedbackDate', fbToday);
+        localStorage.setItem('feedbackReaction', reaction);
+        fbHit.classList.toggle('feedback-btn--active', reaction === 'hit');
+        fbMiss.classList.toggle('feedback-btn--active', reaction === 'miss');
+        tg.HapticFeedback.impactOccurred('medium');
+        showToast(reaction === 'hit' ? '🎯 Отлично! Прогноз работает' : '↩ Понятно, учтём это', '#b07d2c');
+        // Отправляем на сервер (если есть initData)
+        const initData = tg.initData;
+        if (initData) {
+          fetch('/api/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': initData },
+            body: JSON.stringify({ date: fbToday, reaction }),
+          }).catch(() => {});
+        }
+      });
+    });
+  }
+
   // Listeners добавляются только один раз
   if (_todayInited) return;
   _todayInited = true;
@@ -501,22 +711,6 @@ function applyTodayData(data) {
     }
   });
 
-  // Natal teaser — «Уведомить меня»
-  const natalBtn = $('natal-notify-btn');
-  if (natalBtn) {
-    const notified = localStorage.getItem('natalNotifySet');
-    if (notified) {
-      natalBtn.textContent = 'Буду ✓';
-      natalBtn.disabled = true;
-    }
-    natalBtn.addEventListener('click', () => {
-      localStorage.setItem('natalNotifySet', '1');
-      natalBtn.textContent = 'Буду ✓';
-      natalBtn.disabled = true;
-      tg.HapticFeedback.notificationOccurred('success');
-      showToast('Уведомим, когда появится 🌟');
-    }, { once: true });
-  }
 
   // Retention hook: показать через 3с при первом визите (если уведомления не включены)
   if (!localStorage.getItem('retentionShown') && !localStorage.getItem('notifyTime')) {
@@ -880,9 +1074,18 @@ function openSettings() {
 
   // Pre-fill sign
   const signSelect = $('settings-sign');
-  if (signSelect) {
-    signSelect.value = userSign || 'aries';
-  }
+  if (signSelect) signSelect.value = userSign || 'aries';
+
+  // Pre-fill goal cards
+  const savedGoal = localStorage.getItem('obGoal');
+  document.querySelectorAll('#settings-goal-cards .goal-card').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.goal === savedGoal);
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#settings-goal-cards .goal-card').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      tg.HapticFeedback.impactOccurred('light');
+    });
+  });
 
   // Pre-fill notify time
   const notifyInput = $('settings-notify');
@@ -906,6 +1109,13 @@ function saveSettings() {
   if (signSelect?.value) {
     userSign = signSelect.value;
     localStorage.setItem('userSign', userSign);
+  }
+
+  // Сохранить новый фокус если изменился
+  const activeGoal = $('settings-goal-cards')?.querySelector('.goal-card.active');
+  if (activeGoal?.dataset.goal) {
+    localStorage.setItem('obGoal', activeGoal.dataset.goal);
+    _quiz.goal = activeGoal.dataset.goal;
   }
   if (notifyInput?.value) {
     localStorage.setItem('notifyTime', notifyInput.value);
@@ -1240,14 +1450,12 @@ async function renderCalendar() {
 }
 
 function initHeaderButtons() {
+  // Имя пользователя в хедере
+  const name = tg.initDataUnsafe?.user?.first_name || localStorage.getItem('userName') || '';
+  const nameEl = $('header-name');
+  if (nameEl && name) nameEl.textContent = name;
+
   $('settings-btn')?.addEventListener('click', openSettings);
-  $('refresh-btn')?.addEventListener('click', () => {
-    sessionStorage.clear();
-    _todayInited = false;
-    renderToday();
-    showToast('Обновлено', '#2AABEE');
-    tg.HapticFeedback.impactOccurred('light');
-  });
 }
 
 // ─── Term Tooltips ─────────────────────────────────────────────────────────────

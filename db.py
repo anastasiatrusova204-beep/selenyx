@@ -69,6 +69,29 @@ async def init_db() -> None:
     await _db.execute(
         "CREATE INDEX IF NOT EXISTS idx_events_ts ON event_log(ts)"
     )
+    # Ответы квиза онбординга
+    await _db.execute("""
+        CREATE TABLE IF NOT EXISTS onboarding_answers (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id          INTEGER NOT NULL,
+            goal             TEXT,
+            current_state    TEXT,
+            birth_date       TEXT,
+            experience_level TEXT,
+            created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    # Обратная связь по прогнозу («В точку» / «Не про меня»)
+    await _db.execute("""
+        CREATE TABLE IF NOT EXISTS daily_feedback (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id         INTEGER NOT NULL,
+            date            TEXT NOT NULL,
+            reaction        TEXT NOT NULL,
+            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, date)
+        )
+    """)
     await _db.commit()
 
 
@@ -202,6 +225,35 @@ async def save_user_email(user_id: int, email: str) -> None:
 async def delete_user_email(user_id: int) -> None:
     """Удаляет email пользователя."""
     await _db.execute("UPDATE users SET email = NULL WHERE user_id = ?", (user_id,))
+    await _db.commit()
+
+
+async def save_onboarding(user_id: int, goal: str, current_state: str,
+                          birth_date: str, experience_level: str) -> None:
+    """Сохраняет ответы квиза онбординга (одна запись на пользователя)."""
+    await _db.execute("""
+        INSERT INTO onboarding_answers (user_id, goal, current_state, birth_date, experience_level)
+        VALUES (?, ?, ?, ?, ?)
+    """, (user_id, goal, current_state, birth_date, experience_level))
+    await _db.commit()
+
+
+async def get_onboarding(user_id: int) -> Optional[dict]:
+    async with _db.execute(
+        "SELECT * FROM onboarding_answers WHERE user_id = ? ORDER BY created_at DESC LIMIT 1",
+        (user_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+        return dict(row) if row else None
+
+
+async def save_daily_feedback(user_id: int, date: str, reaction: str) -> None:
+    """Сохраняет реакцию на прогноз дня. При повторе перезаписывает."""
+    await _db.execute("""
+        INSERT INTO daily_feedback (user_id, date, reaction)
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id, date) DO UPDATE SET reaction = excluded.reaction
+    """, (user_id, date, reaction))
     await _db.commit()
 
 

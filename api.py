@@ -35,6 +35,7 @@ from db import (
     save_notify_time, save_user_tier, init_db,
     ensure_user_exists, start_trial, get_trial_days_left,
     log_event, get_stats,
+    save_onboarding, save_daily_feedback,
 )
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
@@ -429,6 +430,44 @@ ADMIN_IDS = set(
 )
 
 
+async def api_onboarding(request: web.Request) -> web.Response:
+    """Сохраняет ответы квиза онбординга и знак зодиака."""
+    tg = request["tg_user"]
+    try:
+        body = await request.json()
+        await ensure_user_exists(tg["id"], tg.get("first_name", ""))
+        goal       = body.get("goal", "")
+        state      = body.get("current_state", "")
+        birth_date = body.get("birth_date", "")
+        level      = body.get("experience_level", "beginner")
+        sign       = body.get("zodiac_sign", "")
+        await save_onboarding(tg["id"], goal, state, birth_date, level)
+        if sign:
+            await save_user_sign(tg["id"], tg.get("first_name", ""), sign)
+        if birth_date:
+            await save_birth_data(tg["id"], birth_date, None)
+        await log_event(tg["id"], "onboarding_complete", goal)
+        return _json({"ok": True})
+    except Exception as e:
+        return _json({"error": str(e)}, status=400)
+
+
+async def api_feedback(request: web.Request) -> web.Response:
+    """Сохраняет реакцию пользователя на прогноз: 'hit' или 'miss'."""
+    tg = request["tg_user"]
+    try:
+        body     = await request.json()
+        date     = body.get("date", "")
+        reaction = body.get("reaction", "")
+        if reaction not in ("hit", "miss"):
+            return _json({"error": "reaction must be 'hit' or 'miss'"}, status=400)
+        await save_daily_feedback(tg["id"], date, reaction)
+        await log_event(tg["id"], f"feedback_{reaction}", date)
+        return _json({"ok": True})
+    except Exception as e:
+        return _json({"error": str(e)}, status=400)
+
+
 async def api_admin_stats(request: web.Request) -> web.Response:
     """Простая статистика воронки — только для ADMIN_IDS."""
     tg = request["tg_user"]
@@ -470,6 +509,8 @@ async def start_api_server() -> None:
     app.router.add_post("/api/notify",         api_notify)
     app.router.add_post("/api/sign",           api_sign)
     app.router.add_post("/api/event",          api_event)
+    app.router.add_post("/api/onboarding",     api_onboarding)
+    app.router.add_post("/api/feedback",       api_feedback)
     app.router.add_get("/api/admin/stats",     api_admin_stats)
 
     runner = web.AppRunner(app)
