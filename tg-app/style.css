@@ -363,10 +363,10 @@ ul { list-style: none; }
 }
 
 .feedback-btn {
-  padding: 6px 14px; border-radius: 20px;
-  border: 1.5px solid var(--gold);
+  padding: 7px 16px; border-radius: 20px;
+  border: 2px solid var(--gold);
   background: transparent; color: var(--gold);
-  font-size: 13px; font-weight: 500;
+  font-size: 13px; font-weight: 600;
   transition: background var(--t), color var(--t), transform var(--t);
   touch-action: manipulation;
 }
@@ -552,6 +552,12 @@ ul { list-style: none; }
 .ob-skip-btn {
   font-size: 13px; color: var(--text-hint);
   text-decoration: underline; padding: 4px;
+}
+
+.ob-back-btn {
+  font-size: 18px; color: var(--text-hint);
+  padding: 4px 8px; line-height: 1;
+  border: none; background: none; cursor: pointer;
 }
 
 .card-basis {
@@ -1185,6 +1191,11 @@ select.form-input { cursor: pointer; }
 }
 .today-moon-inline {
   font-size: 13px; color: var(--text-hint);
+}
+.today-goal-line {
+  font-size: 12px; color: var(--gold);
+  font-weight: 600; margin-top: 2px;
+  letter-spacing: 0.3px;
 }
 .today-share-btn {
   flex-shrink: 0; height: 32px; padding: 0 12px;
