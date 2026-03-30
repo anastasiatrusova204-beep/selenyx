@@ -879,12 +879,13 @@ function applyMoonData(moon) {
 
   // Лунный день — кликабельная карточка → шторка
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
+  const ldPreview = ld.energy || ld.hint || '';
   setHTML('moon-lunar-info', `
     <div class="moon-ld-row">
       <span class="moon-ld-icon">${ld.symbol || '🌙'}</span>
       <div class="moon-ld-body">
         <span class="card-label">${moon.lunarDay}-й лунный день${ld.name ? ' · ' + ld.name : ''}</span>
-        <p class="card-text" style="margin-top:4px">${ld.energy || ''}</p>
+        ${ldPreview ? `<p class="card-text" style="margin-top:4px">${ldPreview}</p>` : ''}
       </div>
       <span class="moon-ld-caret">›</span>
     </div>
