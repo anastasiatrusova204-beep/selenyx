@@ -534,6 +534,11 @@ ul { list-style: none; }
   text-decoration: underline; padding: 4px;
 }
 
+.card-basis {
+  font-size: 11px; color: var(--text-hint);
+  margin-bottom: 6px; line-height: 1.4;
+}
+
 .card-label {
   font-size: 10px; color: var(--gold);
   text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
