@@ -583,6 +583,9 @@ function applyTodayData(data) {
   setText('today-daynum', dayNum);
   setText('today-daynum-hint', NUMEROLOGY[dayNum]?.name || '');
 
+  // Basis — источник прогноза
+  setText('today-basis', `🌙 ${moon.phaseName} · Луна в ${moon.signRu} · ${moon.lunarDay}-й лунный день`);
+
   // Phase tip
   setText('today-good', phaseTips.good || '');
   setText('today-avoid', phaseTips.avoid || '');
