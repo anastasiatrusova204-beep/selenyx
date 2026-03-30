@@ -864,21 +864,29 @@ function applyMoonData(moon) {
   // Арка лунного цикла
   setHTML('moon-cycle-arc', _buildCycleArc(moon.lunarDay, moon.angle));
 
-  // Энергия знака + советы фазы
-  const energyText = MOON_SIGN_ENERGY[moon.sign] || '';
-  setText('moon-energy-text', energyText);
+  // Персональное послание: знак пользователя × фаза Луны
+  const personalMsg = userSign && ZODIAC_PHASE_TIPS?.[userSign]?.[moon.phase];
+  const signData = SIGNS.find(s => s.id === userSign);
+  if (personalMsg) {
+    setText('moon-card-label', `${signData?.emoji || '✨'} Послание для ${signData?.ru || userSign}`);
+    setText('moon-energy-text', personalMsg);
+  } else {
+    setText('moon-card-label', '🌙 Энергия дня');
+    setText('moon-energy-text', MOON_SIGN_ENERGY[moon.sign] || '');
+  }
 
+  // Чипы действий по фазе
   const tips = PHASE_TIPS[moon.phase] || {};
   setHTML('moon-phase-advice', tips.good ? `
-    <div class="moon-advice-row">
-      <span class="moon-advice-icon">✦</span>
-      <span class="moon-advice-label">Хорошо сейчас</span>
-      <span class="moon-advice-text">${tips.good}</span>
+    <div class="moon-action-chip moon-action-chip--good">
+      <span class="mac-icon">✦</span>
+      <p class="mac-label">Сегодня хорошо</p>
+      <p class="mac-text">${tips.good}</p>
     </div>
-    <div class="moon-advice-row">
-      <span class="moon-advice-icon">✕</span>
-      <span class="moon-advice-label">Лучше избегать</span>
-      <span class="moon-advice-text">${tips.avoid}</span>
+    <div class="moon-action-chip moon-action-chip--avoid">
+      <span class="mac-icon">✕</span>
+      <p class="mac-label">Лучше избегать</p>
+      <p class="mac-text">${tips.avoid}</p>
     </div>
   ` : '');
 
@@ -1512,6 +1520,12 @@ async function renderCalendar() {
   renderCalGrid();
   initCalNav();
   initViewToggle();
+
+  // База знаний — кнопка в конце вкладки «День»
+  $('kb-open-btn')?.addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('light');
+    openKnowledge();
+  });
 }
 
 function initHeaderButtons() {
