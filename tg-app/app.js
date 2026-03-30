@@ -265,21 +265,25 @@ function initOnboarding() {
     });
   });
 
-  // State input → micro-insight
-  const stateInput = $('ob-state-input');
+  // State chips → micro-insight
   const stateInsight = $('ob-state-insight');
-  if (stateInput && stateInsight) {
-    stateInput.addEventListener('input', () => {
-      const insight = _getStateInsight(stateInput.value);
-      if (insight) {
-        stateInsight.textContent = insight;
-        stateInsight.classList.remove('hidden');
-      } else {
-        stateInsight.classList.add('hidden');
+  document.querySelectorAll('.state-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.state-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      _quiz.currentState = chip.dataset.state;
+      tg.HapticFeedback.impactOccurred('light');
+      if (stateInsight) {
+        const insight = _getStateInsight(chip.dataset.state);
+        if (insight) {
+          stateInsight.textContent = insight;
+          stateInsight.classList.remove('hidden');
+        } else {
+          stateInsight.classList.add('hidden');
+        }
       }
-      _quiz.currentState = stateInput.value.trim();
     });
-  }
+  });
 
   // Birth date — три поля → moon phase insight
   const birthDay   = $('ob-birth-day');
