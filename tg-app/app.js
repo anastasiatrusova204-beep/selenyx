@@ -877,18 +877,38 @@ function applyMoonData(moon) {
     </div>
   ` : '');
 
-  // Лунный день — расширенный блок
+  // Лунный день — кликабельная карточка → шторка
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
   setHTML('moon-lunar-info', `
-    <p class="card-label">${ld.symbol || '🌙'} ${moon.lunarDay}-й лунный день</p>
-    <p class="card-text" style="margin-top:6px">${ld.energy || ''}</p>
-    ${ld.hint ? `<p class="card-text muted" style="margin-top:4px">${ld.hint}</p>` : ''}
-    ${ld.practice ? `<p class="moon-practice-tag">Практика: ${ld.practice}</p>` : ''}
+    <div class="moon-ld-row">
+      <span class="moon-ld-icon">${ld.symbol || '🌙'}</span>
+      <div class="moon-ld-body">
+        <span class="card-label">${moon.lunarDay}-й лунный день${ld.name ? ' · ' + ld.name : ''}</span>
+        <p class="card-text" style="margin-top:4px">${ld.energy || ''}</p>
+      </div>
+      <span class="moon-ld-caret">›</span>
+    </div>
   `);
+
+  const lunarInfoEl = $('moon-lunar-info');
+  if (lunarInfoEl) {
+    lunarInfoEl.style.cursor = 'pointer';
+    lunarInfoEl.onclick = () => {
+      tg.HapticFeedback.impactOccurred('light');
+      openSheet({
+        icon: `<span style="font-size:48px">${ld.symbol || '🌙'}</span>`,
+        title: `${moon.lunarDay}-й лунный день${ld.name ? ' — ' + ld.name : ''}`,
+        text: ld.energy || '',
+        sections: [
+          ld.hint ? { label: 'Смысл дня', sub: ld.hint } : null,
+          ld.practice ? { label: 'Практика', sub: ld.practice } : null,
+        ].filter(Boolean),
+      });
+    };
+  }
 
   // Wrap astrology terms
   wrapTerms($('moon-energy-text'));
-  wrapTerms($('moon-lunar-info'));
 }
 
 /** Строит SVG-арку лунного цикла (1–30 дней, угол 0–360°) */
