@@ -593,7 +593,7 @@ ul { list-style: none; }
 .mini-card[style*="cursor"]::after {
   content: '›';
   position: absolute; right: 14px; bottom: 14px;
-  font-size: 14px; color: var(--gold); opacity: 0.5;
+  font-size: 16px; color: var(--gold); opacity: 0.75;
   transition: opacity var(--t), transform var(--t);
 }
 .mini-card[style*="cursor"]:hover::after {
@@ -1207,6 +1207,18 @@ select.form-input { cursor: pointer; }
   touch-action: manipulation;
 }
 .today-share-btn:active { background: var(--gold-dim); transform: scale(0.92); }
+
+.practice-card {
+  background: var(--bg2); border-radius: var(--r-sm);
+  border: 1px solid var(--divider); padding: 14px 16px;
+  margin-top: 4px;
+}
+.practice-day-title {
+  font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 4px;
+}
+.practice-day-text {
+  font-size: 14px; color: var(--text); line-height: 1.5;
+}
 
 .kb-open-btn {
   width: 100%; padding: 14px 16px; margin-top: 4px;

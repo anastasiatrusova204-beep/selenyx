@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=23">
+  <link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
 <div id="app">
@@ -250,6 +250,7 @@
             <p class="mini-label">🔢 Число дня</p>
             <p id="today-daynum" class="mini-text big-num"></p>
             <p id="today-daynum-hint" class="mini-text muted small"></p>
+            <p id="today-daynum-preview" class="mini-text muted small"></p>
           </div>
         </div>
 
@@ -308,6 +309,12 @@
           </div>
         </div>
 
+
+        <!-- Практика дня -->
+        <div class="practice-card">
+          <p id="today-practice-day" class="practice-day-title"></p>
+          <p id="today-practice-text" class="practice-day-text"></p>
+        </div>
 
         <!-- Глоссарий -->
         <button id="kb-open-btn" class="kb-open-btn">📚 База знаний — астрология простыми словами</button>
@@ -649,6 +656,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=8"></script>
-<script src="app.js?v=20"></script>
+<script src="app.js?v=21"></script>
 </body>
 </html>

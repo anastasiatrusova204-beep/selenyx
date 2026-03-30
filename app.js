@@ -655,7 +655,10 @@ function applyTodayData(data) {
 
   // Day number
   setText('today-daynum', dayNum);
-  setText('today-daynum-hint', NUMEROLOGY[dayNum]?.name || '');
+  const numData = NUMEROLOGY[dayNum];
+  setText('today-daynum-hint', numData?.name || '');
+  const numHint = numData?.hint || '';
+  setText('today-daynum-preview', numHint.length > 45 ? numHint.slice(0, 45) + '…' : numHint);
 
   // Basis — источник прогноза
   setText('today-basis', `🌙 ${moon.phaseName} · Луна в ${moon.signRu} · ${moon.lunarDay}-й лунный день`);
