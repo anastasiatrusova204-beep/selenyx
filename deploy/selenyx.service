@@ -1,0 +1,17 @@
+[Unit]
+Description=Selenyx Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=selenyx
+WorkingDirectory=/home/selenyx/app
+EnvironmentFile=/home/selenyx/app/.env
+ExecStart=/home/selenyx/app/venv/bin/python3 bot.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/selenyx/bot.log
+StandardError=append:/var/log/selenyx/bot.log
+
+[Install]
+WantedBy=multi-user.target

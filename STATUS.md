@@ -93,6 +93,26 @@ MVP готов ✅  →  Закрытый тест ⏳  →  Полировка 
 
 ---
 
+## 🖥 Миграция Railway → Beget VPS
+
+**Подробный гайд:** [MIGRATE-TO-BEGET.md](MIGRATE-TO-BEGET.md)
+
+| Шаг | Действие | Статус |
+|-----|----------|--------|
+| 1 | Создать VPS на beget.com (Start, Ubuntu 22.04) | ⏳ |
+| 2 | Экспортировать БД с Railway | ⏳ |
+| 3 | Настроить VPS (Python 3.11, nginx, git) | ⏳ |
+| 4 | Загрузить код + БД | ⏳ |
+| 5 | Создать .env на Beget | ⏳ |
+| 6 | Запустить через systemd (`deploy/selenyx.service`) | ⏳ |
+| 7 | Настроить nginx + SSL (`deploy/nginx.conf`) | ⏳ |
+| 8 | Проверить healthcheck | ⏳ |
+| 9 | Остановить Railway | ⏳ |
+
+> Файлы готовы: `deploy/selenyx.service`, `deploy/nginx.conf`
+
+---
+
 ## ⏳ Следующие спринты
 
 ### Спринт А — Онбординг и персонализация
