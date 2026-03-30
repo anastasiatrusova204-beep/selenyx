@@ -891,7 +891,7 @@ function applyMoonData(moon) {
         <span class="card-label">${moon.lunarDay}-й лунный день${ld.name ? ' · ' + ld.name : ''}</span>
         ${ldPreview ? `<p class="card-text" style="margin-top:4px">${ldPreview}</p>` : ''}
       </div>
-      <span class="moon-ld-caret">›</span>
+      <span class="moon-ld-caret">Практика →</span>
     </div>
   `);
 

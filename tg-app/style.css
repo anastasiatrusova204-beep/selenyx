@@ -912,9 +912,15 @@ ul { list-style: none; }
 
 .moon-advice-text { font-size: 14px; color: var(--text); line-height: 1.5; }
 
-/* Lunar day clickable row */
+/* Lunar day clickable card */
+#moon-lunar-info {
+  cursor: pointer;
+  transition: background var(--t), transform var(--t);
+}
+#moon-lunar-info:active { background: var(--bg3); transform: scale(0.98); }
+
 .moon-ld-row {
-  display: flex; align-items: flex-start; gap: 12px;
+  display: flex; align-items: center; gap: 12px;
 }
 
 .moon-ld-icon { font-size: 28px; flex-shrink: 0; line-height: 1.2; }
@@ -922,8 +928,11 @@ ul { list-style: none; }
 .moon-ld-body { flex: 1; min-width: 0; }
 
 .moon-ld-caret {
-  font-size: 20px; color: var(--text-hint);
-  align-self: center; flex-shrink: 0;
+  flex-shrink: 0;
+  background: var(--gold-dim); color: var(--gold);
+  font-size: 13px; font-weight: 600;
+  padding: 4px 10px; border-radius: 20px;
+  white-space: nowrap;
 }
 
 /* ─── 15. ВКЛАДКА КАРТА ─────────────────────────────────── */
