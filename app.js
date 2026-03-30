@@ -853,33 +853,37 @@ function renderMoon() {
 function applyMoonData(moon) {
   setText('moon-phase-name', moon.phaseName);
   setText('moon-phase-emoji', moon.emoji);
-  const deg = moon.moonLon != null ? ` · ${Math.floor(moon.moonLon % 30)}° ${moon.signRu.slice(0,3)}.` : '';
-  setText('moon-sign-name', `Луна в ${moon.signRu}${deg}`);
-
-  const energyText = MOON_SIGN_ENERGY[moon.sign] || '';
-  setText('moon-energy-text', energyText);
-
-  // Tile row: фаза + освещённость
-  setHTML('moon-tile-row', `
-    <div class="tile">
-      <span class="tile-icon">${moon.emoji}</span>
-      <span class="tile-label">${moon.phaseName}</span>
-    </div>
-    <div class="tile">
-      <span class="tile-icon">✨</span>
-      <span class="tile-label">${moon.illumination}% света</span>
-    </div>
-  `);
+  const deg = moon.moonLon != null ? ` · ${Math.floor(moon.moonLon % 30)}°` : '';
+  setText('moon-sign-name', `Луна в ${moon.signRu}${deg} · ${moon.illumination}% освещённости`);
 
   // Арка лунного цикла
   setHTML('moon-cycle-arc', _buildCycleArc(moon.lunarDay, moon.angle));
 
-  // Lunar day info
+  // Энергия знака + советы фазы
+  const energyText = MOON_SIGN_ENERGY[moon.sign] || '';
+  setText('moon-energy-text', energyText);
+
+  const tips = PHASE_TIPS[moon.phase] || {};
+  setHTML('moon-phase-advice', tips.good ? `
+    <div class="moon-advice-row">
+      <span class="moon-advice-icon">✦</span>
+      <span class="moon-advice-label">Хорошо сейчас</span>
+      <span class="moon-advice-text">${tips.good}</span>
+    </div>
+    <div class="moon-advice-row">
+      <span class="moon-advice-icon">✕</span>
+      <span class="moon-advice-label">Лучше избегать</span>
+      <span class="moon-advice-text">${tips.avoid}</span>
+    </div>
+  ` : '');
+
+  // Лунный день — расширенный блок
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
   setHTML('moon-lunar-info', `
-    <p><b>${ld.symbol || '🌙'} ${moon.lunarDay} лунный день</b></p>
-    <p>${ld.energy || ''}</p>
-    <p class="muted">${ld.practice || ''}</p>
+    <p class="card-label">${ld.symbol || '🌙'} ${moon.lunarDay}-й лунный день</p>
+    <p class="card-text" style="margin-top:6px">${ld.energy || ''}</p>
+    ${ld.hint ? `<p class="card-text muted" style="margin-top:4px">${ld.hint}</p>` : ''}
+    ${ld.practice ? `<p class="moon-practice-tag">Практика: ${ld.practice}</p>` : ''}
   `);
 
   // Wrap astrology terms

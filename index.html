@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=18">
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 <div id="app">
@@ -310,18 +310,18 @@
           <p id="moon-sign-name" class="moon-sign-sub"></p>
         </div>
 
-        <div id="moon-tile-row" class="tile-row"></div>
-
         <!-- Арка лунного цикла -->
         <div id="moon-cycle-arc" class="moon-cycle-arc-wrap"></div>
 
+        <!-- Что значит эта фаза + знак -->
         <div class="accent-card accent-card--gold">
+          <p class="card-label">🌙 Энергия дня</p>
           <p id="moon-energy-text" class="card-text"></p>
+          <div id="moon-phase-advice" class="moon-phase-advice"></div>
         </div>
 
-        <div id="moon-lunar-info" class="mini-card"></div>
-
-        <p class="ephem-note">🔭 Расчёт по алгоритму Жана Мееуса · точность ±0.3°</p>
+        <!-- Практика лунного дня -->
+        <div id="moon-lunar-info" class="accent-card"></div>
 
       </div>
     </section>
