@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 <div id="app">
@@ -48,12 +48,22 @@
 
     <!-- Slide 2: Current state -->
     <div id="ob-slide-2" class="ob-slide hidden">
-      <h2 class="ob-title">Одним словом — как ты сейчас?</h2>
-      <p class="ob-text">Напиши первое, что приходит в голову</p>
-      <input id="ob-state-input" class="ob-text-input"
-        type="text" maxlength="40"
-        placeholder="тревога, усталость, надежда…"
-        autocomplete="off" spellcheck="true" lang="ru">
+      <h2 class="ob-title">Как ты сейчас?</h2>
+      <p class="ob-text">Выбери ближайшее состояние</p>
+      <div class="state-grid">
+        <button class="state-chip" data-state="тревога">😰 Тревога</button>
+        <button class="state-chip" data-state="усталость">😴 Усталость</button>
+        <button class="state-chip" data-state="надежда">🌱 Надежда</button>
+        <button class="state-chip" data-state="растерянность">😕 Растерянность</button>
+        <button class="state-chip" data-state="вдохновение">✨ Вдохновение</button>
+        <button class="state-chip" data-state="грусть">😢 Грусть</button>
+        <button class="state-chip" data-state="раздражение">😤 Раздражение</button>
+        <button class="state-chip" data-state="спокойствие">🌿 Спокойствие</button>
+        <button class="state-chip" data-state="неуверенность">🌀 Неуверенность</button>
+        <button class="state-chip" data-state="радость">☀️ Радость</button>
+        <button class="state-chip" data-state="пустота">🪨 Пустота</button>
+        <button class="state-chip" data-state="решимость">💪 Решимость</button>
+      </div>
       <div id="ob-state-insight" class="ob-insight hidden" aria-live="polite"></div>
     </div>
 

@@ -214,6 +214,26 @@ ul { list-style: none; }
 
 .goal-card:active { transform: scale(0.97); }
 
+/* State chips grid (онбординг слайд 2) */
+.state-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; width: 100%; max-width: 320px; margin-top: 4px;
+}
+
+.state-chip {
+  padding: 11px 10px; border-radius: var(--r-sm);
+  background: var(--bg2); border: 1.5px solid var(--divider);
+  font-size: 14px; color: var(--text); text-align: left;
+  transition: all var(--t); touch-action: manipulation;
+}
+
+.state-chip:active { transform: scale(0.97); }
+
+.state-chip.active {
+  background: var(--gold-dim); border-color: var(--gold);
+  color: var(--gold); font-weight: 600;
+}
+
 .goal-card.active {
   background: var(--gold-dim); border-color: var(--gold);
   color: var(--gold); font-weight: 600;
