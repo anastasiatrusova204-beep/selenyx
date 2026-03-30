@@ -128,7 +128,7 @@ ul { list-style: none; }
 #onboarding-screen { z-index: 9; }
 
 .ob-container {
-  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  flex: 1; display: flex; flex-direction: column; overflow-y: auto;
 }
 
 .ob-slide {
@@ -199,6 +199,165 @@ ul { list-style: none; }
   display: flex; flex-direction: column; gap: 8px;
 }
 
+/* Goal cards (онбординг) */
+.goal-cards {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; max-width: 320px;
+}
+
+.goal-card {
+  padding: 14px 18px; border-radius: var(--r-sm);
+  background: var(--bg2); border: 1.5px solid var(--divider);
+  font-size: 15px; font-weight: 500; color: var(--text-sub);
+  text-align: left; transition: all var(--t);
+}
+
+.goal-card:active { transform: scale(0.97); }
+
+.goal-card.active {
+  background: var(--gold-dim); border-color: var(--gold);
+  color: var(--gold); font-weight: 600;
+}
+
+/* Компактные goal-cards в настройках */
+.goal-cards--compact { gap: 7px; }
+
+.goal-cards--compact .goal-card {
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+/* Text input (онбординг) */
+.ob-text-input {
+  width: 100%; max-width: 300px;
+  padding: 14px 16px; border-radius: var(--r-sm);
+  border: 1.5px solid var(--divider);
+  background: var(--bg2); color: var(--text);
+  font-family: var(--font-body); font-size: 16px;
+  outline: none; transition: border-color var(--t);
+  -webkit-appearance: none; appearance: none;
+}
+
+.ob-text-input:focus { border-color: var(--gold); }
+
+/* Birth date row */
+.birth-row {
+  display: flex; gap: 8px; width: 100%; max-width: 300px;
+}
+
+.birth-field {
+  padding: 14px 10px; text-align: center;
+}
+
+.birth-field[type="number"] { width: 72px; flex-shrink: 0; }
+.birth-field[type="number"]::-webkit-inner-spin-button,
+.birth-field[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.birth-month { flex: 1; text-align: left; }
+
+/* Micro-insight */
+.ob-insight {
+  max-width: 300px; padding: 12px 16px;
+  background: var(--gold-dim); border-radius: var(--r-sm);
+  border-left: 3px solid var(--gold);
+  font-size: 14px; color: var(--text-sub); line-height: 1.6;
+  text-align: left;
+  animation: fadeInUp 0.3s ease;
+}
+
+/* Roadmap screen */
+#roadmap-screen { z-index: 9; }
+
+.roadmap-container {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 40px 24px 32px;
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  gap: 28px;
+}
+
+.roadmap-header { text-align: center; }
+
+.roadmap-moon { font-size: 48px; margin-bottom: 12px; }
+
+.roadmap-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 600; color: var(--text);
+  margin-bottom: 8px;
+}
+
+.roadmap-sub { font-size: 14px; color: var(--text-sub); line-height: 1.6; }
+
+.roadmap-phases { display: flex; flex-direction: column; gap: 10px; }
+
+.roadmap-phase {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: var(--r-sm);
+  background: var(--bg2); border: 1px solid var(--divider);
+}
+
+.roadmap-phase--active {
+  background: var(--gold-dim); border-color: var(--gold);
+}
+
+.roadmap-phase--locked { opacity: 0.6; }
+
+.roadmap-phase-num {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600; color: var(--gold);
+  min-width: 28px;
+}
+
+.roadmap-phase--locked .roadmap-phase-num { color: var(--text-hint); }
+
+.roadmap-phase-info { flex: 1; }
+
+.roadmap-phase-info h3 {
+  font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px;
+}
+
+.roadmap-phase-info p { font-size: 12px; color: var(--text-sub); }
+
+.roadmap-phase-badge {
+  font-size: 11px; font-weight: 600; color: var(--gold);
+  background: var(--gold-dim); padding: 3px 8px;
+  border-radius: 20px; white-space: nowrap;
+}
+
+.roadmap-phase-badge--locked {
+  color: var(--text-hint); background: var(--bg3);
+}
+
+/* Feedback row — внутри accent-card */
+.feedback-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  flex-wrap: wrap;
+}
+
+.feedback-label {
+  font-size: 12px; color: rgba(255,255,255,0.55);
+  flex: 0 0 100%; margin-bottom: 2px;
+  letter-spacing: 0.02em;
+}
+
+.feedback-btn {
+  padding: 6px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
+  font-size: 13px; font-weight: 500;
+  transition: background var(--t), border-color var(--t), transform var(--t);
+  touch-action: manipulation;
+}
+
+.feedback-btn:active { transform: scale(0.95); }
+
+.feedback-btn--active {
+  background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.8);
+  color: #fff; font-weight: 600;
+}
+
 /* ─── 8. ГЛАВНЫЙ ЭКРАН ──────────────────────────────────── */
 #main-screen { display: flex; flex-direction: column; z-index: 8; }
 
@@ -243,6 +402,27 @@ ul { list-style: none; }
 }
 
 .icon-btn:active { background: var(--bg3); }
+
+/* Profile button in header */
+.header-profile-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1px solid var(--divider);
+  background: var(--bg2);
+  transition: background var(--t);
+}
+
+.header-profile-btn:active { background: var(--bg3); }
+
+.header-profile-name {
+  font-size: 13px; font-weight: 500;
+  color: var(--text-sub); max-width: 80px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.header-profile-icon {
+  font-size: 15px; color: var(--gold);
+}
 
 /* ─── 9. ТАБ-БАР ────────────────────────────────────────── */
 .tab-bar {
