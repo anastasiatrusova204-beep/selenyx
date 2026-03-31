@@ -751,11 +751,20 @@ function applyTodayData(data) {
     numCard.addEventListener('click', () => {
       tg.HapticFeedback.impactOccurred('medium');
       const num = NUMEROLOGY[dayNum];
+      const todayStr = new Date().toLocaleDateString('ru-RU');
+      const digits = todayStr.replace(/\D/g,'').split('').map(Number);
+      const digitSum = digits.reduce((a,b) => a+b, 0);
+      const digitStr = digits.join('+') + ' = ' + digitSum + (digitSum > 9 ? ' → ' + dayNum : '');
       openSheet({
         icon: `<span style="font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--gold)">${dayNum}</span>`,
         title: num?.name || `Число ${dayNum}`,
-        text: num?.hint || '',
-        sections: [],
+        text: num?.text || num?.hint || '',
+        sections: [
+          { label: '✦ Как рассчитывается', sub: `Сложи все цифры сегодняшней даты (${todayStr}): ${digitStr}. Если получилось двузначное — складываем снова, пока не останется одна цифра. Это вибрация дня по пифагорейской нумерологии. Планета числа ${dayNum}: ${num?.planet || ''}.` },
+          { label: '✦ Что поддерживает сегодня', sub: num?.good || '' },
+          { label: '✦ Чего избегать', sub: num?.avoid || '' },
+          { label: '✦ Практика дня', sub: num?.practice || '' },
+        ],
       });
     });
   }
