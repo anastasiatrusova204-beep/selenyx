@@ -664,12 +664,15 @@ function applyTodayData(data) {
   // Basis — источник прогноза
   setText('today-basis', `${moon.lunarDay}-й лунный день`);
 
-  // Персональное послание по знаку × фазе
-  const personalTip = (ZODIAC_PHASE_TIPS?.[sign] || ZODIAC_PHASE_TIPS?.aries)?.[moon.phase] || phaseTips.good || '';
+  // Персональный совет: знак × цель пользователя
+  const _GOAL_DOMAIN_MAP = { relationships: 'love', career: 'work', health: 'health', selfknowledge: 'psych' };
+  const goalDomain = _GOAL_DOMAIN_MAP[savedGoal] || 'work';
   const signData = SIGNS.find(s => s.id === sign);
+  const goalDomainText = (DOMAINS?.[sign] || DOMAINS?.aries)?.[goalDomain] || phaseTips.good || '';
+  const _GOAL_LABEL = { love: 'Отношения', work: 'Карьера', health: 'Здоровье', psych: 'Самопознание' };
   const cardLabel = $('today-card-label');
-  if (cardLabel) cardLabel.textContent = `✦ ${signData?.emoji || '✨'} Для ${signData?.ru || sign}`;
-  setText('today-good', personalTip);
+  if (cardLabel) cardLabel.textContent = `✦ ${signData?.emoji || '✨'} ${signData?.ru || sign} · ${_GOAL_LABEL[goalDomain] || ''}`;
+  setText('today-good', goalDomainText);
   setText('today-avoid', phaseTips.avoid || '');
 
   // Практика лунного дня
