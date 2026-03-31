@@ -1136,55 +1136,98 @@ let fortuneRevealed = false;
 
 function renderOracle() {
   fortuneRevealed = false;
-  $('oracle-cookie')?.classList.remove('revealed');
-  hide('oracle-text-block');
+  const cookie = $('oracle-cookie');
+  const veil   = $('oracle-veil');
+  if (cookie) {
+    cookie.classList.remove('revealed', 'cracking');
+    cookie.style.display = '';
+  }
+  if (veil) {
+    veil.classList.add('hidden');
+    // Reset animations so they replay on next reveal
+    const resetEls = veil.querySelectorAll('.oracle-reveal-content, .oracle-share-btn');
+    resetEls.forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''; });
+  }
   show('oracle-cookie-wrap');
 
-  $('oracle-cookie')?.addEventListener('click', revealFortune, { once: true });
+  if (cookie) cookie.addEventListener('click', revealFortune, { once: true });
 }
 
 function revealFortune() {
   if (fortuneRevealed) return;
   fortuneRevealed = true;
-  tg.HapticFeedback.notificationOccurred('success');
 
-  $('oracle-cookie')?.classList.add('revealed');
+  const cookie = $('oracle-cookie');
+  const veil   = $('oracle-veil');
+  const particles = $('oracle-particles');
+
+  // 1. Cookie cracks
+  if (cookie) cookie.classList.add('cracking');
+  tg.HapticFeedback.impactOccurred('medium');
+
   setTimeout(() => {
+    // 2. Hide cookie wrap, show veil (clip-path animation kicks in via CSS)
     hide('oracle-cookie-wrap');
-    show('oracle-text-block');
+    if (veil) veil.classList.remove('hidden');
 
+    // 3. Spawn particles
+    if (particles) {
+      particles.innerHTML = '';
+      const count = 14;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('span');
+        p.className = 'oracle-particle';
+        const angle = (360 / count) * i + Math.random() * 20 - 10;
+        const dist  = 80 + Math.random() * 80;
+        const rad   = (angle * Math.PI) / 180;
+        p.style.setProperty('--tx', `${Math.cos(rad) * dist}px`);
+        p.style.setProperty('--ty', `${Math.sin(rad) * dist}px`);
+        p.style.setProperty('--delay', `${(Math.random() * 0.3).toFixed(2)}s`);
+        p.style.setProperty('--dur',   `${(0.7 + Math.random() * 0.5).toFixed(2)}s`);
+        particles.appendChild(p);
+      }
+    }
+
+    // 4. Get oracle data
     const moon    = calcMoonData();
     const weekday = new Date().getDay();
     const oracle  = getDailyOracle(userSign || 'aries', moon.phase, weekday, moon.lunarDay);
 
-    setText('oracle-prediction', oracle.text);
-    setText('oracle-context', oracle.context);
-    wrapTerms($('oracle-prediction'));
+    // 5. Typewriter for prediction text (word by word)
+    setTimeout(() => {
+      tg.HapticFeedback.notificationOccurred('success');
+      const predEl = $('oracle-prediction');
+      if (predEl) {
+        predEl.textContent = '';
+        const words = oracle.text.split(' ');
+        let idx = 0;
+        const interval = setInterval(() => {
+          if (idx < words.length) {
+            predEl.textContent += (idx === 0 ? '' : ' ') + words[idx];
+            idx++;
+          } else {
+            clearInterval(interval);
+            wrapTerms(predEl);
+          }
+        }, 80);
+      }
+      setText('oracle-context', oracle.context);
 
-    // Кнопка шаринг
-    const shareBtn = $('oracle-share');
-    if (shareBtn) {
-      shareBtn.onclick = () => {
-        const shareText = `✨ Послание дня:\n«${oracle.text}»\n${oracle.context}\n\nSеленyx — личный навигатор → @Selenyx_mybot`;
-        if (tg.openTelegramLink) {
-          tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(shareText)}`);
-        } else {
-          window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(shareText)}`, '_blank');
-        }
-        tg.HapticFeedback.impactOccurred('medium');
-      };
-    }
-
-    // Animate in
-    const block = $('oracle-text-block');
-    if (block) {
-      block.style.opacity = '0';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        block.style.transition = 'opacity 0.5s ease';
-        block.style.opacity = '1';
-      }));
-    }
-  }, 600);
+      // 6. Share button handler (button appears via CSS delay — 1.8s)
+      const shareBtn = $('oracle-share');
+      if (shareBtn) {
+        shareBtn.onclick = () => {
+          const shareText = `✨ Послание дня:\n«${oracle.text}»\n${oracle.context}\n\nSеленyx — личный навигатор → @Selenyx_mybot`;
+          if (tg.openTelegramLink) {
+            tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(shareText)}`);
+          } else {
+            window.open(`https://t.me/share/url?url=https://t.me/Selenyx_mybot/app&text=${encodeURIComponent(shareText)}`, '_blank');
+          }
+          tg.HapticFeedback.impactOccurred('medium');
+        };
+      }
+    }, 600);
+  }, 350);
 }
 
 // ─── Settings overlay ─────────────────────────────────────────────────────────
