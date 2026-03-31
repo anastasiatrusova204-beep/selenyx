@@ -460,20 +460,24 @@
         <p class="section-sub">Нажми на печеньку, чтобы получить послание</p>
 
         <div id="oracle-cookie-wrap" class="oracle-cookie-wrap">
+          <p class="oracle-hint">Нажми — и услышишь</p>
           <button id="oracle-cookie" class="oracle-cookie" aria-label="Открыть предсказание">
             🥠
           </button>
+          <p class="oracle-hint-sub">Послание ждёт тебя</p>
         </div>
 
-        <div id="oracle-text-block" class="oracle-result hidden">
-          <div class="oracle-card">
-            <p class="oracle-label">Послание дня</p>
+        <!-- Вуаль-оверлей -->
+        <div id="oracle-veil" class="oracle-veil hidden">
+          <div id="oracle-particles" class="oracle-particles"></div>
+          <div id="oracle-text-block" class="oracle-reveal-content">
+            <p class="oracle-reveal-label">✦ Оракул говорит</p>
             <p id="oracle-prediction" class="oracle-text"></p>
             <p id="oracle-context" class="oracle-context"></p>
+            <button id="oracle-share" class="oracle-share-btn">
+              Поделиться посланием
+            </button>
           </div>
-          <button id="oracle-share" class="btn-primary full-width">
-            📤 Поделиться посланием
-          </button>
         </div>
 
       </div>
@@ -648,7 +652,7 @@
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
-<script src="data.js?v=14"></script>
-<script src="app.js?v=36"></script>
+<script src="data.js?v=15"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>
