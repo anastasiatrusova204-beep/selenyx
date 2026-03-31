@@ -513,7 +513,7 @@ function calcStreak() {
 
   const badge = $('streak-badge');
   if (badge && streak >= 2) {
-    badge.textContent = `🔥 ${streak}`;
+    badge.textContent = `🔥 ${streak} дн.`;
     badge.classList.remove('hidden');
   }
 
