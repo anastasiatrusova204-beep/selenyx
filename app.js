@@ -935,11 +935,10 @@ function applyMoonData(moon) {
       tg.HapticFeedback.impactOccurred('light');
       openSheet({
         icon: `<span style="font-size:48px">${ld.symbol || '🌙'}</span>`,
-        title: `${moon.lunarDay}-й лунный день${ld.name ? ' — ' + ld.name : ''}`,
-        text: ld.energy || '',
+        title: `${moon.lunarDay}-й лунный день — ${ld.name || ''}`,
+        text: ld.hint || '',
         sections: [
-          ld.hint ? { label: 'Смысл дня', sub: ld.hint } : null,
-          ld.practice ? { label: 'Практика', sub: ld.practice } : null,
+          ld.practice ? { label: '✦ Практика на сегодня', sub: ld.practice } : null,
         ].filter(Boolean),
       });
     };
