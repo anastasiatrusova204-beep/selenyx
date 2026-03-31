@@ -44,7 +44,7 @@ applyTheme();
 tg.onEvent?.('themeChanged', applyTheme);
 
 // ─── sessionStorage with date key ─────────────────────────────────────────────
-const _V = 'v2'; // увеличить при изменении структуры данных
+const _V = 'v3'; // увеличить при изменении структуры данных
 function _dk(k) { return k + '_' + _V + '_' + new Date().toLocaleDateString('ru-RU'); }
 function ssGet(k) { try { const v = sessionStorage.getItem(_dk(k)); return v ? JSON.parse(v) : null; } catch { return null; } }
 function ssSet(k, v) { try { sessionStorage.setItem(_dk(k), JSON.stringify(v)); } catch {} }
@@ -583,7 +583,8 @@ let _todayInited = false; // guard против дублирования listene
 let _pendingWeeklySummary = 0; // streak milestone для weekly overlay
 
 function applyTodayData(data) {
-  const { moon, sign, dayNum, color, phaseTips, domains } = data;
+  const { moon, dayNum, color, phaseTips, domains } = data;
+  const sign = data.sign || userSign || 'aries';
 
   // Today's date + moon inline
   const now = new Date();
