@@ -669,9 +669,9 @@ function applyTodayData(data) {
   const goalDomain = _GOAL_DOMAIN_MAP[savedGoal] || 'work';
   const signData = SIGNS.find(s => s.id === sign);
   const goalDomainText = (DOMAINS?.[sign] || DOMAINS?.aries)?.[goalDomain] || phaseTips.good || '';
-  const _GOAL_LABEL = { love: 'Отношения', work: 'Карьера', health: 'Здоровье', psych: 'Самопознание' };
+  const _GOAL_PHRASE = { love: 'в отношениях', work: 'в карьере', health: 'для здоровья', psych: 'для самопознания' };
   const cardLabel = $('today-card-label');
-  if (cardLabel) cardLabel.textContent = `✦ ${signData?.emoji || '✨'} ${signData?.ru || sign} · ${_GOAL_LABEL[goalDomain] || ''}`;
+  if (cardLabel) cardLabel.textContent = `✦ Для ${signData?.ru || sign} ${_GOAL_PHRASE[goalDomain] || ''} сегодня`;
   setText('today-good', goalDomainText);
   setText('today-avoid', phaseTips.avoid || '');
 
