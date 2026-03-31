@@ -737,7 +737,10 @@ function applyTodayData(data) {
         icon: `<span style="display:inline-block;width:40px;height:40px;background:${color.hex};border-radius:50%"></span>`,
         title: color.name,
         text: color.hint,
-        sections: [{ label: '🪐 Планета дня', sub: color.planet }],
+        sections: [
+          { label: '🪐 Планета дня', sub: color.planet },
+          color.tip ? { label: '✦ Как использовать сегодня', sub: color.tip } : null,
+        ].filter(Boolean),
       });
     });
   }
