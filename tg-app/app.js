@@ -663,8 +663,12 @@ function applyTodayData(data) {
   // Basis — источник прогноза
   setText('today-basis', `${moon.lunarDay}-й лунный день`);
 
-  // Phase tip
-  setText('today-good', phaseTips.good || '');
+  // Персональное послание по знаку × фазе
+  const personalTip = (ZODIAC_PHASE_TIPS?.[sign] || ZODIAC_PHASE_TIPS?.aries)?.[moon.phase] || phaseTips.good || '';
+  const signData = SIGNS.find(s => s.id === sign);
+  const cardLabel = $('today-card-label');
+  if (cardLabel) cardLabel.textContent = `✦ ${signData?.emoji || '✨'} Для ${signData?.ru || sign}`;
+  setText('today-good', personalTip);
   setText('today-avoid', phaseTips.avoid || '');
 
   // Практика лунного дня

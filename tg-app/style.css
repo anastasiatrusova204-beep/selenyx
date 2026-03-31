@@ -590,14 +590,9 @@ ul { list-style: none; }
   box-shadow: var(--shadow), 0 4px 16px var(--gold-dim);
   transform: translateY(-1px);
 }
-.mini-card[style*="cursor"]::after {
-  content: '›';
-  position: absolute; right: 14px; bottom: 14px;
-  font-size: 16px; color: var(--gold); opacity: 0.75;
-  transition: opacity var(--t), transform var(--t);
-}
-.mini-card[style*="cursor"]:hover::after {
-  opacity: 1; transform: translateX(2px);
+.mini-more {
+  font-size: 11px; color: var(--gold); margin-top: auto; padding-top: 6px;
+  font-weight: 600; letter-spacing: 0.3px;
 }
 .mini-card[style*="cursor"]:active {
   transform: scale(0.97); box-shadow: none;
