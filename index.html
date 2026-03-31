@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 <div id="app">
@@ -225,7 +225,7 @@
         <!-- Phase tips — главный блок дня -->
         <div class="accent-card accent-card--gold">
           <p id="today-basis" class="card-basis"></p>
-          <p class="card-label">✦ Сегодня хорошо</p>
+          <p id="today-card-label" class="card-label">✦ Твой прогноз</p>
           <p id="today-good" class="card-text"></p>
           <p class="card-label mt">✦ Избегай</p>
           <p id="today-avoid" class="card-text muted"></p>
@@ -245,12 +245,14 @@
           <div class="mini-card half">
             <p class="mini-label">🎨 Цвет дня</p>
             <p id="today-color" class="mini-text"></p>
+            <p class="mini-more">Подробнее →</p>
           </div>
           <div class="mini-card half">
             <p class="mini-label">🔢 Число дня</p>
             <p id="today-daynum" class="mini-text big-num"></p>
             <p id="today-daynum-hint" class="mini-text muted small"></p>
             <p id="today-daynum-preview" class="mini-text muted small"></p>
+            <p class="mini-more">Подробнее →</p>
           </div>
         </div>
 
@@ -334,12 +336,6 @@
 
         <!-- Арка лунного цикла -->
         <div id="moon-cycle-arc" class="moon-cycle-arc-wrap"></div>
-
-        <!-- Персональное послание -->
-        <div class="accent-card accent-card--gold">
-          <p id="moon-card-label" class="card-label">🌙 Энергия дня</p>
-          <p id="moon-energy-text" class="card-text"></p>
-        </div>
 
         <!-- Что делать сегодня — чипы -->
         <div id="moon-phase-advice" class="moon-action-block"></div>
@@ -656,6 +652,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=8"></script>
-<script src="app.js?v=22"></script>
+<script src="app.js?v=23"></script>
 </body>
 </html>
