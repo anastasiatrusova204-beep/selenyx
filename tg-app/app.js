@@ -652,7 +652,7 @@ function applyTodayData(data) {
   }
 
   // Color card — название цветом дня
-  setHTML('today-color', `<span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span><span style="color:var(--text-hint);font-size:12px;margin-left:5px">· ${color.planet}</span>`);
+  setHTML('today-color', `<span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span>`);
 
   // Day number
   setText('today-daynum', dayNum);
@@ -738,7 +738,18 @@ function applyTodayData(data) {
         title: color.name,
         text: color.hint,
         sections: [
-          { label: '🪐 Планета дня', sub: color.planet },
+          { label: '✦ Почему этот цвет', sub: (() => {
+            const _P = {
+              'Луна':     'Воскресенье — день Луны. Серебристый усиливает интуицию и эмоциональную чуткость.',
+              'Марс':     'Понедельник — день Марса. Красный даёт решительность и помогает двигаться вперёд.',
+              'Меркурий': 'Вторник — день Меркурия. Оранжевый поддерживает общение, гибкость мышления и контакты.',
+              'Юпитер':   'Среда — день Юпитера. Синий расширяет кругозор и поддерживает обучение и рост.',
+              'Венера':   'Четверг — день Венеры. Зелёный гармонизирует отношения и привлекает изобилие.',
+              'Солнце':   'Пятница — день Солнца. Золотой усиливает уверенность, видимость и творческую силу.',
+              'Сатурн':   'Суббота — день Сатурна. Фиолетовый поддерживает глубокое мышление, анализ и структуру.',
+            };
+            return _P[color.planet] || '';
+          })() },
           color.tip ? { label: '✦ Как использовать сегодня', sub: color.tip } : null,
         ].filter(Boolean),
       });
