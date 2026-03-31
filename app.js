@@ -661,7 +661,7 @@ function applyTodayData(data) {
   setText('today-daynum-preview', numHint.length > 45 ? numHint.slice(0, 45) + '…' : numHint);
 
   // Basis — источник прогноза
-  setText('today-basis', `🌙 ${moon.phaseName} · Луна в ${moon.signRu} · ${moon.lunarDay}-й лунный день`);
+  setText('today-basis', `${moon.lunarDay}-й лунный день`);
 
   // Phase tip
   setText('today-good', phaseTips.good || '');
