@@ -583,7 +583,7 @@ let _todayInited = false; // guard против дублирования listene
 let _pendingWeeklySummary = 0; // streak milestone для weekly overlay
 
 function applyTodayData(data) {
-  const { moon, dayNum, color, phaseTips, domains } = data;
+  const { moon, sign, dayNum, color, phaseTips, domains } = data;
 
   // Today's date + moon inline
   const now = new Date();
