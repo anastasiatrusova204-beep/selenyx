@@ -908,31 +908,11 @@ function applyMoonData(moon) {
   // Арка лунного цикла
   setHTML('moon-cycle-arc', _buildCycleArc(moon.lunarDay, moon.angle));
 
-  // Персональное послание: знак пользователя × фаза Луны
-  const personalMsg = userSign && ZODIAC_PHASE_TIPS?.[userSign]?.[moon.phase];
-  const signData = SIGNS.find(s => s.id === userSign);
-  if (personalMsg) {
-    setText('moon-card-label', `${signData?.emoji || '✨'} Послание для ${signData?.ru || userSign}`);
-    setText('moon-energy-text', personalMsg);
-  } else {
-    setText('moon-card-label', '🌙 Энергия дня');
-    setText('moon-energy-text', MOON_SIGN_ENERGY[moon.sign] || '');
-  }
-
-  // Чипы действий по фазе
-  const tips = PHASE_TIPS[moon.phase] || {};
-  setHTML('moon-phase-advice', tips.good ? `
-    <div class="moon-action-chip moon-action-chip--good">
-      <span class="mac-icon">✦</span>
-      <p class="mac-label">Сегодня хорошо</p>
-      <p class="mac-text">${tips.good}</p>
-    </div>
-    <div class="moon-action-chip moon-action-chip--avoid">
-      <span class="mac-icon">✕</span>
-      <p class="mac-label">Лучше избегать</p>
-      <p class="mac-text">${tips.avoid}</p>
-    </div>
-  ` : '');
+  // Энергия знака где Луна сейчас (не знак пользователя, а астрономический)
+  setText('moon-sign-energy-label', `🌙 Луна в ${moon.signRu} — что это значит`);
+  const signEnergy = MOON_SIGN_ENERGY[moon.sign] || '';
+  setText('moon-sign-energy-text', signEnergy);
+  wrapTerms($('moon-sign-energy-text'));
 
   // Лунный день — кликабельная карточка → шторка
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
@@ -965,8 +945,6 @@ function applyMoonData(moon) {
     };
   }
 
-  // Wrap astrology terms
-  wrapTerms($('moon-energy-text'));
 }
 
 /** Строит SVG-арку лунного цикла (1–30 дней, угол 0–360°) */
