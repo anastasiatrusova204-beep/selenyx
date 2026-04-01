@@ -1784,11 +1784,131 @@ function initKnowledge() {
   });
 }
 
+// ─── ДИАГНОСТИКА ──────────────────────────────────────────────────────────────
+
+let _diagSelected = [];
+
+function openDiag() {
+  _diagSelected = [];
+  const overlay = $('diag-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  show('diag-pick-view');
+  hide('diag-result-view');
+  renderDiagColors();
+  tg.BackButton.show();
+  tg.BackButton.onClick(closeDiag);
+  tg.HapticFeedback.impactOccurred('light');
+}
+
+function closeDiag() {
+  hide('diag-overlay');
+  tg.BackButton.offClick(closeDiag);
+  tg.BackButton.hide();
+  switchTab(currentTab);
+}
+
+function renderDiagColors() {
+  const grid = $('diag-colors');
+  if (!grid || typeof COLOR_PSYCHOLOGY === 'undefined') return;
+  // Перемешиваем порядок каждый день
+  const keys = [...COLOR_TEST_ORDER].sort(() => {
+    const seed = new Date().toDateString();
+    return (seed.charCodeAt(Math.random() * seed.length | 0) % 3) - 1;
+  });
+  grid.innerHTML = keys.map(key => {
+    const c = COLOR_PSYCHOLOGY[key];
+    return `<div class="diag-color-card" data-key="${key}" style="background:${c.hex}" role="button" tabindex="0" aria-label="${c.name}">
+      <div class="diag-color-check">✓</div>
+      <span class="diag-color-name">${c.name}</span>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.diag-color-card').forEach(card => {
+    card.addEventListener('click', () => onDiagColorTap(card));
+  });
+  updateDiagCountHint();
+}
+
+function onDiagColorTap(card) {
+  const key = card.dataset.key;
+  if (_diagSelected.includes(key)) {
+    _diagSelected = _diagSelected.filter(k => k !== key);
+    card.classList.remove('selected');
+  } else {
+    if (_diagSelected.length >= 2) return;
+    _diagSelected.push(key);
+    card.classList.add('selected');
+    tg.HapticFeedback.impactOccurred('light');
+  }
+  updateDiagCountHint();
+  if (_diagSelected.length === 2) {
+    setTimeout(() => showDiagResult(), 400);
+  }
+}
+
+function updateDiagCountHint() {
+  const el = $('diag-count-hint');
+  if (el) el.textContent = `Выбрано: ${_diagSelected.length} из 2`;
+}
+
+function showDiagResult() {
+  if (typeof COLOR_PSYCHOLOGY === 'undefined') return;
+  const [k1, k2] = _diagSelected;
+  const c1 = COLOR_PSYCHOLOGY[k1];
+  const c2 = COLOR_PSYCHOLOGY[k2];
+
+  // Ищем трактовку пары
+  const pairKey1 = `${k1}+${k2}`;
+  const pairKey2 = `${k2}+${k1}`;
+  const pair = (typeof COLOR_PAIR_PSYCHOLOGY !== 'undefined') &&
+    (COLOR_PAIR_PSYCHOLOGY[pairKey1] || COLOR_PAIR_PSYCHOLOGY[pairKey2]);
+
+  const title = pair ? pair.title : `${c1.name} + ${c2.name}`;
+  const text  = pair ? pair.text  : `${c1.text} ${c2.text}`;
+
+  // Цветные кружки
+  setHTML('diag-result-colors', `
+    <div class="diag-result-swatch" style="background:${c1.hex}"></div>
+    <div class="diag-result-swatch" style="background:${c2.hex}"></div>
+  `);
+  setText('diag-result-title', title);
+  setText('diag-result-text', text);
+
+  hide('diag-pick-view');
+  show('diag-result-view');
+  tg.HapticFeedback.notificationOccurred('success');
+
+  // Сброс кнопок фидбека
+  ['diag-hit', 'diag-miss'].forEach(id => $(`${id}`)?.classList.remove('active'));
+}
+
+function initDiag() {
+  $('diag-start-btn')?.addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('medium');
+    openDiag();
+  });
+  $('diag-close')?.addEventListener('click', closeDiag);
+  $('diag-result-close')?.addEventListener('click', closeDiag);
+
+  $('diag-hit')?.addEventListener('click', () => {
+    $('diag-hit').classList.add('active');
+    $('diag-miss').classList.remove('active');
+    tg.HapticFeedback.notificationOccurred('success');
+  });
+  $('diag-miss')?.addEventListener('click', () => {
+    $('diag-miss').classList.add('active');
+    $('diag-hit').classList.remove('active');
+    tg.HapticFeedback.impactOccurred('light');
+  });
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initHeaderButtons();
   initTermTooltips();
   initKnowledge();
+  initDiag();
 
   initSplash();
 });
