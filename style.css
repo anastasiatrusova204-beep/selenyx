@@ -928,20 +928,24 @@ ul { list-style: none; }
 }
 #moon-lunar-info:active { background: var(--bg3); transform: scale(0.98); }
 
-.moon-ld-row {
-  display: flex; align-items: center; gap: 12px;
+.moon-ld-header {
+  display: flex; align-items: center; gap: 10px;
 }
 
-.moon-ld-icon { font-size: 28px; flex-shrink: 0; line-height: 1.2; }
+.moon-ld-icon { font-size: 32px; flex-shrink: 0; line-height: 1; }
 
-.moon-ld-body { flex: 1; min-width: 0; }
+.moon-ld-text {
+  margin-top: 10px;
+  line-height: 1.6;
+}
 
-.moon-ld-caret {
-  flex-shrink: 0;
+.moon-ld-practice-btn {
+  margin-top: 14px;
   background: var(--gold-dim); color: var(--gold);
   font-size: 13px; font-weight: 600;
-  padding: 4px 10px; border-radius: 20px;
-  white-space: nowrap;
+  padding: 8px 16px; border-radius: 20px;
+  border: none; cursor: pointer;
+  align-self: flex-start;
 }
 
 /* ─── 15. ВКЛАДКА КАРТА ─────────────────────────────────── */
