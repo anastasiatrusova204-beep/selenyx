@@ -1022,43 +1022,111 @@ select.form-input { cursor: pointer; }
 /* ─── 17. ВКЛАДКА ОРАКУЛ ────────────────────────────────── */
 .oracle-pane .pane-scroll { align-items: center; }
 
+/* ── Cookie wrap ── */
 .oracle-cookie-wrap {
-  display: flex; align-items: center; justify-content: center; padding: 32px 0;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 48px 0; gap: 12px;
+}
+
+.oracle-hint {
+  font-size: 13px; color: var(--text-hint); letter-spacing: 0.04em;
+}
+.oracle-hint-sub {
+  font-size: 11px; color: var(--gold); letter-spacing: 0.08em;
+  text-transform: uppercase; opacity: 0.7;
+  animation: oraclePulseText 2s ease-in-out infinite;
 }
 
 .oracle-cookie {
-  font-size: 80px; line-height: 1; cursor: pointer;
-  animation: cookieSway 2.5s ease-in-out infinite;
-  filter: drop-shadow(0 4px 16px rgba(200,169,110,0.4));
+  font-size: 88px; line-height: 1; cursor: pointer;
+  animation: cookieSway 2.8s ease-in-out infinite;
+  filter: drop-shadow(0 6px 24px rgba(200,169,110,0.5));
   transition: transform 200ms ease; display: block;
+  position: relative;
+}
+.oracle-cookie:active { transform: scale(0.88); }
+.oracle-cookie.cracking { animation: cookieCrack 0.35s ease forwards; }
+
+/* ── Вуаль-оверлей ── */
+.oracle-veil {
+  position: fixed; inset: 0; z-index: 50;
+  background: linear-gradient(160deg, #1a1425 0%, #0e0c18 60%, #1c1508 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px;
+  animation: veilReveal 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.oracle-veil.hidden { display: none; }
+
+@keyframes veilReveal {
+  from { clip-path: inset(0 0 100% 0); opacity: 0; }
+  to   { clip-path: inset(0 0 0% 0);   opacity: 1; }
 }
 
-.oracle-cookie:active { transform: scale(0.9); }
-
-.oracle-cookie.revealed { animation: cookiePop 400ms ease forwards; }
-
-.oracle-result {
-  width: 100%; display: flex; flex-direction: column; gap: 14px;
+/* ── Частицы ── */
+.oracle-particles {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.oracle-particle {
+  position: absolute; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--gold);
+  animation: particleFly var(--dur, 0.9s) ease-out var(--delay, 0s) forwards;
+  opacity: 0;
 }
 
-.oracle-card {
-  background: var(--card); border-radius: var(--r); padding: 28px 20px;
-  border: 0.5px solid var(--divider);
-  text-align: center; display: flex; flex-direction: column; gap: 14px;
+@keyframes particleFly {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
 
-.oracle-label {
-  font-size: 11px; color: var(--text-hint);
-  text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+/* ── Контент внутри вуали ── */
+.oracle-reveal-content {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 20px; text-align: center; width: 100%; max-width: 320px;
+  opacity: 0; animation: contentAppear 0.4s ease 0.6s forwards;
+}
+
+@keyframes contentAppear {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.oracle-reveal-label {
+  font-size: 11px; color: var(--gold); letter-spacing: 0.12em;
+  text-transform: uppercase; font-weight: 600;
 }
 
 .oracle-text {
   font-family: var(--font-display);
-  font-size: 22px; font-style: italic; color: var(--text); line-height: 1.55;
+  font-size: 24px; font-style: italic;
+  color: #f5ead8; line-height: 1.55;
+  min-height: 2em;
 }
 
 .oracle-context {
-  font-size: 12px; color: var(--text-hint); letter-spacing: 0.04em;
+  font-size: 12px; color: rgba(245,234,216,0.5); letter-spacing: 0.04em;
+}
+
+.oracle-share-btn {
+  margin-top: 8px; padding: 12px 28px;
+  border-radius: 24px; border: 1px solid var(--gold);
+  color: var(--gold); font-size: 13px; font-weight: 500;
+  background: transparent; letter-spacing: 0.04em;
+  opacity: 0; animation: contentAppear 0.4s ease 1.8s forwards;
+  transition: background var(--t);
+}
+.oracle-share-btn:active { background: rgba(200,169,110,0.1); }
+
+/* ── Анимации печеньки ── */
+@keyframes oraclePulseText {
+  0%, 100% { opacity: 0.7; } 50% { opacity: 1; }
+}
+
+@keyframes cookieCrack {
+  0%   { transform: scale(1) rotate(0deg); }
+  30%  { transform: scale(1.15) rotate(-8deg); }
+  60%  { transform: scale(0.85) rotate(5deg); }
+  100% { transform: scale(0) rotate(15deg); opacity: 0; }
 }
 
 /* ─── 18. ОВЕРЛЕЙ НАСТРОЙКИ ─────────────────────────────── */

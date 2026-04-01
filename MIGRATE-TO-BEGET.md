@@ -1,7 +1,7 @@
 # Миграция Railway → Beget VPS
 
-> Создано: 2026-03-30
-> Статус: Готово к выполнению
+> Обновлён: 2026-04-01
+> Статус: Готово к выполнению. Скрипты автоматизации созданы.
 
 ---
 
@@ -9,191 +9,151 @@
 
 | | Railway | Beget VPS |
 |--|---------|-----------|
-| Цена | ~$5/мес | 250–500 ₽/мес |
+| Цена | ~$5/мес ($60/год) | 250–500 ₽/мес |
 | Оплата из РФ | ❌ проблемы | ✅ карта РФ |
 | ЮKassa интеграция | сложно | ✅ нативно |
-| Контроль | ограниченный | полный root |
-| БД backup | Railway Volume | ручной cron |
+| Контроль над сервером | ограниченный | полный root |
+| БД backup | Railway Volume | cron (`deploy/backup.sh`) |
+| SSL | автоматически | certbot (бесплатно) |
 
 ---
 
-## Шаг 1 — Создать VPS на Beget
+## Вариант A — Автоматически (рекомендуется)
 
-1. Зайти на beget.com → VPS → тариф **Start** (250 ₽/мес, 1 CPU, 1 Gb RAM)
-2. Выбрать образ: **Ubuntu 22.04**
+### Шаг 1 — Создать VPS на Beget
+
+1. [beget.com](https://beget.com) → VPS → тариф **Start** (250 ₽/мес, 1 CPU, 1 Gb RAM)
+2. Образ: **Ubuntu 22.04**
 3. Записать: IP-адрес VPS, root-пароль
 
----
-
-## Шаг 2 — Экспортировать БД с Railway (локально)
+### Шаг 2 — Экспортировать БД с Railway
 
 ```bash
-# Подключиться к Railway и сделать дамп
+# Выполнить локально:
 RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway shell --service selenyx-bot
 
-# Внутри контейнера:
+# Внутри контейнера Railway:
 sqlite3 /data/selenyx.db .dump > /tmp/backup.sql
-cat /data/selenyx.db | base64 > /tmp/db_base64.txt
 exit
 
-# Скачать файл БД (выполнить локально):
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway run --service selenyx-bot "cat /data/selenyx.db" > selenyx_backup.db
+# Скачать БД локально:
+RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway run --service selenyx-bot \
+    "cat /data/selenyx.db" > selenyx_backup.db
 ```
 
----
-
-## Шаг 3 — Настроить Beget VPS
+### Шаг 3 — Запустить автоустановку на VPS
 
 ```bash
-# Подключиться по SSH
+# Подключиться к VPS:
 ssh root@ВАШ_IP_BEGET
 
-# Обновить систему
-apt update && apt upgrade -y
-
-# Установить зависимости
-apt install -y python3.11 python3.11-venv python3-pip sqlite3 nginx certbot python3-certbot-nginx git
-
-# Создать пользователя для бота
-useradd -m -s /bin/bash selenyx
-
-# Создать директории
-mkdir -p /home/selenyx/app /data /var/log/selenyx
-chown selenyx:selenyx /home/selenyx/app /data /var/log/selenyx
+# Скачать и запустить setup-скрипт:
+curl -fsSL https://raw.githubusercontent.com/anastasiatrusova204-beep/selenyx/main/deploy/setup-beget.sh | bash
 ```
 
----
-
-## Шаг 4 — Загрузить код и БД
+Или клонировать репозиторий и запустить локально:
 
 ```bash
-# Переключиться на пользователя selenyx
-su - selenyx
-
-# Клонировать репозиторий
-cd /home/selenyx
-git clone https://github.com/anastasiatrusova204-beep/selenyx.git app
-cd app
-
-# Создать виртуальное окружение
-python3.11 -m venv venv
-venv/bin/pip install -r requirements.txt
-
-# Выйти из пользователя selenyx
-exit
+git clone https://github.com/anastasiatrusova204-beep/selenyx.git /tmp/selenyx-setup
+bash /tmp/selenyx-setup/deploy/setup-beget.sh
 ```
 
+Скрипт сам: обновит систему, установит Python 3.11 / nginx / certbot / git, создаст пользователя `selenyx`, клонирует репозиторий, установит зависимости, настроит systemd и автобэкап.
+
+### Шаг 4 — Загрузить БД
+
 ```bash
-# Загрузить БД (выполнить локально):
+# Выполнить локально после Шага 2:
 scp selenyx_backup.db root@ВАШ_IP_BEGET:/data/selenyx.db
 ssh root@ВАШ_IP_BEGET "chown selenyx:selenyx /data/selenyx.db"
 ```
 
----
-
-## Шаг 5 — Создать .env на Beget
+### Шаг 5 — Создать .env
 
 ```bash
+ssh root@ВАШ_IP_BEGET
 su - selenyx
+cp /home/selenyx/app/.env.example /home/selenyx/app/.env
 nano /home/selenyx/app/.env
 ```
 
-Содержимое файла (заменить значения):
+Заполнить:
 ```
 BOT_TOKEN=токен_от_BotFather
 ADMIN_IDS=958560798
 DB_PATH=/data/selenyx.db
 DEMO_MODE=false
 PORT=8080
-
-# Добавить после настройки ЮKassa:
-# YOOKASSA_SHOP_ID=...
-# YOOKASSA_SECRET_KEY=...
-
-# Добавить после подключения GPT:
-# OPENAI_API_KEY=...
 ```
 
----
-
-## Шаг 6 — Установить systemd сервис
+### Шаг 6 — Настроить домен и SSL
 
 ```bash
-# Скопировать файл сервиса
-cp /home/selenyx/app/deploy/selenyx.service /etc/systemd/system/selenyx.service
-
-# Включить и запустить
-systemctl daemon-reload
-systemctl enable selenyx
-systemctl start selenyx
-
-# Проверить статус
-systemctl status selenyx
-journalctl -u selenyx -f
-```
-
----
-
-## Шаг 7 — Настроить nginx и SSL
-
-```bash
-# Скопировать конфиг nginx
-cp /home/selenyx/app/deploy/nginx.conf /etc/nginx/sites-available/selenyx
-
-# Заменить YOUR_BEGET_DOMAIN на реальный домен
+# Заменить домен в nginx конфиге:
 nano /etc/nginx/sites-available/selenyx
+# Найти YOUR_BEGET_DOMAIN → заменить на реальный домен (например: api.selenyx.ru)
 
-# Включить сайт
-ln -s /etc/nginx/sites-available/selenyx /etc/nginx/sites-enabled/
+# Проверить и перезагрузить nginx:
 nginx -t && systemctl reload nginx
 
-# Получить SSL-сертификат
+# Получить SSL-сертификат (бесплатно):
 certbot --nginx -d ВАШ_ДОМЕН
 ```
 
----
-
-## Шаг 8 — Проверить работу
+### Шаг 7 — Запустить и проверить
 
 ```bash
-# Проверить что бот жив
+systemctl start selenyx
+systemctl status selenyx
+
+# Healthcheck:
 curl https://ВАШ_ДОМЕН/health
+# Ожидаемый ответ: "ok"
 
-# Посмотреть логи
-tail -f /var/log/selenyx/bot.log
-
-# Проверить БД
-sqlite3 /data/selenyx.db "SELECT COUNT(*) FROM users;"
+# Логи:
+journalctl -u selenyx -f
 ```
+
+### Шаг 8 — Переключение (downtime ~5 мин)
+
+1. Убедиться что Beget работает (Шаг 7 ✅)
+2. Railway → Deployments → **Pause** сервис
+3. Если всё стабильно 2–3 дня → удалить Railway сервис
+
+> ⚠️ Не удаляй Railway Volume пока не убедишься что Beget работает стабильно.
 
 ---
 
-## Шаг 9 — Переключение (downtime ~5 мин)
+## Вариант B — Вручную (пошагово)
 
-1. Открыть Railway → Deployments → **Pause** сервис
-2. Убедиться что Beget работает (шаг 8)
-3. Если всё ок — удалить Railway сервис (или оставить как резерв)
-
-> ⚠️ Не удаляй Railway Volume пока не убедишься что Beget работает стабильно 2–3 дня.
+Если хочешь контролировать каждый шаг — смотри команды внутри `deploy/setup-beget.sh`.
+Каждый блок прокомментирован и разбит на 8 шагов.
 
 ---
 
-## Настройка автобэкапа БД
+## Обновление кода после деплоя
+
+При каждом изменении в репозитории:
 
 ```bash
-# Добавить cron задачу
-crontab -e
-
-# Бэкап каждую ночь в 03:00
-0 3 * * * sqlite3 /data/selenyx.db .dump > /home/selenyx/backups/selenyx_$(date +\%Y\%m\%d).sql
-0 3 * * * find /home/selenyx/backups -name "*.sql" -mtime +30 -delete
+ssh root@ВАШ_IP_BEGET
+bash /home/selenyx/app/deploy/update.sh
 ```
 
+Скрипт: git pull → pip install → systemctl restart selenyx.
+
+---
+
+## Резервное копирование
+
+Бэкап настраивается автоматически при `setup-beget.sh` (cron, 03:00 ночи).
+
+Запустить вручную:
 ```bash
-# Создать директорию для бэкапов
-mkdir -p /home/selenyx/backups
-chown selenyx:selenyx /home/selenyx/backups
+su - selenyx -c "bash /home/selenyx/app/deploy/backup.sh"
 ```
+
+Бэкапы хранятся в `/home/selenyx/backups/` — последние 30 дней.
 
 ---
 
@@ -201,34 +161,35 @@ chown selenyx:selenyx /home/selenyx/backups
 
 | Проблема | Решение |
 |----------|---------|
-| `TelegramConflictError` | Railway всё ещё работает — остановить его |
-| Бот не стартует | Проверить `.env` — все переменные заполнены? |
-| API недоступен | `systemctl status selenyx` — смотреть ошибки |
-| БД пустая | Проверить `DB_PATH=/data/selenyx.db` в `.env` |
-| SSL не работает | Certbot: `certbot renew --dry-run` |
+| `TelegramConflictError` | Railway всё ещё работает — остановить его (`Pause` в дашборде) |
+| Бот не стартует | `journalctl -u selenyx -n 50` — смотреть ошибку |
+| API недоступен | `systemctl status selenyx` + проверить `.env` |
+| БД пустая | Проверить `DB_PATH=/data/selenyx.db` в `.env` + права `chown selenyx:selenyx /data/selenyx.db` |
+| SSL не работает | `certbot renew --dry-run` + `nginx -t` |
+| nginx 502 | Бот не запущен: `systemctl start selenyx` |
+| `Permission denied` на `/data` | `chown -R selenyx:selenyx /data` |
 
 ---
 
-## После миграции — добавить в .env
+## Файлы деплоя
 
-Когда будешь подключать ЮKassa и OpenAI:
-
-```
-YOOKASSA_SHOP_ID=ваш_shop_id
-YOOKASSA_SECRET_KEY=ваш_secret_key
-OPENAI_API_KEY=sk-...
-```
+| Файл | Назначение |
+|------|-----------|
+| `deploy/setup-beget.sh` | Автоматическая установка на чистый VPS |
+| `deploy/update.sh` | Обновление кода и перезапуск |
+| `deploy/backup.sh` | Резервное копирование БД (вызывается cron) |
+| `deploy/nginx.conf` | Конфиг nginx (reverse proxy + SSL + gzip) |
+| `deploy/selenyx.service` | systemd-сервис (автозапуск после перезагрузки) |
 
 ---
 
 ## Статус
 
-- [ ] Шаг 1: VPS создан на Beget
-- [ ] Шаг 2: БД экспортирована с Railway
-- [ ] Шаг 3: VPS настроен (Python, nginx, git)
-- [ ] Шаг 4: Код загружен, зависимости установлены
-- [ ] Шаг 5: .env создан
-- [ ] Шаг 6: systemd сервис работает
-- [ ] Шаг 7: nginx + SSL работает
-- [ ] Шаг 8: healthcheck прошёл
-- [ ] Шаг 9: Railway остановлен
+- [ ] Шаг 1: VPS создан на Beget (Start, Ubuntu 22.04)
+- [ ] Шаг 2: БД экспортирована с Railway → `selenyx_backup.db`
+- [ ] Шаг 3: `setup-beget.sh` выполнен успешно
+- [ ] Шаг 4: БД загружена в `/data/selenyx.db`
+- [ ] Шаг 5: `.env` создан и заполнен
+- [ ] Шаг 6: nginx настроен, SSL получен
+- [ ] Шаг 7: `curl https://домен/health` → "ok"
+- [ ] Шаг 8: Railway остановлен
