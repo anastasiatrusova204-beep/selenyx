@@ -1714,12 +1714,16 @@ function openKnowledge(idx) {
   tg.BackButton.show();
   tg.BackButton.onClick(closeKnowledge);
   tg.HapticFeedback.impactOccurred('light');
+  // Снимаем активность с кнопки базы знаний в таббаре
+  $('kb-tab-btn')?.classList.remove('active');
 }
 
 function closeKnowledge() {
   hide('knowledge-overlay');
-  tg.BackButton.hide();
   tg.BackButton.offClick(closeKnowledge);
+  tg.BackButton.hide();
+  // Переключаемся обратно на активную вкладку
+  switchTab(currentTab);
 }
 
 function renderKbList() {
