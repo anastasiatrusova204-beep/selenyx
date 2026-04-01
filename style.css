@@ -1642,6 +1642,197 @@ select.form-input { cursor: pointer; }
   color: var(--text);
 }
 
+/* ── ДИАГНОСТИКА ───────────────────────────────────────────────────────────── */
+
+/* Карточка-приглашение на вкладке День */
+.diag-invite-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.diag-invite-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.diag-invite-icon { font-size: 32px; flex-shrink: 0; }
+.diag-invite-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.diag-invite-sub {
+  font-size: 13px;
+  color: var(--text-hint);
+  margin-top: 2px;
+}
+.diag-start-btn {
+  background: var(--gold);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 20px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: opacity 0.2s;
+}
+.diag-start-btn:active { opacity: 0.8; }
+
+/* Оверлей теста */
+.diag-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.diag-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px 32px;
+}
+.diag-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.diag-header-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+}
+.diag-header-sub {
+  font-size: 13px;
+  color: var(--text-hint);
+}
+
+/* Сетка цветов 3×2 */
+.diag-colors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.diag-color-card {
+  aspect-ratio: 1;
+  border-radius: 18px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.18s, box-shadow 0.18s;
+  border: 3px solid transparent;
+}
+.diag-color-card:active { transform: scale(0.94); }
+.diag-color-card.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px var(--gold), 0 8px 24px rgba(0,0,0,0.18);
+  transform: scale(1.04);
+}
+.diag-color-card .diag-color-check {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 22px; height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.diag-color-card.selected .diag-color-check { opacity: 1; }
+.diag-color-name {
+  position: absolute;
+  bottom: 8px;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.diag-count-hint {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-hint);
+}
+
+/* Экран результата */
+.diag-result-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+}
+.diag-result-colors {
+  display: flex;
+  gap: 12px;
+}
+.diag-result-swatch {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.diag-result-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.3;
+}
+.diag-result-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.diag-feedback-row {
+  border-top: 1px solid var(--card-border);
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.diag-feedback-label {
+  font-size: 13px;
+  color: var(--text-hint);
+  text-align: center;
+}
+.diag-feedback-btns {
+  display: flex;
+  gap: 10px;
+}
+.diag-feedback-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 24px;
+  border: 1.5px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.diag-feedback-btn.active,
+.diag-feedback-btn:active {
+  background: var(--gold);
+  color: #fff;
+}
+
 /* ── KNOWLEDGE BASE ────────────────────────────────────────────────────────── */
 .knowledge-overlay {
   position: fixed;

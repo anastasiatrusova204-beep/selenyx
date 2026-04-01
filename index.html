@@ -308,6 +308,18 @@
 
 
 
+        <!-- Диагностика дня — карточка-приглашение -->
+        <div id="diag-invite" class="diag-invite-card">
+          <div class="diag-invite-top">
+            <span class="diag-invite-icon">🎨</span>
+            <div>
+              <p class="diag-invite-title">Диагностика дня</p>
+              <p class="diag-invite-sub">Выбери цвета — узнай своё состояние</p>
+            </div>
+          </div>
+          <button id="diag-start-btn" class="diag-start-btn">Начать · 10 сек</button>
+        </div>
+
       </div>
     </section>
 
@@ -602,6 +614,41 @@
 <div id="term-tooltip" class="term-tooltip hidden" role="tooltip" aria-live="polite">
   <p class="term-tooltip-title" id="term-tooltip-title"></p>
   <p class="term-tooltip-text"  id="term-tooltip-text"></p>
+</div>
+
+<!-- ── Диагностика — оверлей ─────────────────────────────────────────── -->
+<div id="diag-overlay" class="diag-overlay hidden" role="dialog" aria-label="Диагностика дня">
+
+  <!-- Экран выбора цветов -->
+  <div id="diag-pick-view" class="diag-view">
+    <div class="diag-header">
+      <button id="diag-close" class="overlay-close-btn" aria-label="Закрыть">✕</button>
+      <p class="diag-header-title">Выбери 2 цвета которые притягивают прямо сейчас</p>
+      <p class="diag-header-sub">Не думай — просто реагируй</p>
+    </div>
+    <div id="diag-colors" class="diag-colors-grid"></div>
+    <p id="diag-count-hint" class="diag-count-hint">Выбрано: 0 из 2</p>
+  </div>
+
+  <!-- Экран трактовки -->
+  <div id="diag-result-view" class="diag-view hidden">
+    <div class="diag-header">
+      <button id="diag-result-close" class="overlay-close-btn" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="diag-result-body">
+      <div id="diag-result-colors" class="diag-result-colors"></div>
+      <p id="diag-result-title" class="diag-result-title"></p>
+      <p id="diag-result-text" class="diag-result-text"></p>
+    </div>
+    <div class="diag-feedback-row">
+      <p class="diag-feedback-label">Это точно про тебя?</p>
+      <div class="diag-feedback-btns">
+        <button id="diag-hit" class="diag-feedback-btn">🎯 В точку</button>
+        <button id="diag-miss" class="diag-feedback-btn">↩ Не про меня</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── Knowledge Base Overlay ───────────────────────────────────────── -->
