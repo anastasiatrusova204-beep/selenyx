@@ -946,20 +946,17 @@ function applyMoonData(moon) {
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
   const ldPreview = ld.energy || ld.hint || '';
   setHTML('moon-lunar-info', `
-    <div class="moon-ld-row">
+    <div class="moon-ld-header">
       <span class="moon-ld-icon">${ld.symbol || '🌙'}</span>
-      <div class="moon-ld-body">
-        <span class="card-label">${moon.lunarDay}-й лунный день${ld.name ? ' · ' + ld.name : ''}</span>
-        ${ldPreview ? `<p class="card-text" style="margin-top:4px">${ldPreview}</p>` : ''}
-      </div>
-      <span class="moon-ld-caret">Практика →</span>
+      <span class="card-label">${moon.lunarDay}-й лунный день${ld.name ? ' · ' + ld.name : ''}</span>
     </div>
+    ${ldPreview ? `<p class="card-text moon-ld-text">${ldPreview}</p>` : ''}
+    ${ld.practice ? `<button class="moon-ld-practice-btn">Практика на сегодня →</button>` : ''}
   `);
 
-  const lunarInfoEl = $('moon-lunar-info');
-  if (lunarInfoEl) {
-    lunarInfoEl.style.cursor = 'pointer';
-    lunarInfoEl.onclick = () => {
+  const practiceBtn = $('moon-lunar-info')?.querySelector('.moon-ld-practice-btn');
+  if (practiceBtn) {
+    practiceBtn.onclick = () => {
       tg.HapticFeedback.impactOccurred('light');
       openSheet({
         icon: `<span style="font-size:48px">${ld.symbol || '🌙'}</span>`,
