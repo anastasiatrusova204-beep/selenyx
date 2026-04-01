@@ -1613,8 +1613,8 @@ async function renderCalendar() {
   initCalNav();
   initViewToggle();
 
-  // База знаний — кнопка в конце вкладки «День»
-  $('kb-open-btn')?.addEventListener('click', () => {
+  // База знаний — кнопка в таббаре
+  $('kb-tab-btn')?.addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('light');
     openKnowledge();
   });
