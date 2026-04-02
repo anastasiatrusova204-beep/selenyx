@@ -651,16 +651,37 @@ function applyTodayData(data) {
     }
   }
 
-  // Color card — название цветом дня
-  setHTML('today-color', `<span style="display:inline-block;width:14px;height:14px;background:${color.hex};border-radius:50%;margin-right:6px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span>`);
-  setText('today-color-hint', color.hint || '');
+  // Color accordion — preview
+  setHTML('today-color', `<span style="display:inline-block;width:10px;height:10px;background:${color.hex};border-radius:50%;margin-right:5px;vertical-align:middle;flex-shrink:0"></span><span style="color:${color.hex};font-weight:600">${color.name}</span>`);
 
-  // Day number
-  setText('today-daynum', dayNum);
+  // Color accordion — body
+  const colorBody = document.querySelector('#color-acc-card .domain-card-body');
+  if (colorBody) {
+    const _P = {
+      'Луна':     'Воскресенье — день Луны. Серебристый усиливает интуицию и эмоциональную чуткость.',
+      'Марс':     'Понедельник — день Марса. Красный даёт решительность и помогает двигаться вперёд.',
+      'Меркурий': 'Вторник — день Меркурия. Оранжевый поддерживает общение, гибкость мышления и контакты.',
+      'Юпитер':   'Среда — день Юпитера. Синий расширяет кругозор и поддерживает обучение и рост.',
+      'Венера':   'Четверг — день Венеры. Зелёный гармонизирует отношения и привлекает изобилие.',
+      'Солнце':   'Пятница — день Солнца. Золотой усиливает уверенность, видимость и творческую силу.',
+      'Сатурн':   'Суббота — день Сатурна. Фиолетовый поддерживает глубокое мышление, анализ и структуру.',
+    };
+    colorBody.innerHTML = `<p class="domain-card-text">${color.hint || ''}</p>${_P[color.planet] ? `<p class="card-label mt">✦ Почему этот цвет</p><p class="domain-card-text">${_P[color.planet]}</p>` : ''}${color.tip ? `<p class="card-label mt">✦ Как использовать сегодня</p><p class="domain-card-text">${color.tip}</p>` : ''}`;
+  }
+
+  // Number accordion — preview
   const numData = NUMEROLOGY[dayNum];
-  setText('today-daynum-hint', numData?.name || '');
-  const numHint = numData?.hint || '';
-  setText('today-daynum-preview', numHint.length > 45 ? numHint.slice(0, 45) + '…' : numHint);
+  setHTML('today-daynum', `<span style="font-weight:700;color:var(--gold)">${dayNum}</span>&thinsp;<span style="font-size:12px;opacity:.7">${numData?.name || ''}</span>`);
+
+  // Number accordion — body
+  const numBody = document.querySelector('#num-acc-card .domain-card-body');
+  if (numBody) {
+    const todayStr = new Date().toLocaleDateString('ru-RU');
+    const digits = todayStr.replace(/\D/g,'').split('').map(Number);
+    const digitSum = digits.reduce((a,b) => a+b, 0);
+    const digitStr = digits.join('+') + ' = ' + digitSum + (digitSum > 9 ? ' → ' + dayNum : '');
+    numBody.innerHTML = `${numData?.text || numData?.hint ? `<p class="domain-card-text">${numData.text || numData.hint}</p>` : ''}<p class="card-label mt">✦ Как рассчитывается</p><p class="domain-card-text">Сложи все цифры даты (${todayStr}): ${digitStr}. Если получилось двузначное — складываем снова. Планета числа ${dayNum}: ${numData?.planet || ''}.</p>${numData?.good ? `<p class="card-label mt">✦ Что поддерживает сегодня</p><p class="domain-card-text">${numData.good}</p>` : ''}${numData?.avoid ? `<p class="card-label mt">✦ Чего избегать</p><p class="domain-card-text">${numData.avoid}</p>` : ''}${numData?.practice ? `<p class="card-label mt">✦ Практика дня</p><p class="domain-card-text">${numData.practice}</p>` : ''}`;
+  }
 
   // Basis — источник прогноза
   setText('today-basis', `${moon.lunarDay}-й лунный день`);
@@ -726,60 +747,30 @@ function applyTodayData(data) {
     setTimeout(() => showWeeklySummary(s, moon), 1500);
   }
 
-  // Color card → sheet
-  const colorCard = $('today-color')?.closest('.mini-card');
-  const numCard   = $('today-daynum')?.closest('.mini-card');
-
-  if (colorCard) {
-    colorCard.style.cursor = 'pointer';
-    colorCard.addEventListener('click', () => {
-      tg.HapticFeedback.impactOccurred('medium');
-      openSheet({
-        icon: `<span style="display:inline-block;width:40px;height:40px;background:${color.hex};border-radius:50%"></span>`,
-        title: color.name,
-        text: color.hint,
-        sections: [
-          { label: '✦ Почему этот цвет', sub: (() => {
-            const _P = {
-              'Луна':     'Воскресенье — день Луны. Серебристый усиливает интуицию и эмоциональную чуткость.',
-              'Марс':     'Понедельник — день Марса. Красный даёт решительность и помогает двигаться вперёд.',
-              'Меркурий': 'Вторник — день Меркурия. Оранжевый поддерживает общение, гибкость мышления и контакты.',
-              'Юпитер':   'Среда — день Юпитера. Синий расширяет кругозор и поддерживает обучение и рост.',
-              'Венера':   'Четверг — день Венеры. Зелёный гармонизирует отношения и привлекает изобилие.',
-              'Солнце':   'Пятница — день Солнца. Золотой усиливает уверенность, видимость и творческую силу.',
-              'Сатурн':   'Суббота — день Сатурна. Фиолетовый поддерживает глубокое мышление, анализ и структуру.',
-            };
-            return _P[color.planet] || '';
-          })() },
-          color.tip ? { label: '✦ Как использовать сегодня', sub: color.tip } : null,
-        ].filter(Boolean),
+  // Color + Number accordion toggle (same pattern as domain cards)
+  [
+    { id: 'color-acc-card' },
+    { id: 'num-acc-card' },
+  ].forEach(({ id }) => {
+    const card = $(id);
+    if (!card) return;
+    const header = card.querySelector('.domain-card-header');
+    header.addEventListener('click', () => {
+      const isOpen = card.classList.contains('open');
+      // Закрыть все аккордеоны (домены + цвет + число)
+      document.querySelectorAll('.domain-card').forEach(c => {
+        c.classList.remove('open');
+        c.querySelector('.domain-card-header').setAttribute('aria-expanded', 'false');
+        c.querySelector('.domain-card-body').hidden = true;
       });
+      if (!isOpen) {
+        tg.HapticFeedback.impactOccurred('light');
+        card.classList.add('open');
+        header.setAttribute('aria-expanded', 'true');
+        card.querySelector('.domain-card-body').hidden = false;
+      }
     });
-  }
-
-  // Day number card → sheet
-  if (numCard) {
-    numCard.style.cursor = 'pointer';
-    numCard.addEventListener('click', () => {
-      tg.HapticFeedback.impactOccurred('medium');
-      const num = NUMEROLOGY[dayNum];
-      const todayStr = new Date().toLocaleDateString('ru-RU');
-      const digits = todayStr.replace(/\D/g,'').split('').map(Number);
-      const digitSum = digits.reduce((a,b) => a+b, 0);
-      const digitStr = digits.join('+') + ' = ' + digitSum + (digitSum > 9 ? ' → ' + dayNum : '');
-      openSheet({
-        icon: `<span style="font-family:var(--font-display);font-size:48px;font-weight:600;color:var(--gold)">${dayNum}</span>`,
-        title: num?.name || `Число ${dayNum}`,
-        text: num?.text || num?.hint || '',
-        sections: [
-          { label: '✦ Как рассчитывается', sub: `Сложи все цифры сегодняшней даты (${todayStr}): ${digitStr}. Если получилось двузначное — складываем снова, пока не останется одна цифра. Это вибрация дня по пифагорейской нумерологии. Планета числа ${dayNum}: ${num?.planet || ''}.` },
-          { label: '✦ Что поддерживает сегодня', sub: num?.good || '' },
-          { label: '✦ Чего избегать', sub: num?.avoid || '' },
-          { label: '✦ Практика дня', sub: num?.practice || '' },
-        ],
-      });
-    });
-  }
+  });
 
   // Domain accordion — inline expandable cards
   document.querySelectorAll('.domain-card').forEach(card => {

@@ -234,21 +234,30 @@
         <!-- Retrograde planets (показывается только если есть активные) -->
         <div id="today-retro" class="retro-card hidden"></div>
 
-        <!-- Color + Number row -->
-        <div class="mini-row">
-          <div class="mini-card half">
-            <p class="mini-label">🎨 Цвет дня</p>
-            <p id="today-color" class="mini-text"></p>
-            <p id="today-color-hint" class="mini-text muted small"></p>
-            <p class="mini-more">Подробнее →</p>
-          </div>
-          <div class="mini-card half">
-            <p class="mini-label">🔢 Число дня</p>
-            <p id="today-daynum" class="mini-text big-num"></p>
-            <p id="today-daynum-hint" class="mini-text muted small"></p>
-            <p id="today-daynum-preview" class="mini-text muted small"></p>
-            <p class="mini-more">Подробнее →</p>
-          </div>
+        <!-- Color accordion card -->
+        <div class="domain-card" id="color-acc-card" style="--domain-color:#b07d3a;--domain-bg:rgba(176,125,58,0.07)">
+          <button class="domain-card-header" aria-expanded="false">
+            <span class="domain-card-icon">🎨</span>
+            <div class="domain-card-header-content">
+              <span class="domain-card-label">Цвет дня</span>
+              <span id="today-color" class="domain-card-preview"></span>
+            </div>
+            <span class="domain-card-caret">›</span>
+          </button>
+          <div class="domain-card-body" hidden></div>
+        </div>
+
+        <!-- Number accordion card -->
+        <div class="domain-card" id="num-acc-card" style="--domain-color:#5a4a8c;--domain-bg:rgba(90,74,140,0.07)">
+          <button class="domain-card-header" aria-expanded="false">
+            <span class="domain-card-icon">🔢</span>
+            <div class="domain-card-header-content">
+              <span class="domain-card-label">Число дня</span>
+              <span id="today-daynum" class="domain-card-preview"></span>
+            </div>
+            <span class="domain-card-caret">›</span>
+          </button>
+          <div class="domain-card-body" hidden></div>
         </div>
 
         <!-- Retention banner (показывается через 3с после первого просмотра) -->
@@ -697,6 +706,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=16"></script>
-<script src="app.js?v=37"></script>
+<script src="app.js?v=38"></script>
 </body>
 </html>
