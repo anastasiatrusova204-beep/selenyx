@@ -18,15 +18,53 @@ venv/bin/python3 bot.py > bot.log 2>&1 &
 sleep 8 && cat bot.log
 ```
 
-## Как задеплоить на Railway
+## Хостинг бота — Beget VPS (актуально с 2026-04-02)
+
+**Railway ОСТАНОВЛЕН.** Бот перенесён на Beget VPS.
+
+| Параметр | Значение |
+|----------|---------|
+| IP | 45.9.43.149 |
+| Пользователь | root / selenyx |
+| ОС | Ubuntu 24.04 |
+| Бот | systemd сервис `selenyx` |
+| Логи | `/var/log/selenyx/bot.log` |
+| БД | `/data/selenyx.db` |
+| .env | `/home/selenyx/app/.env` |
+
+## Как задеплоить обновление на Beget
 ```bash
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway up --service selenyx-bot
+# Подключиться и обновить (expect нужен для пароля):
+expect -f - << 'EXPECT'
+set timeout 60
+spawn ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no root@45.9.43.149 {bash /home/selenyx/app/deploy/update.sh}
+expect "password:"
+send "a%kkZUIr2imH\r"
+expect eof
+EXPECT
 ```
 
-## Откат на Railway (если деплой сломал что-то)
-1. Открыть https://railway.com/project/f53049ff-7cb8-43a4-bffd-d6dc455ec19a
-2. Сервис selenyx-bot → Deployments → найти последний рабочий → «Redeploy»
-3. Или через CLI: `~/bin/railway rollback --service selenyx-bot` (откатывает на предыдущий деплой)
+## Как посмотреть логи бота на Beget
+```bash
+expect -f - << 'EXPECT'
+set timeout 30
+spawn ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no root@45.9.43.149 {tail -50 /var/log/selenyx/bot.log}
+expect "password:"
+send "a%kkZUIr2imH\r"
+expect eof
+EXPECT
+```
+
+## Как перезапустить бота на Beget
+```bash
+expect -f - << 'EXPECT'
+set timeout 30
+spawn ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no root@45.9.43.149 {systemctl restart selenyx && systemctl status selenyx}
+expect "password:"
+send "a%kkZUIr2imH\r"
+expect eof
+EXPECT
+```
 
 ## DEMO_MODE — тестирование Mini App в браузере
 Mini App в браузере вне Telegram не проходит HMAC-аутентификацию → 401.

@@ -185,11 +185,15 @@ su - selenyx -c "bash /home/selenyx/app/deploy/backup.sh"
 
 ## Статус
 
-- [ ] Шаг 1: VPS создан на Beget (Start, Ubuntu 22.04)
-- [ ] Шаг 2: БД экспортирована с Railway → `selenyx_backup.db`
-- [ ] Шаг 3: `setup-beget.sh` выполнен успешно
-- [ ] Шаг 4: БД загружена в `/data/selenyx.db`
-- [ ] Шаг 5: `.env` создан и заполнен
-- [ ] Шаг 6: nginx настроен, SSL получен
-- [ ] Шаг 7: `curl https://домен/health` → "ok"
-- [ ] Шаг 8: Railway остановлен
+- [x] Шаг 1: VPS создан на Beget (Ubuntu 24.04, IP: 45.9.43.149)
+- [x] Шаг 2: БД экспортирована с Railway
+- [x] Шаг 3: зависимости, пользователь, репозиторий установлены
+- [x] Шаг 4: БД загружена в `/data/selenyx.db`
+- [x] Шаг 5: `.env` создан с правильным BOT_TOKEN
+- [x] Шаг 6: nginx работает (HTTP, без SSL — домен не настроен)
+- [x] Шаг 7: бот запущен, `systemctl status selenyx` = active
+- [x] Шаг 8: Railway остановлен (Service offline)
+
+## ⚠️ Осталось (не блокирует работу)
+- [ ] Настроить домен и SSL (certbot) — нужен домен типа api.selenyx.ru
+- [ ] Настроить SSH-ключ чтобы не вводить пароль каждый раз

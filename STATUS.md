@@ -1,6 +1,6 @@
 # STATUS.md — Единый источник правды по прогрессу Selenyx
 
-> Обновлён: 2026-04-01
+> Обновлён: 2026-04-02
 > Открывать в начале каждой сессии. Остальные файлы — справочник по деталям.
 
 ---
@@ -8,12 +8,32 @@
 ## Где мы сейчас
 
 ```
-MVP готов ✅  →  Закрытый тест ⏳  →  Полировка ⏳  →  Монетизация ⏳
+MVP готов ✅  →  Лендинг задеплоен ✅  →  Закрытый тест ⏳  →  Монетизация ⏳
 ```
 
-**Бот:** @Selenyx_mybot
-**Mini App:** https://t.me/Selenyx_mybot/app
-**GitHub Pages:** https://anastasiatrusova204-beep.github.io/selenyx/
+**Бот:** @Selenyx_mybot  
+**Mini App:** https://t.me/Selenyx_mybot/app  
+**GitHub Pages (кнопка бота):** https://anastasiatrusova204-beep.github.io/selenyx/  
+**Beget VPS (лендинг + mini app + бот):** http://45.9.43.149  
+**Лендинг:** http://45.9.43.149/ (будет selenyx.ru после DNS)  
+**Mini App на Beget:** http://45.9.43.149/app/ (HTTP, для теста)
+
+### Текущая инфраструктура
+
+| Компонент | Где работает | Статус |
+|-----------|-------------|--------|
+| Бот (@Selenyx_mybot) | Beget VPS, systemd `selenyx` | ✅ работает |
+| API (/api/, /health) | Beget VPS, порт 8080 | ✅ работает |
+| Лендинг (/) | Beget VPS /home/selenyx/landing/ | ✅ задеплоен |
+| Mini App (/app/) | Beget VPS /home/selenyx/miniapp/ | ✅ задеплоен |
+| Кнопка меню бота | GitHub Pages (HTTPS обязателен) | ✅ https://anastasiatrusova204-beep.github.io/selenyx/ |
+| Railway | ОСТАНОВЛЕН | ✅ offline |
+
+### ⚠️ Осталось по инфраструктуре
+- [ ] Настроить DNS selenyx.ru → 45.9.43.149 (домен на Reg.ru/Timeweb, нет доступа)
+- [ ] certbot SSL после DNS
+- [ ] Обновить TG_APP_URL=https://selenyx.ru/app/ после SSL
+- [ ] SSH-ключ чтобы не вводить пароль
 
 ---
 
@@ -99,9 +119,10 @@ MVP готов ✅  →  Закрытый тест ⏳  →  Полировка 
 
 **Что нужно сделать до теста:**
 
-1. `DEMO_MODE=false` на Railway (сейчас все входят как «Демо»)
+1. Убедиться что `DEMO_MODE=false` в `/home/selenyx/app/.env` на Beget
    ```bash
-   RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway variables set DEMO_MODE=false --service selenyx-bot
+   ssh root@45.9.43.149 "grep DEMO_MODE /home/selenyx/app/.env"
+   # Если false — всё готово. Если true: nano /home/selenyx/app/.env → systemctl restart selenyx
    ```
 2. Пригласить 10–15 человек лично: подруги, знакомые, астро-чаты
 3. Через 3–5 дней: смотреть retention в SQLite (кто вернулся на день 2+)
@@ -114,23 +135,23 @@ MVP готов ✅  →  Закрытый тест ⏳  →  Полировка 
 
 ---
 
-## 🖥 Миграция Railway → Beget VPS
+## ✅ Миграция Railway → Beget VPS — ЗАВЕРШЕНА
 
 **Подробный гайд:** [MIGRATE-TO-BEGET.md](MIGRATE-TO-BEGET.md)
 
 | Шаг | Действие | Статус |
 |-----|----------|--------|
-| 1 | Создать VPS на beget.com (Start, Ubuntu 22.04) | ⏳ |
-| 2 | Экспортировать БД с Railway | ⏳ |
-| 3 | Настроить VPS (Python 3.11, nginx, git) | ⏳ |
-| 4 | Загрузить код + БД | ⏳ |
-| 5 | Создать .env на Beget | ⏳ |
-| 6 | Запустить через systemd (`deploy/selenyx.service`) | ⏳ |
-| 7 | Настроить nginx + SSL (`deploy/nginx.conf`) | ⏳ |
-| 8 | Проверить healthcheck | ⏳ |
-| 9 | Остановить Railway | ⏳ |
-
-> Файлы готовы: `deploy/selenyx.service`, `deploy/nginx.conf`
+| 1 | VPS на beget.com (Ubuntu 24.04, 45.9.43.149) | ✅ |
+| 2 | Экспортировать БД с Railway | ✅ |
+| 3 | Python 3.11, nginx, git на VPS | ✅ |
+| 4 | Код + БД загружены | ✅ |
+| 5 | .env создан с правильным BOT_TOKEN | ✅ |
+| 6 | systemd selenyx.service запущен | ✅ |
+| 7 | nginx работает (HTTP по IP, SSL ожидает домен) | ✅ |
+| 8 | Healthcheck: curl http://45.9.43.149/health → "ok" | ✅ |
+| 9 | Railway остановлен (Service offline) | ✅ |
+| — | Лендинг задеплоен на /home/selenyx/landing/ | ✅ |
+| — | Mini App задеплоен на /home/selenyx/miniapp/ | ✅ |
 
 ---
 
@@ -301,11 +322,12 @@ MVP готов ✅  →  Закрытый тест ⏳  →  Полировка 
 ## 🔧 Технический долг (не блокирует MVP)
 
 ```
-1. Разделить bot + API → два Railway-сервиса
-2. SQLite → Turso (managed backups, point-in-time recovery)
-3. Рефакторинг: index.html → ES-модули (tab-today.js, tab-moon.js, shared.js)
-4. Тайм-зоны → timezone TEXT в таблице users (сейчас хардкод Europe/Moscow)
-5. Вынести data.js константы в редактируемый JSON (без деплоя для правок контента)
+1. Настроить selenyx.ru DNS → 45.9.43.149 + certbot SSL (нужен доступ к Reg.ru/Timeweb)
+2. SSH-ключ для сервера (сейчас вход по паролю)
+3. SQLite → автобэкап cron (deploy/backup.sh уже готов, проверить что настроен)
+4. Рефакторинг: index.html → ES-модули (tab-today.js, tab-moon.js, shared.js)
+5. Тайм-зоны → timezone TEXT в таблице users (сейчас хардкод Europe/Moscow)
+6. Вынести data.js константы в редактируемый JSON (без деплоя для правок контента)
 ```
 
 ---

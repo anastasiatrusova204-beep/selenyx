@@ -33,29 +33,49 @@ pkill -9 -f "bot.py"
 
 ## Деплой
 
-### Mini App → GitHub Pages
+### Mini App → GitHub Pages (кнопка в боте)
 
 ```bash
 git subtree split --prefix=tg-app -b tmp && git push origin tmp:gh-pages --force && git branch -D tmp
 ```
 
-### Бот + API → Railway (текущий хостинг)
+URL: https://anastasiatrusova204-beep.github.io/selenyx/
+
+### Бот + API → Beget VPS (текущий хостинг)
 
 ```bash
-RAILWAY_TOKEN=da21a856-758c-459b-aa21-bc6d6f74f8f7 ~/bin/railway up --service selenyx-bot
+# Подключиться к серверу:
+ssh root@45.9.43.149   # пароль в .env.secrets
+
+# Обновить код на сервере:
+cd /home/selenyx/app && git pull
+systemctl restart selenyx
+
+# Проверить статус:
+systemctl status selenyx
+curl http://45.9.43.149/health
+
+# Логи:
+journalctl -u selenyx -f
 ```
 
-### Бот + API → Beget VPS (планируемый хостинг)
+Подробный гайд: [MIGRATE-TO-BEGET.md](MIGRATE-TO-BEGET.md)
+
+### Лендинг → Beget VPS
 
 ```bash
-# Автоматическая установка на VPS:
-bash deploy/setup-beget.sh
-
-# Обновление кода после изменений:
-bash deploy/update.sh
+ssh root@45.9.43.149
+cd /home/selenyx/app && git pull
+cp -r landing/* /home/selenyx/landing/
 ```
 
-Подробный пошаговый гайд: [MIGRATE-TO-BEGET.md](MIGRATE-TO-BEGET.md)
+### Mini App → Beget VPS
+
+```bash
+ssh root@45.9.43.149
+cd /home/selenyx/app && git pull
+cp -r tg-app/* /home/selenyx/miniapp/
+```
 
 ---
 
@@ -68,8 +88,9 @@ bash deploy/update.sh
 | База данных | SQLite · aiosqlite 0.20.0 |
 | Планировщик | APScheduler 3.10.4 |
 | API | aiohttp 3.9.5 |
-| Mini App | Vanilla JS SPA (GitHub Pages) |
-| Хостинг бота | Railway → Beget VPS |
+| Mini App | Vanilla JS SPA (GitHub Pages + Beget VPS) |
+| Хостинг бота | Beget VPS (45.9.43.149) |
+| Лендинг | Beget VPS → selenyx.ru (домен ожидает DNS) |
 
 ---
 
@@ -82,7 +103,7 @@ astro.py            — астро-расчёты: get_moon_data, get_natal_char
 data.py             — контентные константы (~1100 строк)
 db.py               — функции БД, схема таблиц
 requirements.txt
-Dockerfile          — сборка для Railway
+Dockerfile          — Docker-образ для сборки
 .env.example        — шаблон переменных окружения
 
 tg-app/             — ★ Mini App (автономный SPA)
@@ -90,15 +111,19 @@ tg-app/             — ★ Mini App (автономный SPA)
   app.js            — логика и навигация
   data.js           — контент и расчёты
   style.css         — стили и анимации
+  CLAUDE.md         — документация компонентов Mini App
 
-deploy/             — файлы для деплоя на Beget VPS
-  nginx.conf        — конфиг nginx (reverse proxy + SSL)
-  selenyx.service   — systemd-сервис (автозапуск)
-  setup-beget.sh    — автоматическая установка на VPS
-  update.sh         — обновление кода и перезапуск
-  backup.sh         — резервное копирование БД
+landing/            — лендинг-витрина (selenyx.ru)
+  index.html        — полный лендинг (задеплоен на Beget)
+  style.css         — стили лендинга
+  app.js            — интерактивный выбор знака
 
-landing/            — лендинг (HTML, не задеплоен)
+deploy/             — конфиги сервера Beget VPS
+  nginx.conf        — конфиг nginx (reverse proxy, HTTP + SSL-секция)
+  selenyx.service   — systemd-сервис (автозапуск бота)
+  setup-beget.sh    — скрипт первичной установки на VPS
+  update.sh         — обновление кода и перезапуск бота
+  backup.sh         — резервное копирование БД (cron 03:00)
 ```
 
 ---
