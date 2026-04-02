@@ -113,6 +113,7 @@ def start_cta_keyboard() -> InlineKeyboardMarkup:
 def email_ask_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📧 Указать email →", callback_data="cb_email_ask")],
+        [InlineKeyboardButton(text="Пропустить →",       callback_data="cb_email_skip")],
     ])
 
 
@@ -397,6 +398,10 @@ async def handle_email_ask(callback: CallbackQuery, state: FSMContext) -> None:
 @router.callback_query(F.data == "cb_email_skip")
 async def handle_email_skip(callback: CallbackQuery) -> None:
     await callback.message.edit_text("Хорошо, пропустим. Всегда можно добавить через /email.")
+    await callback.message.answer(
+        "Нажми кнопку <b>Selenyx</b> внизу чата — открой приложение.",
+        reply_markup=main_menu(),
+    )
     await callback.answer()
 
 
@@ -414,7 +419,9 @@ async def handle_email_input(message: Message, state: FSMContext) -> None:
     await message.answer(
         f"✅ <b>Готово!</b> Записала: {email}\n\n"
         "Напишу, когда Луна войдёт в твой знак — это происходит раз в месяц "
-        "и длится 2–3 дня с особой энергией."
+        "и длится 2–3 дня с особой энергией.\n\n"
+        "Нажми кнопку <b>Selenyx</b> внизу чата — открой приложение.",
+        reply_markup=main_menu(),
     )
 
 
