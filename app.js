@@ -1159,34 +1159,52 @@ function revealFortune() {
   const veil   = $('oracle-veil');
   const particles = $('oracle-particles');
 
-  // 1. Cookie cracks
+  // 1. Cookie cracks + немедленный взрыв частиц
   if (cookie) cookie.classList.add('cracking');
-  tg.HapticFeedback.impactOccurred('medium');
+  tg.HapticFeedback.impactOccurred('heavy');
+
+  // Частицы — сразу при тапе, до вуали
+  if (particles) {
+    particles.innerHTML = '';
+    const count = 28;
+    const colors = ['#C8A96E','#F5C842','#fff8e7','#E8B96E','#FFD700','#ffffff'];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      p.className = 'oracle-particle';
+      const angle = (360 / count) * i + Math.random() * 14 - 7;
+      const dist  = 120 + Math.random() * 200;
+      const rad   = (angle * Math.PI) / 180;
+      const size  = 5 + Math.random() * 10;
+      p.style.setProperty('--tx', `${Math.cos(rad) * dist}px`);
+      p.style.setProperty('--ty', `${Math.sin(rad) * dist}px`);
+      p.style.setProperty('--delay', `${(Math.random() * 0.1).toFixed(2)}s`);
+      p.style.setProperty('--dur',   `${(0.9 + Math.random() * 0.7).toFixed(2)}s`);
+      p.style.setProperty('--size',  `${size.toFixed(0)}px`);
+      p.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+      particles.appendChild(p);
+    }
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('span');
+      p.className = 'oracle-particle';
+      const angle = Math.random() * 360;
+      const dist  = 60 + Math.random() * 100;
+      const rad   = (angle * Math.PI) / 180;
+      p.style.setProperty('--tx', `${Math.cos(rad) * dist}px`);
+      p.style.setProperty('--ty', `${Math.sin(rad) * dist}px`);
+      p.style.setProperty('--delay', '0s');
+      p.style.setProperty('--dur',   '0.5s');
+      p.style.setProperty('--size',  `${14 + Math.random() * 10}px`);
+      p.style.setProperty('--color', '#FFD700');
+      particles.appendChild(p);
+    }
+  }
 
   setTimeout(() => {
-    // 2. Hide cookie wrap, show veil (clip-path animation kicks in via CSS)
+    // 2. Вуаль появляется ПОСЛЕ взрыва
     hide('oracle-cookie-wrap');
     if (veil) veil.classList.remove('hidden');
 
-    // 3. Spawn particles
-    if (particles) {
-      particles.innerHTML = '';
-      const count = 14;
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement('span');
-        p.className = 'oracle-particle';
-        const angle = (360 / count) * i + Math.random() * 20 - 10;
-        const dist  = 80 + Math.random() * 80;
-        const rad   = (angle * Math.PI) / 180;
-        p.style.setProperty('--tx', `${Math.cos(rad) * dist}px`);
-        p.style.setProperty('--ty', `${Math.sin(rad) * dist}px`);
-        p.style.setProperty('--delay', `${(Math.random() * 0.3).toFixed(2)}s`);
-        p.style.setProperty('--dur',   `${(0.7 + Math.random() * 0.5).toFixed(2)}s`);
-        particles.appendChild(p);
-      }
-    }
-
-    // 4. Get oracle data
+    // 3. Get oracle data
     const moon    = calcMoonData();
     const weekday = new Date().getDay();
     const oracle  = getDailyOracle(userSign || 'aries', moon.phase, weekday, moon.lunarDay);
