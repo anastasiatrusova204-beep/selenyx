@@ -891,7 +891,7 @@
     <a href="#pricing">Цены</a>
     <a href="#contact">Контакт</a>
   </div>
-  <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+  <a href="https://t.me/Selenyx_mybot/app" target="_blank" rel="noopener noreferrer"
      class="btn-tg" aria-label="Открыть Selenyx в Telegram" onclick="track('nav')">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
@@ -914,7 +914,7 @@
     <a href="#contact"  onclick="closeMenu()">Контакт</a>
   </nav>
   <div class="mob-tg">
-    <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+    <a href="https://t.me/Selenyx_mybot/app" target="_blank" rel="noopener noreferrer"
        class="cta" style="display:inline-flex;"
        aria-label="Открыть Selenyx в Telegram"
        onclick="track('mob-menu');closeMenu()">
@@ -935,7 +935,7 @@
         <h1 class="hero-h1">Живи в ритме дня.<br><em>Не вслепую.</em></h1>
         <p class="hero-p">За 30 секунд узнаёшь, что поддерживает сегодня — в работе, здоровье и отношениях. Реальное положение планет, персонально для тебя.</p>
         <div class="cta-wrap">
-          <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+          <a href="https://t.me/Selenyx_mybot/app" target="_blank" rel="noopener noreferrer"
              class="cta" aria-label="Открыть Selenyx в Telegram" onclick="track('hero')">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
@@ -1048,50 +1048,47 @@
         <div class="ph-cap"><strong>🌙 Луна</strong><span>Текущая фаза и лунный день</span></div>
       </div>
 
-      <!-- Natal -->
+      <!-- Month -->
       <div class="r d3">
         <div class="phone">
           <div class="notch"></div>
           <div class="scr">
-            <div class="p-title">🌟 Карта</div>
+            <div class="p-title">📅 Месяц</div>
             <div class="p-hr"></div>
-            <div class="p-2">
-              <div class="p-card p-cen"><div class="p-emo">☀️</div><div class="p-lbl">Солнце</div><div class="p-val">Овен</div></div>
-              <div class="p-card p-cen"><div class="p-emo">🌙</div><div class="p-lbl">Луна</div><div class="p-val">Близнецы</div></div>
+            <div class="p-cap" style="margin-bottom:6px;">ЛУННЫЙ КАЛЕНДАРЬ</div>
+            <div class="p-2" style="grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:7px;">
+              <div class="p-card p-cen" style="padding:4px 2px;"><div style="font-size:11px;">🌑</div><div class="p-lbl">1</div></div>
+              <div class="p-card p-cen" style="padding:4px 2px;"><div style="font-size:11px;">🌒</div><div class="p-lbl">7</div></div>
+              <div class="p-card p-cen" style="padding:4px 2px;background:rgba(200,169,110,.15);border-color:var(--border-g);"><div style="font-size:11px;">🌕</div><div class="p-lbl">15</div></div>
+              <div class="p-card p-cen" style="padding:4px 2px;"><div style="font-size:11px;">🌘</div><div class="p-lbl">22</div></div>
             </div>
-            <div class="p-card p-cen" style="margin-bottom:8px;">
-              <div class="p-emo">⬆️</div><div class="p-lbl">Асцендент</div><div class="p-val">Лев</div>
-            </div>
-            <div class="bar f"></div>
+            <div class="pill" style="display:block;text-align:center;margin-bottom:6px;">K-индекс: 🟢 спокойно</div>
+            <div class="p-cap" style="margin-bottom:5px;">САМОЧУВСТВИЕ</div>
+            <div class="bar f g"></div>
             <div class="bar m"></div>
-            <div class="bar f"></div>
-            <div class="bar s"></div>
+            <div class="bar s g"></div>
           </div>
         </div>
-        <div class="ph-cap"><strong>🌟 Карта</strong><span>Твоё личное начало</span></div>
+        <div class="ph-cap"><strong>📅 Месяц</strong><span>Лунный календарь и трекер</span></div>
       </div>
 
-      <!-- Compat -->
+      <!-- Oracle -->
       <div class="r d4">
         <div class="phone">
           <div class="notch"></div>
           <div class="scr">
-            <div class="p-title">💞 Пара</div>
+            <div class="p-title">🔮 Оракул</div>
             <div class="p-hr"></div>
-            <div class="compat-row">
-              <div class="p-card p-cen" style="padding:7px 10px;"><div style="font-size:18px;">♈</div><div class="p-lbl">Овен</div></div>
-              <span style="font-size:14px;color:var(--gold);">💞</span>
-              <div class="p-card p-cen" style="padding:7px 10px;"><div style="font-size:18px;">♎</div><div class="p-lbl">Весы</div></div>
-            </div>
-            <div class="compat-big">87%</div>
-            <div class="compat-lbl">Совместимость</div>
-            <div class="compat-bg"></div>
+            <div class="p-circle" style="width:64px;height:64px;font-size:26px;margin:8px auto 10px;">🥠</div>
+            <div class="p-cap p-cen" style="margin-bottom:8px;">Послание дня</div>
             <div class="bar f"></div>
             <div class="bar m"></div>
             <div class="bar s"></div>
+            <div style="height:8px;"></div>
+            <div class="pill" style="display:block;text-align:center;">✦ Открыть послание</div>
           </div>
         </div>
-        <div class="ph-cap"><strong>💞 Совместимость</strong><span>Как вы дополняете друг друга</span></div>
+        <div class="ph-cap"><strong>🔮 Оракул</strong><span>Личное послание на день</span></div>
       </div>
     </div>
   </div>
@@ -1134,20 +1131,20 @@
     <div class="steps">
       <div class="step r d1">
         <div class="snum">1</div>
-        <h3>Открой бота в Telegram</h3>
-        <p>Нажми кнопку ниже — Telegram откроется с ботом Selenyx. Никакой установки, никакой регистрации.</p>
+        <h3>Открой приложение</h3>
+        <p>Нажми кнопку — откроется приложение прямо в Telegram. Никакой установки и регистрации.</p>
         <span class="badge">⚡ 5 секунд</span>
       </div>
       <div class="step r d2">
         <div class="snum">2</div>
         <h3>Выбери знак зодиака</h3>
-        <p>Один тап — и приложение готово. Точная дата рождения не обязательна. Знак зодиака — достаточно.</p>
+        <p>Один тап — и приложение настроено под тебя. Дата рождения не обязательна — знак зодиака достаточно.</p>
         <span class="badge">⚡ 10 секунд</span>
       </div>
       <div class="step r d3">
         <div class="snum">3</div>
         <h3>Получай прогноз каждый день</h3>
-        <p>Selenyx покажет что поддерживает в работе, здоровье, отношениях. Включи уведомления и не пропускай ритм.</p>
+        <p>День, Луна, Месяц, Оракул — всё в одном приложении. Включи уведомления и не пропускай ритм.</p>
         <span class="badge">🌙 Каждое утро</span>
       </div>
     </div>
@@ -1292,7 +1289,7 @@
           <span class="fq-ic" aria-hidden="true">+</span>
         </button>
         <div class="fa" role="region">
-          <div class="fa-in"><strong>Бесплатно навсегда:</strong> энергия дня, Луна в знаке, фаза, лунный день, рекомендации, уведомления. Расширенный доступ (натальная карта, прогноз на год, детальная совместимость) — разовые покупки в Telegram Stars. Без авторекурринга.</div>
+          <div class="fa-in"><strong>Бесплатно навсегда.</strong> Все функции открыты сразу: энергия дня, Луна, лунный календарь, оракул, цвет и число дня, уведомления. Никаких скрытых платежей и подписок.</div>
         </div>
       </div>
 
@@ -1302,7 +1299,7 @@
           <span class="fq-ic" aria-hidden="true">+</span>
         </button>
         <div class="fa" role="region">
-          <div class="fa-in">Selenyx хранит только знак зодиака и время уведомлений. <strong>Авторизация через Telegram</strong> — никаких паролей и email. Данные не передаются третьим лицам.</div>
+          <div class="fa-in">Selenyx хранит только знак зодиака и время уведомлений. Авторизация через Telegram — вход через приложение, которому ты уже доверяешь. Данные не передаются третьим лицам.</div>
         </div>
       </div>
 
@@ -1317,40 +1314,26 @@
   <div class="wrap">
     <div class="pricing-hd r">
       <p class="tag">Честно о ценах</p>
-      <h2 class="h2">Прозрачно.<br>Без сюрпризов.</h2>
-      <p class="sub">Базовые функции — бесплатно навсегда. Расширенный доступ — только то, что нужно тебе.</p>
+      <h2 class="h2">Бесплатно.<br>Без сюрпризов.</h2>
+      <p class="sub">Все функции — бесплатно. Никаких скрытых платежей и подписок.</p>
     </div>
-    <div class="price-grid">
+    <div class="price-grid" style="max-width:480px;margin:0 auto;">
       <div class="pc free r d1">
-        <span class="pbadge free">Бесплатно</span>
-        <h3 class="ptitle">Базовый доступ</h3>
-        <p class="psub">Навсегда. Без ограничений по времени.</p>
+        <span class="pbadge free">Бесплатно навсегда</span>
+        <h3 class="ptitle">Всё включено</h3>
+        <p class="psub">Без ограничений по времени.</p>
         <ul class="plist">
           <li><span class="ck" aria-hidden="true">✓</span> Энергия дня — ежедневно</li>
           <li><span class="ck" aria-hidden="true">✓</span> Луна в знаке · фаза · лунный день</li>
           <li><span class="ck" aria-hidden="true">✓</span> Персональная рекомендация</li>
-          <li><span class="ck" aria-hidden="true">✓</span> Совместимость знаков</li>
-          <li><span class="ck" aria-hidden="true">✓</span> Уведомления в удобное время</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Лунный календарь на месяц</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Оракул — личное послание дня</li>
           <li><span class="ck" aria-hidden="true">✓</span> Цвет дня и число дня</li>
+          <li><span class="ck" aria-hidden="true">✓</span> Уведомления в удобное время</li>
         </ul>
-        <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
-           class="cta" aria-label="Начать бесплатно в Telegram" onclick="track('pricing-free')">
+        <a href="https://t.me/Selenyx_mybot/app" target="_blank" rel="noopener noreferrer"
+           class="cta" aria-label="Начать бесплатно" onclick="track('pricing-free')">
           Начать бесплатно
-        </a>
-      </div>
-      <div class="pc premium r d2">
-        <span class="pbadge premium">⭐ Расширенный</span>
-        <h3 class="ptitle">Разовые покупки</h3>
-        <p class="psub">Платишь один раз за нужное. Оплата через Telegram Stars.</p>
-        <div>
-          <div class="prow"><span class="pname">🌟 Натальная карта</span><span class="pprice">690 ₽</span></div>
-          <div class="prow"><span class="pname">📅 Прогноз на год</span><span class="pprice">990 ₽</span></div>
-          <div class="prow"><span class="pname">💞 Детальная совместимость</span><span class="pprice">490 ₽</span></div>
-        </div>
-        <p class="pnote"><strong>Без подписки и авторекурринга.</strong> Telegram Stars — встроенная валюта Telegram. Покупки защищены стандартными гарантиями платформы.</p>
-        <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
-           class="cta" aria-label="Открыть Selenyx в Telegram" onclick="track('pricing-premium')">
-          Открыть в Telegram
         </a>
       </div>
     </div>
@@ -1419,7 +1402,7 @@
       <span class="fcta-moon" aria-hidden="true">🌙</span>
       <h2>Узнай свой первый прогноз</h2>
       <p>За 30 секунд. Без регистрации.</p>
-      <a href="https://t.me/Selenyx_mybot" target="_blank" rel="noopener noreferrer"
+      <a href="https://t.me/Selenyx_mybot/app" target="_blank" rel="noopener noreferrer"
          class="cta" style="display:inline-flex;" aria-label="Открыть Selenyx в Telegram" onclick="track('final')">
         <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
           <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.83.941z"/>
