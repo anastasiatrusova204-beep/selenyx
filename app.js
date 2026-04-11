@@ -676,11 +676,7 @@ function applyTodayData(data) {
   // Number accordion — body
   const numBody = document.querySelector('#num-acc-card .domain-card-body');
   if (numBody) {
-    const todayStr = new Date().toLocaleDateString('ru-RU');
-    const digits = todayStr.replace(/\D/g,'').split('').map(Number);
-    const digitSum = digits.reduce((a,b) => a+b, 0);
-    const digitStr = digits.join('+') + ' = ' + digitSum + (digitSum > 9 ? ' → ' + dayNum : '');
-    numBody.innerHTML = `${numData?.text || numData?.hint ? `<p class="domain-card-text">${numData.text || numData.hint}</p>` : ''}<p class="card-label mt">✦ Как рассчитывается</p><p class="domain-card-text">Сложи все цифры даты (${todayStr}): ${digitStr}. Если получилось двузначное — складываем снова. Планета числа ${dayNum}: ${numData?.planet || ''}.</p>${numData?.good ? `<p class="card-label mt">✦ Что поддерживает сегодня</p><p class="domain-card-text">${numData.good}</p>` : ''}${numData?.avoid ? `<p class="card-label mt">✦ Чего избегать</p><p class="domain-card-text">${numData.avoid}</p>` : ''}${numData?.practice ? `<p class="card-label mt">✦ Практика дня</p><p class="domain-card-text">${numData.practice}</p>` : ''}`;
+    numBody.innerHTML = `${numData?.text || numData?.hint ? `<p class="domain-card-text">${numData.text || numData.hint}</p>` : ''}${numData?.good ? `<p class="card-label mt">✦ Что поддерживает сегодня</p><p class="domain-card-text">${numData.good}</p>` : ''}${numData?.avoid ? `<p class="card-label mt">✦ Чего избегать</p><p class="domain-card-text">${numData.avoid}</p>` : ''}${numData?.practice ? `<p class="card-label mt">✦ Практика дня</p><p class="domain-card-text">${numData.practice}</p>` : ''}`;
   }
 
   // Basis — источник прогноза
