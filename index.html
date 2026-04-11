@@ -244,6 +244,32 @@
           <button id="retention-close" class="retention-dismiss" aria-label="Закрыть">✕</button>
         </div>
 
+        <!-- Color accordion card -->
+        <div class="domain-card" id="color-acc-card" style="--domain-color:#b07d3a;--domain-bg:rgba(176,125,58,0.07)">
+          <button class="domain-card-header" aria-expanded="false">
+            <span class="domain-card-icon">🎨</span>
+            <div class="domain-card-header-content">
+              <span class="domain-card-label">Цвет дня</span>
+              <span id="today-color" class="domain-card-preview"></span>
+            </div>
+            <span class="domain-card-caret">›</span>
+          </button>
+          <div class="domain-card-body" hidden></div>
+        </div>
+
+        <!-- Number accordion card -->
+        <div class="domain-card" id="num-acc-card" style="--domain-color:#5a4a8c;--domain-bg:rgba(90,74,140,0.07)">
+          <button class="domain-card-header" aria-expanded="false">
+            <span class="domain-card-icon">🔢</span>
+            <div class="domain-card-header-content">
+              <span class="domain-card-label">Число дня</span>
+              <span id="today-daynum" class="domain-card-preview"></span>
+            </div>
+            <span class="domain-card-caret">›</span>
+          </button>
+          <div class="domain-card-body" hidden></div>
+        </div>
+
         <!-- Domain accordion -->
         <div class="domain-accordion" id="domain-accordion">
           <div class="domain-card" data-domain="health">
@@ -290,34 +316,6 @@
             </button>
             <div class="domain-card-body" hidden></div>
           </div>
-        </div>
-
-
-
-        <!-- Color accordion card -->
-        <div class="domain-card" id="color-acc-card" style="--domain-color:#b07d3a;--domain-bg:rgba(176,125,58,0.07)">
-          <button class="domain-card-header" aria-expanded="false">
-            <span class="domain-card-icon">🎨</span>
-            <div class="domain-card-header-content">
-              <span class="domain-card-label">Цвет дня</span>
-              <span id="today-color" class="domain-card-preview"></span>
-            </div>
-            <span class="domain-card-caret">›</span>
-          </button>
-          <div class="domain-card-body" hidden></div>
-        </div>
-
-        <!-- Number accordion card -->
-        <div class="domain-card" id="num-acc-card" style="--domain-color:#5a4a8c;--domain-bg:rgba(90,74,140,0.07)">
-          <button class="domain-card-header" aria-expanded="false">
-            <span class="domain-card-icon">🔢</span>
-            <div class="domain-card-header-content">
-              <span class="domain-card-label">Число дня</span>
-              <span id="today-daynum" class="domain-card-preview"></span>
-            </div>
-            <span class="domain-card-caret">›</span>
-          </button>
-          <div class="domain-card-body" hidden></div>
         </div>
 
         <!-- Диагностика дня — карточка-приглашение -->
@@ -709,6 +707,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=16"></script>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 </body>
 </html>
