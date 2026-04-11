@@ -1762,6 +1762,17 @@ function openKbDetail(idx) {
   hide('kb-list-view');
   show('kb-detail-view');
   tg.HapticFeedback.impactOccurred('light');
+
+  // BackButton — возврат к списку статей, не закрытие оверлея
+  tg.BackButton.offClick(closeKnowledge);
+  tg.BackButton.onClick(_kbBackToList);
+}
+
+function _kbBackToList() {
+  tg.BackButton.offClick(_kbBackToList);
+  tg.BackButton.onClick(closeKnowledge);
+  hide('kb-detail-view');
+  show('kb-list-view');
 }
 
 function initKnowledge() {
