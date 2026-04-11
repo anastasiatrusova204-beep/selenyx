@@ -772,8 +772,8 @@ function applyTodayData(data) {
     });
   });
 
-  // Domain accordion — inline expandable cards
-  document.querySelectorAll('.domain-card').forEach(card => {
+  // Domain accordion — inline expandable cards (только карточки с data-domain)
+  document.querySelectorAll('.domain-card[data-domain]').forEach(card => {
     const header = card.querySelector('.domain-card-header');
     header.addEventListener('click', () => {
       const domain = card.dataset.domain;
@@ -1616,8 +1616,8 @@ async function renderCalendar() {
   initCalNav();
   initViewToggle();
 
-  // База знаний — кнопка в таббаре
-  $('kb-tab-btn')?.addEventListener('click', () => {
+  // База знаний — кнопка в хедере
+  $('kb-header-btn')?.addEventListener('click', () => {
     tg.HapticFeedback.impactOccurred('light');
     openKnowledge();
   });
@@ -1720,8 +1720,6 @@ function openKnowledge(idx) {
   tg.BackButton.show();
   tg.BackButton.onClick(closeKnowledge);
   tg.HapticFeedback.impactOccurred('light');
-  // Снимаем активность с кнопки базы знаний в таббаре
-  $('kb-tab-btn')?.classList.remove('active');
 }
 
 function closeKnowledge() {

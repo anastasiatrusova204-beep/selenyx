@@ -422,6 +422,16 @@ ul { list-style: none; }
 
 .icon-btn:active { background: var(--bg3); }
 
+/* Knowledge button in header */
+.header-icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--divider);
+  background: var(--bg2); font-size: 16px;
+  transition: background var(--t);
+}
+.header-icon-btn:active { background: var(--bg3); }
+
 /* Profile button in header */
 .header-profile-btn {
   display: flex; align-items: center; gap: 6px;

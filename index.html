@@ -12,9 +12,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=26">
-  <style>/* critical override: prevent domain-card from collapsing in flex context */
-  .domain-card { flex-shrink: 0; }</style>
+  <link rel="stylesheet" href="style.css?v=27">
+  <style>/* critical: prevent domain-card from collapsing in flex context */
+  .domain-card { flex-shrink: 0; }
+  /* critical: header-icon-btn fallback if CDN serves old CSS */
+  .header-icon-btn { display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid rgba(176,125,44,0.13);background:var(--bg2,#fdf9f2);font-size:16px; }</style>
 </head>
 <body>
 <div id="app">
@@ -203,6 +205,7 @@
     <h1 class="app-logo">🌙 Selenyx</h1>
     <span id="streak-badge" class="streak-badge hidden"></span>
     <div class="header-actions">
+      <button id="kb-header-btn" class="header-icon-btn" aria-label="База знаний">📚</button>
       <button id="settings-btn" class="header-profile-btn" aria-label="Профиль">
         <span id="header-name" class="header-profile-name"></span>
         <span class="header-profile-icon">⚙️</span>
@@ -520,10 +523,6 @@
       <span class="tab-icon">🥠</span>
       <span class="tab-label">Оракул</span>
     </button>
-    <button class="tab-btn" id="kb-tab-btn" role="tab" aria-label="База знаний">
-      <span class="tab-icon">📚</span>
-      <span class="tab-label">Знания</span>
-    </button>
   </nav>
 
 
@@ -709,6 +708,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=16"></script>
-<script src="app.js?v=41"></script>
+<script src="app.js?v=42"></script>
 </body>
 </html>
