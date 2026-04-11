@@ -933,15 +933,14 @@ function applyMoonData(moon) {
   setText('moon-sign-energy-text', signEnergy);
   wrapTerms($('moon-sign-energy-text'));
 
-  // Лунный день — кликабельная карточка → шторка
+  // Лунный день — карточка с описанием + кнопка практики
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
-  const ldPreview = ld.energy || '';
   setHTML('moon-lunar-info', `
     <div class="moon-ld-header">
       <span class="moon-ld-icon">${ld.symbol || '🌙'}</span>
       <span class="card-label">${moon.lunarDay}-й лунный день${ld.name ? ' · ' + ld.name : ''}</span>
     </div>
-    ${ldPreview ? `<p class="card-text moon-ld-text">${ldPreview}</p>` : ''}
+    ${ld.hint ? `<p class="card-text moon-ld-text">${ld.hint}</p>` : ''}
     ${ld.practice ? `<button class="moon-ld-practice-btn">Практика на сегодня →</button>` : ''}
   `);
 
@@ -952,10 +951,8 @@ function applyMoonData(moon) {
       openSheet({
         icon: `<span style="font-size:48px">${ld.symbol || '🌙'}</span>`,
         title: `${moon.lunarDay}-й лунный день — ${ld.name || ''}`,
-        text: ld.hint || '',
-        sections: [
-          ld.practice ? { label: '✦ Практика на сегодня', sub: ld.practice } : null,
-        ].filter(Boolean),
+        text: ld.practice || '',
+        sections: [],
       });
     };
   }
