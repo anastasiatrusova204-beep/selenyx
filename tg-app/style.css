@@ -937,8 +937,21 @@ ul { list-style: none; }
 }
 
 .moon-big-emoji {
-  font-size: 64px; line-height: 1;
-  filter: drop-shadow(0 0 20px rgba(200,169,110,0.4));
+  font-size: 0; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.moon-disc-svg {
+  width: 120px; height: 120px;
+  filter: drop-shadow(0 0 28px rgba(200,169,110,0.55))
+          drop-shadow(0 4px 16px rgba(0,0,0,0.25));
+  animation: moonDiscIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
+  overflow: visible;
+}
+
+@keyframes moonDiscIn {
+  from { opacity: 0; transform: scale(0.78); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 .moon-phase-title {
