@@ -1004,51 +1004,83 @@ function applyMoonData(moon) {
  * illumination: 0–100%
  */
 function _buildMoonDisc(illumination, angle) {
-  const r = 50, cx = 55, cy = 55;
-  // Растущая фаза: правая сторона освещена (0°–180°)
+  const r = 52, cx = 68, cy = 68;
   const waxing     = angle <= 180;
   const cosA       = Math.cos(angle * Math.PI / 180);
   const eRx        = Math.abs(cosA) * r;
-  // Горбатая фаза (>50% освещённости): эллипс рисуется СВЕТЛЫМ цветом
   const isGibbous  = angle > 90 && angle <= 270;
-  const ellipseFill = isGibbous ? 'url(#mLit)' : '#1a1628';
+  const ellipseFill = isGibbous ? 'url(#mLit)' : '#0a0818';
   const clipSide    = waxing ? 'mClipR' : 'mClipL';
 
-  return `<svg class="moon-disc-svg" viewBox="0 0 110 110" aria-label="Луна ${illumination}% освещена">
+  return `<svg class="moon-disc-svg" viewBox="0 0 136 136" aria-label="Луна ${illumination}% освещена">
   <defs>
-    <radialGradient id="mLit" cx="36%" cy="30%" r="70%">
-      <stop offset="0%"   stop-color="#fffef0"/>
-      <stop offset="30%"  stop-color="#fde68a"/>
-      <stop offset="70%"  stop-color="#c8952e"/>
-      <stop offset="100%" stop-color="#8a6020"/>
+    <radialGradient id="mLit" cx="28%" cy="20%" r="80%">
+      <stop offset="0%"   stop-color="#fffef8"/>
+      <stop offset="16%"  stop-color="#fef3c7"/>
+      <stop offset="44%"  stop-color="#d97706"/>
+      <stop offset="76%"  stop-color="#7c3200"/>
+      <stop offset="100%" stop-color="#3c1008"/>
     </radialGradient>
-    <filter id="mGlow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+    <radialGradient id="mHalo1" cx="50%" cy="50%" r="50%">
+      <stop offset="50%" stop-color="#92400e" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.42"/>
+    </radialGradient>
+    <radialGradient id="mHalo2" cx="50%" cy="50%" r="50%">
+      <stop offset="68%" stop-color="#d97706" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fde68a" stop-opacity="0.18"/>
+    </radialGradient>
+    <filter id="mGlowF" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <!-- Правая половина -->
+    <filter id="mSoft"><feGaussianBlur stdDeviation="2.2"/></filter>
     <clipPath id="mClipR">
-      <rect x="${cx}" y="${cy - r - 1}" width="${r + 2}" height="${r * 2 + 2}"/>
+      <rect x="${cx}" y="${cy - r - 2}" width="${r + 3}" height="${r * 2 + 4}"/>
     </clipPath>
-    <!-- Левая половина -->
     <clipPath id="mClipL">
-      <rect x="${cx - r - 2}" y="${cy - r - 1}" width="${r + 2}" height="${r * 2 + 2}"/>
+      <rect x="${cx - r - 3}" y="${cy - r - 2}" width="${r + 3}" height="${r * 2 + 4}"/>
     </clipPath>
   </defs>
 
+  <!-- Звёзды фона -->
+  <circle cx="12" cy="14" r="1.2" fill="white" opacity="0.55"/>
+  <circle cx="120" cy="20" r="0.9" fill="white" opacity="0.50"/>
+  <circle cx="8"   cy="90" r="1.0" fill="white" opacity="0.44"/>
+  <circle cx="124" cy="82" r="1.3" fill="white" opacity="0.54"/>
+  <circle cx="20"  cy="124" r="0.8" fill="white" opacity="0.40"/>
+  <circle cx="114" cy="122" r="1.1" fill="white" opacity="0.46"/>
+  <circle cx="44"  cy="7"   r="0.7" fill="white" opacity="0.42"/>
+  <circle cx="94"  cy="5"   r="1.0" fill="white" opacity="0.47"/>
+  <circle cx="6"   cy="50"  r="0.8" fill="white" opacity="0.37"/>
+  <circle cx="130" cy="55"  r="0.9" fill="white" opacity="0.40"/>
+  <circle cx="28"  cy="8"   r="0.6" fill="white" opacity="0.35"/>
+  <circle cx="108" cy="8"   r="0.7" fill="white" opacity="0.38"/>
+
+  <!-- Внешний ореол (широкий, мягкий) -->
+  <circle cx="${cx}" cy="${cy}" r="${r + 24}" fill="url(#mHalo2)"/>
+  <!-- Внутренний ореол -->
+  <circle cx="${cx}" cy="${cy}" r="${r + 13}" fill="url(#mHalo1)" filter="url(#mSoft)"/>
+
   <!-- Тёмная основа -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a1628"/>
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#0a0818"/>
 
-  <!-- Освещённая половина (обрезана по нужной стороне) -->
+  <!-- Кратеры / текстура поверхности -->
+  <circle cx="${cx - 15}" cy="${cy - 17}" r="12" fill="#060412" opacity="0.55"/>
+  <circle cx="${cx + 17}" cy="${cy + 9}"  r="16" fill="#060412" opacity="0.38"/>
+  <circle cx="${cx - 5}"  cy="${cy + 21}" r="10" fill="#060412" opacity="0.46"/>
+  <circle cx="${cx + 9}"  cy="${cy - 28}" r="7"  fill="#060412" opacity="0.32"/>
+  <circle cx="${cx - 24}" cy="${cy + 5}"  r="8"  fill="#060412" opacity="0.28"/>
+
+  <!-- Освещённая сторона -->
   <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#mLit)"
-    clip-path="url(#${clipSide})" filter="url(#mGlow)"/>
+    clip-path="url(#${clipSide})" filter="url(#mGlowF)"/>
 
-  <!-- Терминаторный эллипс (серп → горб) -->
-  ${eRx > 1 ? `<ellipse cx="${cx}" cy="${cy}" rx="${eRx.toFixed(1)}" ry="${r}" fill="${ellipseFill}"/>` : ''}
+  <!-- Терминатор (мягкий) -->
+  ${eRx > 1 ? `<ellipse cx="${cx}" cy="${cy}" rx="${eRx.toFixed(1)}" ry="${r}" fill="${ellipseFill}" filter="url(#mSoft)"/>` : ''}
 
-  <!-- Лёгкое ободок-свечение -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
-    stroke="rgba(200,169,110,0.25)" stroke-width="1.5"/>
+  <!-- Ободок (тонкий) -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#b45309" stroke-width="1.5" opacity="0.35"/>
+  <circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#fbbf24" stroke-width="0.7" opacity="0.14"/>
 </svg>`;
 }
 
