@@ -2217,20 +2217,20 @@ select.form-input { cursor: pointer; }
   padding: 4px 0 8px;
 }
 .cycle-arc {
-  width: 140px; height: 140px;
-  filter: drop-shadow(0 2px 8px rgba(176,125,44,0.18));
+  width: 160px; height: 160px;
+  overflow: visible;
 }
 .arc-day-num {
   font-family: var(--font-display);
-  font-size: 26px; font-weight: 600;
+  font-size: 34px; font-weight: 600;
   fill: var(--text);
 }
 .arc-day-sub {
   font-family: var(--font-body);
   font-size: 9px; fill: var(--text-hint);
-  text-transform: uppercase; letter-spacing: 0.5px;
+  text-transform: uppercase; letter-spacing: 0.6px;
 }
-.arc-label { font-size: 12px; }
+.arc-label { font-size: 13px; }
 
 /* ─── EPHEMERIS NOTE ──────────────────────────────────────── */
 .ephem-note {

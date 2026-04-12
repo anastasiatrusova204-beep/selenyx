@@ -958,29 +958,84 @@ function applyMoonData(moon) {
 /** Строит SVG-арку лунного цикла (1–30 дней, угол 0–360°) */
 function _buildCycleArc(lunarDay, angle) {
   const r = 54, cx = 70, cy = 70, stroke = 5;
-  const total = 360;
-  const circ  = 2 * Math.PI * r;
-  // Угол 0° = новолуние (верхушка), по часовой
-  const pct   = (angle != null ? angle : ((lunarDay - 1) / 29.53) * 360) / total;
+  const circ   = 2 * Math.PI * r;
+  const pct    = (angle != null ? angle : ((lunarDay - 1) / 29.53) * 360) / 360;
   const arcLen = pct * circ;
-  const dash   = `${arcLen.toFixed(1)} ${(circ - arcLen).toFixed(1)}`;
-  // Точка положения луны на окружности
-  const rad    = (angle != null ? angle : pct * 360) * Math.PI / 180 - Math.PI / 2;
-  const dotX   = (cx + r * Math.cos(rad)).toFixed(1);
-  const dotY   = (cy + r * Math.sin(rad)).toFixed(1);
-  // Метки новолуния (верх) и полнолуния (низ)
+  // Точка положения луны
+  const rad  = (angle != null ? angle : pct * 360) * Math.PI / 180 - Math.PI / 2;
+  const dotX = (cx + r * Math.cos(rad)).toFixed(1);
+  const dotY = (cy + r * Math.sin(rad)).toFixed(1);
+  // Стартовая позиция — новолуние (верхушка дуги)
+  const startX = cx;
+  const startY = (cy - r).toFixed(1);
+  const dashOff = (circ * 0.25).toFixed(1);
+
   return `<svg class="cycle-arc" viewBox="0 0 140 140" aria-label="Лунный цикл: день ${lunarDay} из 29">
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="${stroke}"/>
-    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
-      stroke="var(--gold)" stroke-width="${stroke}" stroke-linecap="round"
-      stroke-dasharray="${dash}" stroke-dashoffset="${(circ * 0.25).toFixed(1)}"
-      transform="rotate(-90 ${cx} ${cy})"/>
-    <circle cx="${dotX}" cy="${dotY}" r="7" fill="var(--gold)" opacity="0.9"/>
-    <text x="${cx}" y="${cy - 6}" text-anchor="middle" class="arc-day-num">${lunarDay}</text>
-    <text x="${cx}" y="${cy + 14}" text-anchor="middle" class="arc-day-sub">лунный день</text>
-    <text x="${cx}" y="10" text-anchor="middle" class="arc-label">🌑</text>
-    <text x="${cx}" y="136" text-anchor="middle" class="arc-label">🌕</text>
-  </svg>`;
+  <defs>
+    <filter id="mGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .arc-fill { animation: arcGrow 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
+      .arc-fill-glow { animation: arcGrow 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
+      @keyframes arcGrow {
+        from { stroke-dasharray: 0 ${circ.toFixed(1)}; }
+        to   { stroke-dasharray: ${arcLen.toFixed(1)} ${(circ - arcLen).toFixed(1)}; }
+      }
+      .arc-center { animation: arcNumIn 0.45s ease 0.9s both; transform-box: fill-box; transform-origin: 70px 64px; }
+      @keyframes arcNumIn {
+        from { opacity: 0; transform: scale(0.75); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+    </style>
+  </defs>
+
+  <!-- Фоновое кольцо -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+    stroke="var(--bg3)" stroke-width="${stroke}"/>
+
+  <!-- Glow-подложка дуги (шире, прозрачная) -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+    class="arc-fill-glow"
+    stroke="var(--gold)" stroke-width="${stroke + 5}" stroke-linecap="round" opacity="0.18"
+    stroke-dasharray="0 ${circ.toFixed(1)}" stroke-dashoffset="${dashOff}"
+    transform="rotate(-90 ${cx} ${cy})"/>
+
+  <!-- Основная дуга (анимированная) -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+    class="arc-fill"
+    stroke="var(--gold)" stroke-width="${stroke}" stroke-linecap="round"
+    stroke-dasharray="0 ${circ.toFixed(1)}" stroke-dashoffset="${dashOff}"
+    transform="rotate(-90 ${cx} ${cy})"/>
+
+  <!-- Пульсирующее кольцо за точкой -->
+  <circle cx="${dotX}" cy="${dotY}" r="9" fill="none"
+    stroke="rgba(200,169,110,0.5)" stroke-width="1.5">
+    <animate attributeName="r"       values="9;20;9"     dur="3s" repeatCount="indefinite"
+      calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+    <animate attributeName="opacity" values="0.55;0;0.55" dur="3s" repeatCount="indefinite"
+      calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
+  </circle>
+
+  <!-- Точка Луны (едет от новолуния до текущего положения) -->
+  <circle r="7.5" fill="var(--gold)" filter="url(#mGlow)">
+    <animate attributeName="cx" from="${startX}" to="${dotX}" dur="1.2s"
+      calcMode="spline" keySplines="0.16 1 0.3 1" fill="freeze"/>
+    <animate attributeName="cy" from="${startY}" to="${dotY}" dur="1.2s"
+      calcMode="spline" keySplines="0.16 1 0.3 1" fill="freeze"/>
+  </circle>
+
+  <!-- Число дня (fade + scale) -->
+  <g class="arc-center">
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="arc-day-num">${lunarDay}</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" class="arc-day-sub">лунный день</text>
+  </g>
+
+  <!-- Метки фаз -->
+  <text x="${cx}" y="10"  text-anchor="middle" class="arc-label">🌑</text>
+  <text x="${cx}" y="136" text-anchor="middle" class="arc-label">🌕</text>
+</svg>`;
 }
 
 // ─── Chart tab ────────────────────────────────────────────────────────────────
