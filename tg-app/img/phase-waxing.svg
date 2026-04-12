@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <defs>
+    <radialGradient id="wxbase" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1c1830"/>
+      <stop offset="100%" stop-color="#0a0818"/>
+    </radialGradient>
+    <radialGradient id="wxlit" cx="65%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#f8f0c0"/>
+      <stop offset="35%" stop-color="#e8c850"/>
+      <stop offset="70%" stop-color="#c09020"/>
+      <stop offset="100%" stop-color="#7a5808"/>
+    </radialGradient>
+    <radialGradient id="wxglow" cx="68%" cy="44%" r="45%">
+      <stop offset="0%" stop-color="#e8c840" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#c89020" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="wxf"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="wxstar"><feGaussianBlur stdDeviation="1.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Glow behind lit side -->
+  <ellipse cx="172" cy="148" rx="95" ry="95" fill="url(#wxglow)" filter="url(#wxf)"/>
+
+  <!-- Dark base circle -->
+  <circle cx="150" cy="150" r="92" fill="url(#wxbase)"/>
+
+  <!-- Lit crescent (right side) -->
+  <path d="M150 58 C192 58 228 100 228 150 C228 200 192 242 150 242 C172 222 184 188 184 150 C184 112 172 78 150 58Z"
+        fill="url(#wxlit)" opacity="0.88"/>
+
+  <!-- Outline -->
+  <circle cx="150" cy="150" r="92" fill="none" stroke="#806020" stroke-width="1.2" opacity="0.45"/>
+  <path d="M150 58 C192 58 228 100 228 150 C228 200 192 242 150 242 C172 222 184 188 184 150 C184 112 172 78 150 58Z"
+        fill="none" stroke="#f0e070" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Stars on dark side + around -->
+  <circle cx="62"  cy="80"  r="2.8" fill="#d0c8e8" filter="url(#wxstar)" opacity="0.7"/>
+  <circle cx="48"  cy="155" r="2.2" fill="#d0c8e8" filter="url(#wxstar)" opacity="0.65"/>
+  <circle cx="72"  cy="228" r="2.5" fill="#d0c8e8" filter="url(#wxstar)" opacity="0.65"/>
+  <circle cx="150" cy="28"  r="2"   fill="#c8c0e0" opacity="0.55"/>
+  <circle cx="250" cy="60"  r="2"   fill="#c8c0e0" opacity="0.52"/>
+  <circle cx="112" cy="40"  r="1.5" fill="#c0b8d8" opacity="0.48"/>
+  <circle cx="30"  cy="120" r="1.5" fill="#c0b8d8" opacity="0.45"/>
+  <circle cx="95"  cy="255" r="1.8" fill="#c0b8d8" opacity="0.48"/>
+</svg>

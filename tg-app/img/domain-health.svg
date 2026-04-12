@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140">
+  <defs>
+    <radialGradient id="hbg" cx="65%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#7ec89a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#2d6e45" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hglow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a8e8b8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#3a7a50" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="hf"><feGaussianBlur stdDeviation="2.5"/></filter>
+  </defs>
+
+  <!-- Atmospheric glow -->
+  <ellipse cx="148" cy="55" rx="88" ry="72" fill="url(#hbg)"/>
+  <ellipse cx="158" cy="48" rx="50" ry="42" fill="url(#hglow)" filter="url(#hf)"/>
+
+  <!-- Back large leaf -->
+  <path d="M160 8 C192 22 202 62 186 92 C170 120 135 126 112 112 C140 98 158 72 158 46 C142 70 120 82 98 80 C104 48 130 18 160 8Z"
+        fill="#3d7a52" opacity="0.55"/>
+
+  <!-- Main leaf -->
+  <path d="M148 14 C178 28 188 65 173 94 C158 120 124 126 102 112 C130 96 145 70 146 46 C130 68 110 78 90 76 C96 45 122 18 148 14Z"
+        fill="#4a9460" opacity="0.75"/>
+
+  <!-- Leaf veins -->
+  <path d="M146 46 Q132 72 124 118" stroke="#2a6040" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <path d="M146 46 Q158 65 165 80" stroke="#3a7250" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.4"/>
+  <path d="M138 62 Q148 68 155 62" stroke="#3a7250" stroke-width="0.8" fill="none" opacity="0.35"/>
+  <path d="M132 76 Q138 72 142 68" stroke="#3a7250" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+  <!-- Branch left -->
+  <path d="M112 105 C108 88 118 70 128 80Z" fill="#5aaa70" opacity="0.55"/>
+
+  <!-- Small herb sprigs -->
+  <path d="M92 58 C82 46 76 52 86 64Z" fill="#6ab878" opacity="0.5"/>
+  <path d="M88 72 C78 62 72 70 84 80Z" fill="#5aaa68" opacity="0.45"/>
+
+  <!-- Dewdrops -->
+  <circle cx="155" cy="42" r="3.5" fill="white" opacity="0.45"/>
+  <circle cx="170" cy="65" r="2.5" fill="white" opacity="0.35"/>
+  <circle cx="140" cy="82" r="2" fill="white" opacity="0.38"/>
+  <circle cx="160" cy="88" r="1.8" fill="white" opacity="0.3"/>
+
+  <!-- Ground herbs -->
+  <path d="M108 118 Q112 105 116 110" stroke="#4a9460" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+  <path d="M118 120 Q120 108 126 114" stroke="#4a9460" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.45"/>
+</svg>

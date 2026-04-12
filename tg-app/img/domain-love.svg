@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140">
+  <defs>
+    <radialGradient id="lmoon" cx="48%" cy="42%" r="50%">
+      <stop offset="0%" stop-color="#f0b0c8"/>
+      <stop offset="45%" stop-color="#c86090"/>
+      <stop offset="100%" stop-color="#7a2050"/>
+    </radialGradient>
+    <radialGradient id="lglow" cx="55%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#e880b0" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#8c2060" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lhalo" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="#e080a8" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#e080a8" stop-opacity="0.25"/>
+    </radialGradient>
+    <filter id="lf"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <filter id="lstar"><feGaussianBlur stdDeviation="1.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Atmospheric glow -->
+  <ellipse cx="138" cy="58" rx="95" ry="72" fill="url(#lglow)"/>
+  <circle cx="138" cy="58" r="55" fill="url(#lhalo)" filter="url(#lf)"/>
+
+  <!-- Moon body (crescent) -->
+  <!-- Full circle first as dark base -->
+  <circle cx="145" cy="58" r="52" fill="#4a1030" opacity="0.35"/>
+  <!-- Lit face (the visible crescent part comes from overlay) -->
+  <path d="M150 10 C185 28 195 68 178 96 C162 122 128 128 104 115 C132 103 150 80 150 55 C150 30 136 14 118 10 C130 4 142 4 150 10Z"
+        fill="url(#lmoon)" opacity="0.82"/>
+
+  <!-- Moon surface subtle texture -->
+  <circle cx="132" cy="38" r="8" fill="#9c3060" opacity="0.15"/>
+  <circle cx="152" cy="62" r="12" fill="#7a2050" opacity="0.12"/>
+  <circle cx="138" cy="80" r="7" fill="#9c3060" opacity="0.10"/>
+
+  <!-- Moon outline glow -->
+  <path d="M150 10 C185 28 195 68 178 96 C162 122 128 128 104 115 C132 103 150 80 150 55 C150 30 136 14 118 10 C130 4 142 4 150 10Z"
+        fill="none" stroke="#f0b0c8" stroke-width="1" opacity="0.45"/>
+
+  <!-- Rose petals (stylised) -->
+  <ellipse cx="92" cy="88" rx="10" ry="7" fill="#c06080" opacity="0.55" transform="rotate(-20 92 88)"/>
+  <ellipse cx="100" cy="82" rx="9" ry="6" fill="#d07090" opacity="0.5" transform="rotate(15 100 82)"/>
+  <ellipse cx="88" cy="80" rx="8" ry="6" fill="#b85070" opacity="0.48" transform="rotate(-40 88 80)"/>
+  <ellipse cx="98" cy="92" rx="8" ry="5" fill="#c86080" opacity="0.45" transform="rotate(30 98 92)"/>
+  <circle cx="94" cy="86" r="5" fill="#f0a0b8" opacity="0.5"/>
+  <circle cx="94" cy="86" r="2.5" fill="#ffe0ec" opacity="0.7"/>
+
+  <!-- Stars (sparkly with glow) -->
+  <circle cx="90" cy="22" r="3.5" fill="#f8c0d8" filter="url(#lstar)" opacity="0.8"/>
+  <circle cx="175" cy="18" r="2.5" fill="#f8c0d8" filter="url(#lstar)" opacity="0.7"/>
+  <circle cx="192" cy="50" r="3" fill="#f8c0d8" filter="url(#lstar)" opacity="0.65"/>
+  <circle cx="80" cy="50" r="2" fill="#f8c0d8" opacity="0.6"/>
+  <circle cx="188" cy="80" r="2" fill="#f8c0d8" opacity="0.55"/>
+
+  <!-- 4-pointed star accent -->
+  <path d="M176 14 L178 8 L180 14 L186 16 L180 18 L178 24 L176 18 L170 16Z"
+        fill="#f8d0e8" opacity="0.65"/>
+</svg>

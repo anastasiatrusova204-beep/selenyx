@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140">
+  <defs>
+    <radialGradient id="pnebula" cx="52%" cy="44%" r="62%">
+      <stop offset="0%" stop-color="#9878d8" stop-opacity="0.48"/>
+      <stop offset="55%" stop-color="#4830a0" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#1a0860" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pneb2" cx="35%" cy="60%" r="45%">
+      <stop offset="0%" stop-color="#6040c0" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#200880" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="pstar">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pbig">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Nebula atmospheres -->
+  <ellipse cx="135" cy="62" rx="92" ry="70" fill="url(#pnebula)"/>
+  <ellipse cx="105" cy="78" rx="65" ry="50" fill="url(#pneb2)"/>
+
+  <!-- Constellation lines -->
+  <line x1="92"  y1="32"  x2="138" y2="16"  stroke="#9080d0" stroke-width="0.9" opacity="0.45"/>
+  <line x1="138" y1="16"  x2="175" y2="40"  stroke="#9080d0" stroke-width="0.9" opacity="0.45"/>
+  <line x1="175" y1="40"  x2="165" y2="80"  stroke="#9080d0" stroke-width="0.9" opacity="0.45"/>
+  <line x1="165" y1="80"  x2="128" y2="98"  stroke="#9080d0" stroke-width="0.9" opacity="0.42"/>
+  <line x1="128" y1="98"  x2="92"  y2="32"  stroke="#9080d0" stroke-width="0.7" opacity="0.25"/>
+  <line x1="138" y1="16"  x2="165" y2="80"  stroke="#7060b0" stroke-width="0.6" opacity="0.2"/>
+
+  <!-- Extra constellation lines -->
+  <line x1="92"  y1="32"  x2="128" y2="98"  stroke="#7060b0" stroke-width="0.5" opacity="0.18"/>
+
+  <!-- Main constellation stars -->
+  <circle cx="92"  cy="32"  r="5.5" fill="#c0b0f0" filter="url(#pstar)" opacity="0.85"/>
+  <circle cx="138" cy="16"  r="4"   fill="#d8c8ff" filter="url(#pstar)" opacity="0.8"/>
+  <circle cx="175" cy="40"  r="6.5" fill="#b8a8e8" filter="url(#pbig)"  opacity="0.8"/>
+  <circle cx="165" cy="80"  r="4.5" fill="#c0b0f0" filter="url(#pstar)" opacity="0.75"/>
+  <circle cx="128" cy="98"  r="3.5" fill="#b8a8e8" filter="url(#pstar)" opacity="0.72"/>
+
+  <!-- Background tiny stars (scattered) -->
+  <circle cx="78"  cy="18"  r="1.2" fill="#d0c8f8" opacity="0.55"/>
+  <circle cx="108" cy="10"  r="1"   fill="#d0c8f8" opacity="0.5"/>
+  <circle cx="155" cy="8"   r="1.5" fill="#d0c8f8" opacity="0.52"/>
+  <circle cx="192" cy="28"  r="1.2" fill="#d0c8f8" opacity="0.48"/>
+  <circle cx="200" cy="58"  r="1"   fill="#d0c8f8" opacity="0.45"/>
+  <circle cx="188" cy="95"  r="1.3" fill="#d0c8f8" opacity="0.45"/>
+  <circle cx="82"  cy="68"  r="1.5" fill="#d0c8f8" opacity="0.48"/>
+  <circle cx="72"  cy="92"  r="1"   fill="#d0c8f8" opacity="0.4"/>
+  <circle cx="148" cy="55"  r="1.2" fill="#c0b8f0" opacity="0.42"/>
+  <circle cx="112" cy="48"  r="1"   fill="#d0c8f8" opacity="0.38"/>
+
+  <!-- Large central accent star (4-pointed) -->
+  <path d="M175 32 L177 24 L179 32 L187 34 L179 36 L177 44 L175 36 L167 34Z"
+        fill="#e8d8ff" filter="url(#pstar)" opacity="0.75"/>
+</svg>
