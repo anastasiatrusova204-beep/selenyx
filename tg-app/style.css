@@ -1035,119 +1035,220 @@ select.form-input { cursor: pointer; }
 .compat-text { font-size: 13px; color: var(--text-sub); line-height: 1.65; }
 
 /* ─── 17. ВКЛАДКА ОРАКУЛ ────────────────────────────────── */
-.oracle-pane .pane-scroll { align-items: center; }
+
+/* Тёмный мистический фон — с первого момента, как открылась вкладка */
+.tab-pane[data-tab="oracle"] {
+  background: radial-gradient(ellipse at 50% 30%, #1e1630 0%, #0e0c18 55%, #18130a 100%);
+}
+
+.oracle-pane {
+  align-items: center;
+  position: relative;
+  background: transparent;
+}
+
+/* Звёздное небо — декоративные точки */
+.oracle-pane::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,215,0,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 38% 8%,  rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 62% 22%, rgba(255,215,0,0.5) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 80% 12%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 38%, rgba(255,215,0,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 5%  52%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 27% 68%, rgba(255,215,0,0.4) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 72% 55%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 48% 78%, rgba(255,215,0,0.45) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 88% 72%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 20% 88%, rgba(255,215,0,0.35) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 92%, rgba(255,255,255,0.3) 0%, transparent 100%);
+  animation: starTwinkle 5s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* Section title/sub переопределяем для тёмного фона */
+.tab-pane[data-tab="oracle"] .section-title { color: rgba(245,234,216,0.9); }
+.tab-pane[data-tab="oracle"] .section-sub   { color: rgba(245,234,216,0.4); }
 
 /* ── Cookie wrap ── */
 .oracle-cookie-wrap {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 48px 0; gap: 12px;
+  justify-content: center; padding: 40px 0 32px; gap: 16px;
+  position: relative; z-index: 1;
+}
+
+/* Ambient glow ring */
+.oracle-cookie-wrap::before {
+  content: '';
+  position: absolute;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,169,110,0.18) 0%, rgba(200,169,110,0.05) 50%, transparent 70%);
+  animation: cookieGlow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes cookieGlow {
+  0%, 100% { transform: scale(0.85); opacity: 0.6; }
+  50%       { transform: scale(1.15); opacity: 1; }
 }
 
 .oracle-hint {
-  font-size: 13px; color: var(--text-hint); letter-spacing: 0.04em;
+  font-size: 13px; color: rgba(245,234,216,0.45); letter-spacing: 0.04em;
 }
 .oracle-hint-sub {
-  font-size: 11px; color: var(--gold); letter-spacing: 0.08em;
-  text-transform: uppercase; opacity: 0.7;
-  animation: oraclePulseText 2s ease-in-out infinite;
+  font-size: 11px; color: #d4a04a; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: oraclePulseText 2.2s ease-in-out infinite;
 }
 
 .oracle-cookie {
-  font-size: 88px; line-height: 1; cursor: pointer;
+  font-size: 96px; line-height: 1; cursor: pointer;
   animation: cookieSway 2.8s ease-in-out infinite;
-  filter: drop-shadow(0 6px 24px rgba(200,169,110,0.5));
-  transition: transform 200ms ease; display: block;
-  position: relative;
+  filter: drop-shadow(0 0 32px rgba(200,169,110,0.7)) drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+  transition: filter 200ms ease; display: block;
+  position: relative; z-index: 1;
 }
-.oracle-cookie:active { transform: scale(0.88); }
-.oracle-cookie.cracking { animation: cookieCrack 0.35s ease forwards; }
+.oracle-cookie:active { filter: drop-shadow(0 0 56px rgba(255,215,0,0.9)); }
+.oracle-cookie.cracking { animation: cookieCrack 0.4s ease forwards; }
 
 /* ── Вуаль-оверлей ── */
 .oracle-veil {
   position: fixed; inset: 0; z-index: 50;
-  background: linear-gradient(160deg, #1a1425 0%, #0e0c18 60%, #1c1508 100%);
+  background: radial-gradient(ellipse at 50% 40%, #1e1630 0%, #0e0c18 55%, #18130a 100%);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   padding: 32px 24px;
-  animation: veilReveal 1.1s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation: veilReveal 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
 }
 .oracle-veil.hidden { display: none; }
 
 @keyframes veilReveal {
-  0%   { clip-path: inset(100% 0 0 0); opacity: 0; }
-  30%  { opacity: 1; }
-  100% { clip-path: inset(0% 0 0 0);   opacity: 1; }
+  0%   { opacity: 0; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Вспышка при тапе ── */
+.oracle-flash {
+  position: fixed; left: 50%; top: 45%;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: rgba(255,240,180,0.95);
+  transform: translate(-50%,-50%);
+  animation: flashBurst 0.55s cubic-bezier(0.2,0,0.4,1) forwards;
+  z-index: 55; pointer-events: none;
+}
+
+@keyframes flashBurst {
+  0%   { transform: translate(-50%,-50%) scale(1);  opacity: 1; }
+  25%  { transform: translate(-50%,-50%) scale(20); opacity: 0.85; }
+  100% { transform: translate(-50%,-50%) scale(55); opacity: 0; }
 }
 
 /* ── Частицы ── */
 .oracle-particles {
-  position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 51;
+  position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 54;
 }
 .oracle-particle {
   position: absolute;
-  left: 50%; top: 50%;
+  left: 50%; top: 45%;
   width: var(--size, 8px); height: var(--size, 8px);
   border-radius: 50%;
-  background: var(--color, var(--gold));
-  animation: particleFly var(--dur, 1.1s) cubic-bezier(0.2,0.8,0.4,1) var(--delay, 0s) forwards;
+  background: var(--color, #FFD700);
+  animation: particleFly var(--dur, 1.1s) cubic-bezier(0.15,0.85,0.3,1) var(--delay, 0s) forwards;
+  opacity: 0;
+}
+/* Вытянутые искры */
+.oracle-spark {
+  position: absolute;
+  left: 50%; top: 45%;
+  width: var(--size, 3px); height: calc(var(--size, 3px) * 4);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, var(--color, #FFD700), transparent);
+  transform-origin: center top;
+  animation: sparkFly var(--dur, 0.9s) cubic-bezier(0.1,0.85,0.2,1) var(--delay, 0s) forwards;
   opacity: 0;
 }
 
 @keyframes particleFly {
-  0%   { transform: translate(-50%,-50%) scale(1.5); opacity: 1; }
-  60%  { opacity: 0.8; }
-  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+  0%   { transform: translate(-50%,-50%) scale(2) rotate(0deg); opacity: 1; }
+  35%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0) rotate(var(--rot,120deg)); opacity: 0; }
+}
+
+@keyframes sparkFly {
+  0%   { transform: translate(-50%,-50%) rotate(var(--rot,0deg)) scaleY(1.5); opacity: 1; }
+  40%  { opacity: 0.9; }
+  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot,0deg)) scaleY(0); opacity: 0; }
 }
 
 /* ── Контент внутри вуали ── */
 .oracle-reveal-content {
   display: flex; flex-direction: column; align-items: center;
-  gap: 20px; text-align: center; width: 100%; max-width: 320px;
-  opacity: 0; animation: contentAppear 0.5s ease 0.9s forwards;
+  gap: 24px; text-align: center; width: 100%; max-width: 320px;
+  opacity: 0; animation: contentAppear 0.6s ease 0.7s forwards;
 }
 
 @keyframes contentAppear {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .oracle-reveal-label {
-  font-size: 11px; color: var(--gold); letter-spacing: 0.12em;
+  font-size: 11px; color: #d4a04a; letter-spacing: 0.14em;
   text-transform: uppercase; font-weight: 600;
 }
 
 .oracle-text {
   font-family: var(--font-display);
-  font-size: 24px; font-style: italic;
-  color: #f5ead8; line-height: 1.55;
-  min-height: 2em;
+  font-size: 26px; font-style: italic;
+  color: #f5ead8; line-height: 1.6;
+  min-height: 3em;
+}
+
+/* Мигающий курсор при печати */
+.oracle-cursor {
+  display: inline-block;
+  width: 2px; height: 1.1em;
+  background: #d4a04a;
+  margin-left: 4px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s step-end infinite;
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; } 50% { opacity: 0; }
 }
 
 .oracle-context {
-  font-size: 12px; color: rgba(245,234,216,0.5); letter-spacing: 0.04em;
+  font-size: 12px; color: rgba(245,234,216,0.45); letter-spacing: 0.05em;
+  opacity: 0; animation: contentAppear 0.5s ease 1.0s forwards;
 }
 
 .oracle-share-btn {
-  margin-top: 8px; padding: 12px 28px;
-  border-radius: 24px; border: 1px solid var(--gold);
-  color: var(--gold); font-size: 13px; font-weight: 500;
-  background: transparent; letter-spacing: 0.04em;
-  opacity: 0; animation: contentAppear 0.4s ease 1.8s forwards;
-  transition: background var(--t);
+  margin-top: 4px; padding: 13px 32px;
+  border-radius: 28px; border: 1px solid rgba(212,160,74,0.6);
+  color: #d4a04a; font-size: 13px; font-weight: 500;
+  background: rgba(212,160,74,0.08); letter-spacing: 0.06em;
+  opacity: 0; animation: contentAppear 0.5s ease 2.8s forwards;
+  transition: background 200ms ease, border-color 200ms ease;
 }
-.oracle-share-btn:active { background: rgba(200,169,110,0.1); }
+.oracle-share-btn:active { background: rgba(212,160,74,0.18); border-color: rgba(212,160,74,0.9); }
 
 /* ── Анимации печеньки ── */
 @keyframes oraclePulseText {
-  0%, 100% { opacity: 0.7; } 50% { opacity: 1; }
+  0%, 100% { opacity: 0.5; } 50% { opacity: 1; }
 }
 
 @keyframes cookieCrack {
-  0%   { transform: scale(1) rotate(0deg); filter: drop-shadow(0 6px 24px rgba(200,169,110,0.5)); }
-  20%  { transform: scale(1.35) rotate(-12deg); filter: drop-shadow(0 0 40px rgba(255,215,0,0.9)); }
-  50%  { transform: scale(1.1) rotate(8deg); filter: drop-shadow(0 0 60px rgba(255,215,0,1)); }
-  75%  { transform: scale(0.5) rotate(-5deg); opacity: 0.6; }
-  100% { transform: scale(0) rotate(20deg); opacity: 0; }
+  0%   { transform: scale(1) rotate(0deg);   filter: drop-shadow(0 0 32px rgba(200,169,110,0.7)); }
+  15%  { transform: scale(1.4) rotate(-8deg); filter: drop-shadow(0 0 60px rgba(255,215,0,1)); }
+  45%  { transform: scale(1.15) rotate(6deg); filter: drop-shadow(0 0 80px rgba(255,255,255,0.9)); }
+  70%  { transform: scale(0.4) rotate(-10deg); opacity: 0.5; }
+  100% { transform: scale(0) rotate(25deg); opacity: 0; }
 }
 
 /* ─── 18. ОВЕРЛЕЙ НАСТРОЙКИ ─────────────────────────────── */
