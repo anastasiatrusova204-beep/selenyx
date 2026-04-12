@@ -142,10 +142,29 @@ ul { list-style: none; }
 }
 
 /* ─── 7. ОНБОРДИНГ ──────────────────────────────────────── */
-#onboarding-screen { z-index: 9; }
+#onboarding-screen { z-index: 9; overflow: hidden; }
+
+/* Фоновые золотые звёзды */
+#onboarding-screen::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 8%  12%, rgba(176,125,44,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 22% 28%, rgba(176,125,44,0.35) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 78% 10%, rgba(176,125,44,0.45) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 90% 32%, rgba(176,125,44,0.3)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 8%,  rgba(176,125,44,0.5)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 10% 55%, rgba(176,125,44,0.3)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 88% 65%, rgba(176,125,44,0.4)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 40% 80%, rgba(176,125,44,0.35) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 68% 88%, rgba(176,125,44,0.45) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 25% 92%, rgba(176,125,44,0.3)  0%, transparent 100%);
+  animation: starTwinkle 6s ease-in-out infinite;
+}
 
 .ob-container {
   flex: 1; display: flex; flex-direction: column; overflow-y: auto;
+  position: relative; z-index: 1;
 }
 
 .ob-slide {
@@ -154,16 +173,32 @@ ul { list-style: none; }
   padding: 32px 28px 16px; gap: 18px; text-align: center;
 }
 
-.ob-illustration { font-size: 64px; line-height: 1; margin-bottom: 4px; }
+@keyframes obSlideIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ob-illustration {
+  font-size: 72px; line-height: 1; margin-bottom: 4px;
+  filter: drop-shadow(0 0 20px rgba(176,125,44,0.45));
+  animation: obIllustIn 0.5s ease both;
+}
+
+@keyframes obIllustIn {
+  from { opacity: 0; transform: scale(0.8) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 .ob-title {
   font-family: var(--font-display);
   font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.2;
+  animation: obSlideIn 0.45s 0.1s ease both;
 }
 
 .ob-text {
   font-size: 15px; color: var(--text-sub); line-height: 1.65;
   max-width: 300px;
+  animation: obSlideIn 0.45s 0.2s ease both;
 }
 
 .ob-list {

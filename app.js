@@ -359,7 +359,22 @@ function initOnboarding() {
 function showObSlide(idx) {
   for (let i = 0; i < OB_COUNT; i++) {
     const el = $(`ob-slide-${i}`);
-    if (el) el.classList.toggle('hidden', i !== idx);
+    if (!el) continue;
+    if (i === idx) {
+      el.classList.remove('hidden');
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = 'obSlideIn 0.28s ease forwards';
+      // Сбросить анимации дочерних элементов для повторного воспроизведения
+      el.querySelectorAll('.ob-illustration, .ob-title, .ob-text').forEach(child => {
+        child.style.animation = 'none';
+        child.offsetHeight;
+        child.style.animation = '';
+      });
+    } else {
+      el.classList.add('hidden');
+      el.style.animation = '';
+    }
   }
   document.querySelectorAll('.ob-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
   const nextBtn  = $('ob-next');
