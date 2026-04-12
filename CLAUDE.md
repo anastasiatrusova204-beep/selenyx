@@ -1,13 +1,15 @@
 # tg-app/CLAUDE.md — документация Mini App Selenyx
 
-## Файлы
+> Обновлён: 2026-04-12
 
-| Файл | Назначение |
-|------|-----------|
-| `index.html` | HTML-структура: сплэш, онбординг, 5 вкладок, оверлей настроек |
-| `style.css` | Все стили: CSS-переменные, компоненты, анимации, тёмная тема |
-| `data.js` | Контентные данные + вспомогательные функции расчётов |
-| `app.js` | Логика навигации, Telegram SDK, рендеринг вкладок |
+## Актуальные версии
+
+| Файл | Версия | Назначение |
+|------|--------|-----------|
+| `index.html` | — | HTML-структура: сплэш, онбординг, вкладки, оверлеи |
+| `style.css` | v=33 | Стили, анимации, тёмная тема |
+| `data.js` | v=17 | Контентные данные + расчёты |
+| `app.js` | v=51 | Логика навигации, Telegram SDK, рендеринг |
 
 ---
 
@@ -15,121 +17,109 @@
 
 ```
 index.html загружает data.js → app.js
-app.js инициализирует tg (Telegram Web App SDK)
 DOMContentLoaded → initSplash()
-  ├── если localStorage.userSign → showScreen('main') → initMain()
+  ├── localStorage.userSign → showScreen('main') → initMain()
   └── иначе → showScreen('onboarding') → initOnboarding()
 ```
 
-### Экраны (в index.html)
-- `#splash-screen` — логотип, 1.6 сек
-- `#onboarding-screen` — 3 слайда (приветствие, что внутри, выбор знака)
-- `#main-screen` — хедер + 5 вкладок + таббар
-
-### Оверлеи
-- `#settings-overlay` — выбор знака и времени уведомлений
+**Экраны:** `#splash-screen` → `#onboarding-screen` (4 слайда) → `#main-screen`  
+**Оверлеи:** `#settings-overlay`, `#knowledge-overlay`
 
 ---
 
-## Вкладки
+## Вкладки (4 активных)
 
-| data-tab | Функция рендера | Кэш |
-|----------|-----------------|-----|
-| `today`  | `renderToday()` | `ssGet('td')` |
-| `moon`   | `renderMoon()` | `ssGet('md')` |
-| `chart`  | `renderChart()` | `localStorage.userBirth` |
-| `compat` | `renderCompat()` | нет (быстро) |
-| `oracle` | `renderOracle()` | нет (случайно) |
+| data-tab | Функция | Кэш |
+|----------|---------|-----|
+| `today` | `renderToday()` → `applyTodayData()` | `ssGet('td')` |
+| `moon` | `renderMoon()` → `applyMoonData()` | `ssGet('md')` |
+| `month` | `renderMonth()` | нет |
+| `oracle` | `renderOracle()` | нет |
+
+`chart` и `compat` — скрыты (платная версия).
+
+---
+
+## Контентная архитектура (важно — не путать источники)
+
+| Вкладка / блок | Источник данных |
+|----------------|----------------|
+| День — карточка прогноза | `ZODIAC_PHASE_TIPS[sign][phase]` |
+| День — домены (аккордеон) | `DOMAINS[sign][domain]` |
+| День — «Избегай» | `PHASE_TIPS[phase].avoid` |
+| Луна — энергия знака | `MOON_SIGN_ENERGY[sign]` |
+| Луна — лунный день | `LUNAR_DAYS[day]` |
+| Оракул | `PREDICTIONS[idx]` — детерминированная ротация по дню |
+| Нумерология | `NUMEROLOGY[1–9]` — поля: text/good/avoid/practice/planet |
+
+**Оракул — формула выбора:**
+```javascript
+const predIdx = ((lunarDay - 1) * 13 + signIdx * 3 + weekday) % PREDICTIONS.length;
+```
 
 ---
 
 ## Где менять контент
 
-### Знаки, фазы Луны, элементы
-→ `data.js`, массив `SIGNS` (строка ~5)
-
-### Советы по фазам (хорошо/избегай)
-→ `data.js`, объект `PHASE_TIPS` (~строка 70)
-
-### Подсказки по дням недели
-→ `data.js`, объект `WEEKDAY_HINTS` (~строка 140) — ключи 0–6 (0=воскресенье)
-
-### Энергия Луны в знаке
-→ `data.js`, объект `MOON_SIGN_ENERGY` (~строка 155)
-
-### Домены по знаку (здоровье/работа/любовь/психология)
-→ `data.js`, объект `DOMAINS` (~строка 180) — ключ = id знака
-
-### Предсказания оракула
-→ `data.js`, массив `PREDICTIONS` (~строка 100) — добавляй строки свободно
-
-### Совместимость
-→ `data.js`, объект `COMPAT` (~строка 120) — ключ = `${elem1}_${elem2}`
-
-### Лунные дни (символ, энергия, практика)
-→ `data.js`, объект `LUNAR_DAYS` (~строка 215) — ключи 1–30
-
-### Нумерология
-→ `data.js`, объект `NUMEROLOGY` (~строка 130) — ключи 1–9
+| Что | Файл | Где |
+|-----|------|-----|
+| Предсказания оракула | `data.js` | массив `PREDICTIONS` |
+| Советы для вкладки День | `data.js` | объект `ZODIAC_PHASE_TIPS[sign][phase]` |
+| Домены (здоровье/работа/любовь/психология) | `data.js` | объект `DOMAINS[sign][domain]` |
+| Энергия Луны в знаке | `data.js` | объект `MOON_SIGN_ENERGY[sign]` |
+| Лунные дни 1–30 | `data.js` | объект `LUNAR_DAYS[day]` |
+| Нумерология | `data.js` | объект `NUMEROLOGY[1–9]` |
+| Фазы Луны (хорошо/избегай) | `data.js` | объект `PHASE_TIPS[phase]` |
 
 ---
 
-## Сессионный кэш (sessionStorage)
+## Кэш и версии
 
-Ключи имеют дату-суффикс через `_dk(k)`:
-- `td_ДД.ММ.ГГГГ` — данные вкладки «День»
-- `md_ДД.ММ.ГГГГ` — данные вкладки «Луна»
+**sessionStorage** — ключ `_dk(k)` = `k + '_' + _V + '_' + дата`:
+- Протухает после полуночи
+- При изменении структуры данных — бампать `_V` в начале `app.js`
+- Текущий: `const _V = 'v7'`
 
-После полуночи ключ автоматически не совпадёт → свежий расчёт.
-
----
-
-## localStorage (постоянное хранилище)
-
-- `userSign` — id знака зодиака (напр. `'aries'`)
-- `userBirth` — JSON `{date: 'ДД.ММ.ГГГГ', time: 'ЧЧ:ММ'}`
-- `notifyTime` — строка времени, напр. `'09:00'`
+**Инвалидация при деплое** — бампать версии в `index.html`:
+```html
+<script src="data.js?v=17"></script>
+<script src="app.js?v=51"></script>
+```
 
 ---
 
-## Тёмная тема
+## BackButton — паттерн управления
 
-`style.css` использует класс `.dark` на `<html>`.
-В `app.js` функция `applyTheme()` добавляет/убирает класс по `tg.colorScheme`.
+```javascript
+// Переключение обработчика при входе в оверлей:
+tg.BackButton.offClick(старый);
+tg.BackButton.onClick(новый);
+
+// Например — при открытии статьи в базе знаний:
+tg.BackButton.offClick(closeKnowledge);
+tg.BackButton.onClick(_kbBackToList);  // → возврат к списку
+```
 
 ---
 
 ## Telegram SDK
 
 ```javascript
-tg.ready()          // вызывается в app.js до всего
-tg.expand()         // разворачивает на весь экран
-tg.HapticFeedback.impactOccurred('light')   // лёгкая вибрация
+tg.ready()
+tg.expand()
+tg.HapticFeedback.impactOccurred('light')
 tg.HapticFeedback.notificationOccurred('success')
-tg.BackButton.show() / .hide() / .onClick()
+tg.BackButton.show() / .hide() / .onClick() / .offClick()
 tg.showPopup({ message, buttons }, callback)
 ```
 
 ---
 
-## Как открыть в браузере (без Telegram)
+## Локальный запуск (без Telegram)
 
-1. Перейти в папку `tg-app/`
-2. Открыть `index.html` через live-server или Python:
-   ```bash
-   python3 -m http.server 8080 --directory tg-app/
-   # → http://localhost:8080
-   ```
-3. SDK-заглушка в `app.js` эмулирует `window.Telegram.WebApp` — всё работает.
+```bash
+python3 -m http.server 8080 --directory tg-app/
+# → http://localhost:8080
+```
 
----
-
-## Что НЕ в первой версии
-
-- Реальные API-запросы к серверу (данные из data.js)
-- Push-уведомления через Railway
-- Авторизация через Telegram HMAC
-- Анимация взрыва частиц
-- Premium gates / Telegram Stars оплата
-
-Это standalone-версия для тестирования UX вне сервера.
+SDK-заглушка в `app.js` эмулирует `window.Telegram.WebApp`.
