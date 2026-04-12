@@ -1,48 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 150">
   <defs>
-    <radialGradient id="hbg" cx="65%" cy="35%" r="60%">
-      <stop offset="0%" stop-color="#7ec89a" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#2d6e45" stop-opacity="0"/>
+    <radialGradient id="bg" cx="65%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#7ec89a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#1a4a28" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="hglow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#a8e8b8" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#3a7a50" stop-opacity="0"/>
+    <radialGradient id="bg2" cx="80%" cy="70%" r="45%">
+      <stop offset="0%" stop-color="#a8e8b8" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#2a6040" stop-opacity="0"/>
     </radialGradient>
-    <filter id="hf"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <radialGradient id="leafG1" cx="30%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#8acc9a"/>
+      <stop offset="55%" stop-color="#3a8050"/>
+      <stop offset="100%" stop-color="#1e4a2c"/>
+    </radialGradient>
+    <radialGradient id="leafG2" cx="25%" cy="25%" r="75%">
+      <stop offset="0%" stop-color="#6ab882"/>
+      <stop offset="60%" stop-color="#2d6e45"/>
+      <stop offset="100%" stop-color="#163a22"/>
+    </radialGradient>
+    <filter id="gf"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="gf2"><feGaussianBlur stdDeviation="2"/></filter>
   </defs>
 
-  <!-- Atmospheric glow -->
-  <ellipse cx="148" cy="55" rx="88" ry="72" fill="url(#hbg)"/>
-  <ellipse cx="158" cy="48" rx="50" ry="42" fill="url(#hglow)" filter="url(#hf)"/>
+  <!-- Атмосферный фон -->
+  <ellipse cx="165" cy="58" rx="100" ry="82" fill="url(#bg)"/>
+  <ellipse cx="185" cy="90" rx="60" ry="48" fill="url(#bg2)" filter="url(#gf)"/>
 
-  <!-- Back large leaf -->
-  <path d="M160 8 C192 22 202 62 186 92 C170 120 135 126 112 112 C140 98 158 72 158 46 C142 70 120 82 98 80 C104 48 130 18 160 8Z"
-        fill="#3d7a52" opacity="0.55"/>
+  <!-- Задний лист (тёмный) -->
+  <path d="M195 6 C228 22 240 62 222 94 C205 124 168 130 144 116 C170 102 186 76 186 50 C168 74 145 86 122 84 C128 52 158 16 195 6Z"
+        fill="#1e5030" opacity="0.5"/>
 
-  <!-- Main leaf -->
-  <path d="M148 14 C178 28 188 65 173 94 C158 120 124 126 102 112 C130 96 145 70 146 46 C130 68 110 78 90 76 C96 45 122 18 148 14Z"
-        fill="#4a9460" opacity="0.75"/>
+  <!-- Основной большой лист -->
+  <path d="M182 10 C218 26 232 70 214 102 C196 132 156 138 130 122 C158 108 175 80 175 52 C156 76 132 88 108 86 C115 52 148 16 182 10Z"
+        fill="url(#leafG1)" opacity="0.82"/>
 
-  <!-- Leaf veins -->
-  <path d="M146 46 Q132 72 124 118" stroke="#2a6040" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.6"/>
-  <path d="M146 46 Q158 65 165 80" stroke="#3a7250" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.4"/>
-  <path d="M138 62 Q148 68 155 62" stroke="#3a7250" stroke-width="0.8" fill="none" opacity="0.35"/>
-  <path d="M132 76 Q138 72 142 68" stroke="#3a7250" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <!-- Прожилки листа -->
+  <path d="M175 52 Q158 84 150 136" stroke="#1e4828" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.65"/>
+  <path d="M175 52 Q188 74 198 90" stroke="#2a5e38" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.45"/>
+  <path d="M168 70 Q178 76 184 70" stroke="#2a5e38" stroke-width="1" fill="none" opacity="0.38"/>
+  <path d="M161 86 Q168 82 173 78" stroke="#2a5e38" stroke-width="1" fill="none" opacity="0.35"/>
+  <path d="M155 100 Q160 96 165 92" stroke="#2a5e38" stroke-width="0.9" fill="none" opacity="0.3"/>
 
-  <!-- Branch left -->
-  <path d="M112 105 C108 88 118 70 128 80Z" fill="#5aaa70" opacity="0.55"/>
+  <!-- Второй лист (перекрывающий) -->
+  <path d="M148 18 C178 32 190 72 175 100 C160 128 124 134 102 118 C128 104 142 78 142 52 C124 74 103 84 84 82 C90 50 120 18 148 18Z"
+        fill="url(#leafG2)" opacity="0.62"/>
+  <path d="M142 52 Q130 76 126 125" stroke="#163a22" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.5"/>
 
-  <!-- Small herb sprigs -->
-  <path d="M92 58 C82 46 76 52 86 64Z" fill="#6ab878" opacity="0.5"/>
-  <path d="M88 72 C78 62 72 70 84 80Z" fill="#5aaa68" opacity="0.45"/>
+  <!-- Маленькие веточки снизу -->
+  <path d="M148 128 Q144 112 152 118Z" fill="#4a9460" opacity="0.6"/>
+  <path d="M135 132 Q130 115 140 122Z" fill="#5aaa70" opacity="0.55"/>
+  <path d="M120 120 C108 108 102 116 112 126Z" fill="#3a8050" opacity="0.5"/>
 
-  <!-- Dewdrops -->
-  <circle cx="155" cy="42" r="3.5" fill="white" opacity="0.45"/>
-  <circle cx="170" cy="65" r="2.5" fill="white" opacity="0.35"/>
-  <circle cx="140" cy="82" r="2" fill="white" opacity="0.38"/>
-  <circle cx="160" cy="88" r="1.8" fill="white" opacity="0.3"/>
+  <!-- Трава/мелкие ростки -->
+  <path d="M110 134 Q114 118 118 126" stroke="#4a9060" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <path d="M122 138 Q124 122 130 130" stroke="#4a9060" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.5"/>
 
-  <!-- Ground herbs -->
-  <path d="M108 118 Q112 105 116 110" stroke="#4a9460" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
-  <path d="M118 120 Q120 108 126 114" stroke="#4a9460" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.45"/>
+  <!-- Росинки -->
+  <circle cx="186" cy="46" r="4"   fill="white" opacity="0.48"/>
+  <circle cx="202" cy="68" r="2.8" fill="white" opacity="0.38"/>
+  <circle cx="176" cy="82" r="3.2" fill="white" opacity="0.42"/>
+  <circle cx="195" cy="96" r="2"   fill="white" opacity="0.35"/>
+  <circle cx="183" cy="48" r="1.5" fill="white" opacity="0.55"/>
 </svg>

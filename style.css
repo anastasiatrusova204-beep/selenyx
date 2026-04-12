@@ -799,14 +799,14 @@ ul { list-style: none; }
   z-index: -1;
   pointer-events: none;
   background-image: var(--domain-svg);
-  background-size: 160px 105px;
-  background-position: right -8px center;
+  background-size: 55% auto;
+  background-position: right 0 center;
   background-repeat: no-repeat;
   opacity: 0;
   transition: opacity 600ms ease;
 }
 .domain-card:not(.open)::after {
-  opacity: 0.55;
+  opacity: 0.65;
   animation: domainSvgFloat 9s ease-in-out infinite 1.2s;
 }
 
@@ -833,9 +833,9 @@ ul { list-style: none; }
 .tab-pane[data-tab="today"]::before {
   content: '';
   position: absolute;
-  top: 45%; left: 50%;
+  top: 42%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 260px; height: 260px;
+  width: 320px; height: 320px;
   background-image: var(--phase-bg, none);
   background-size: contain;
   background-repeat: no-repeat;
@@ -844,7 +844,7 @@ ul { list-style: none; }
   z-index: -1;
   transition: opacity 1.8s ease;
 }
-.tab-pane[data-tab="today"][data-phase-group]::before { opacity: 0.055; }
+.tab-pane[data-tab="today"][data-phase-group]::before { opacity: 0.10; }
 
 /* Фоновые иллюстрации по фазе луны */
 .tab-pane[data-tab="today"][data-phase-group="new"]::before    { --phase-bg: url('img/phase-new.svg'); }
