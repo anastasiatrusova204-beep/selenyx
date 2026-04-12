@@ -627,8 +627,13 @@ function applyTodayData(data) {
     const accordion = $('domain-accordion');
     if (accordion) {
       const primary = accordion.querySelector(`.domain-card[data-domain="${primaryDomain}"]`);
-      if (primary && accordion.firstElementChild !== primary) {
-        accordion.insertBefore(primary, accordion.firstElementChild);
+      // Убрать старый primary-маркер если был
+      accordion.querySelectorAll('.domain-primary').forEach(c => c.classList.remove('domain-primary'));
+      if (primary) {
+        if (accordion.firstElementChild !== primary) {
+          accordion.insertBefore(primary, accordion.firstElementChild);
+        }
+        primary.classList.add('domain-primary');
       }
     }
   }
