@@ -624,6 +624,16 @@ function applyTodayData(data) {
   const deg = moon.moonLon != null ? ` ${Math.floor(moon.moonLon % 30)}°` : '';
   setText('today-moon-inline', `${moon.emoji} ${moon.phaseName} · Луна в ${moon.signRu}${deg}`);
 
+  // Фоновая иллюстрация по фазе луны
+  const _PHASE_GROUPS = {
+    new: 'new', waning_cresc: 'new', last_quarter: 'waning',
+    waxing_cresc: 'waxing', first_quarter: 'waxing',
+    waxing_gibb: 'full', full: 'full',
+    waning_gibb: 'waning'
+  };
+  const todayPane = document.querySelector('.tab-pane[data-tab="today"]');
+  if (todayPane) todayPane.setAttribute('data-phase-group', _PHASE_GROUPS[moon.phase] || 'full');
+
   // Goal line
   const _GOAL_FOCUS = {
     relationships: '❤️ Фокус: Отношения',

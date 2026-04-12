@@ -751,59 +751,120 @@ ul { list-style: none; }
   transition: border-color 250ms ease, box-shadow 250ms ease;
 }
 
+/* Цвета и орбы + SVG-иллюстрации на плитках */
 .domain-card[data-domain="health"] {
   --domain-color: #4a8c5c; --domain-bg: rgba(74,140,92,0.07);
   --orb1: radial-gradient(ellipse 70% 55% at 85% 25%, rgba(74,140,92,0.28) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 50% 70% at 15% 75%, rgba(120,190,100,0.18) 0%, transparent 60%);
+  /* ботанический лист */
+  --domain-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M65 8 C82 20 88 45 78 68 C68 88 42 92 28 80 C48 72 58 55 60 38 C50 55 38 60 28 62 C30 35 48 12 65 8Z' fill='%234a8c5c'/%3E%3Cpath d='M60 38 L55 92' stroke='%234a8c5c' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M56 68 C46 58 42 63 50 74Z' fill='%234a8c5c'/%3E%3C/svg%3E");
 }
 .domain-card[data-domain="work"] {
   --domain-color: #8c6e2a; --domain-bg: rgba(140,110,42,0.07);
   --orb1: radial-gradient(ellipse 65% 50% at 80% 20%, rgba(200,160,60,0.26) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 55% 65% at 20% 80%, rgba(140,100,30,0.18) 0%, transparent 60%);
+  /* кристалл-гранёный самоцвет */
+  --domain-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,8 82,38 70,88 30,88 18,38' fill='none' stroke='%238c6e2a' stroke-width='2'/%3E%3Cpolygon points='50,8 82,38 50,45' fill='%238c6e2a' opacity='0.35'/%3E%3Cpolygon points='50,8 18,38 50,45' fill='%238c6e2a' opacity='0.22'/%3E%3Cline x1='50' y1='8' x2='36' y2='32' stroke='white' stroke-width='1.5' stroke-linecap='round' opacity='0.45'/%3E%3C/svg%3E");
 }
 .domain-card[data-domain="love"] {
   --domain-color: #9c4060; --domain-bg: rgba(156,64,96,0.07);
   --orb1: radial-gradient(ellipse 72% 52% at 82% 22%, rgba(200,80,120,0.28) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 50% 68% at 18% 78%, rgba(150,50,80,0.20) 0%, transparent 60%);
+  /* серп луны со звёздами */
+  --domain-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M68 12 C88 28 90 58 78 76 C66 92 42 96 26 86 C46 76 58 60 58 42 C58 26 48 14 34 10 C45 6 57 4 68 12Z' fill='%239c4060'/%3E%3Ccircle cx='28' cy='28' r='2.5' fill='%239c4060'/%3E%3Ccircle cx='88' cy='44' r='1.8' fill='%239c4060'/%3E%3Ccircle cx='76' cy='10' r='2.2' fill='%239c4060'/%3E%3C/svg%3E");
 }
 .domain-card[data-domain="psych"] {
   --domain-color: #5a4a8c; --domain-bg: rgba(90,74,140,0.07);
   --orb1: radial-gradient(ellipse 68% 54% at 84% 20%, rgba(120,90,200,0.28) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 52% 66% at 16% 80%, rgba(80,60,150,0.20) 0%, transparent 60%);
+  /* созвездие — точки и линии */
+  --domain-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cline x1='22' y1='32' x2='52' y2='16' stroke='%235a4a8c' stroke-width='1'/%3E%3Cline x1='52' y1='16' x2='80' y2='36' stroke='%235a4a8c' stroke-width='1'/%3E%3Cline x1='80' y1='36' x2='65' y2='66' stroke='%235a4a8c' stroke-width='1'/%3E%3Cline x1='65' y1='66' x2='36' y2='76' stroke='%235a4a8c' stroke-width='1'/%3E%3Ccircle cx='22' cy='32' r='3.5' fill='%235a4a8c'/%3E%3Ccircle cx='52' cy='16' r='2.5' fill='%235a4a8c'/%3E%3Ccircle cx='80' cy='36' r='4' fill='%235a4a8c'/%3E%3Ccircle cx='65' cy='66' r='2.8' fill='%235a4a8c'/%3E%3Ccircle cx='36' cy='76' r='2' fill='%235a4a8c'/%3E%3Ccircle cx='44' cy='50' r='1.2' fill='%235a4a8c'/%3E%3C/svg%3E");
 }
 
-/* Анимированные световые орбы на фоне плитки */
-.domain-card::before,
+/* ── ::before = градиентное свечение (оба орба) ── */
+.domain-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--orb1), var(--orb2);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.domain-card:not(.open)::before {
+  opacity: 1;
+  animation: domainOrbFloat 7s ease-in-out infinite;
+}
+
+/* ── ::after = SVG-иллюстрация по теме домена ── */
 .domain-card::after {
   content: '';
   position: absolute; inset: 0;
   z-index: -1;
   pointer-events: none;
+  background-image: var(--domain-svg);
+  background-size: 115px 115px;
+  background-position: right -10px bottom -10px;
+  background-repeat: no-repeat;
   opacity: 0;
-  transition: opacity 400ms ease;
+  transition: opacity 600ms ease;
 }
-
-.domain-card::before { background: var(--orb1); }
-.domain-card::after  { background: var(--orb2); }
-
-.domain-card:not(.open)::before { opacity: 1; animation: domainOrbFloat  6s ease-in-out infinite; }
-.domain-card:not(.open)::after  { opacity: 1; animation: domainOrbFloat2 8s ease-in-out infinite 1s; }
+.domain-card:not(.open)::after {
+  opacity: 0.25;
+  animation: domainSvgFloat 9s ease-in-out infinite 1.2s;
+}
 
 @keyframes domainOrbFloat {
-  0%   { transform: translate(0, 0)     scale(1); }
-  33%  { transform: translate(-4px, -6px) scale(1.04); }
-  66%  { transform: translate(3px, -3px)  scale(0.97); }
-  100% { transform: translate(0, 0)     scale(1); }
+  0%   { transform: translate(0,0) scale(1); }
+  35%  { transform: translate(-3px,-5px) scale(1.03); }
+  70%  { transform: translate(2px,-2px) scale(0.98); }
+  100% { transform: translate(0,0) scale(1); }
 }
-@keyframes domainOrbFloat2 {
-  0%   { transform: translate(0, 0)     scale(1); }
-  40%  { transform: translate(5px, 4px)  scale(1.05); }
-  70%  { transform: translate(-3px, 7px) scale(0.96); }
-  100% { transform: translate(0, 0)     scale(1); }
+@keyframes domainSvgFloat {
+  0%   { transform: translate(0,0) rotate(0deg); }
+  30%  { transform: translate(-4px,-7px) rotate(-1.5deg); }
+  65%  { transform: translate(3px,-3px) rotate(1deg); }
+  100% { transform: translate(0,0) rotate(0deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .domain-card::before, .domain-card::after { animation: none !important; }
+}
+
+/* ── Фон вкладки «День» — иллюстрация по фазе Луны ── */
+.tab-pane[data-tab="today"] { isolation: isolate; }
+
+.tab-pane[data-tab="today"]::before {
+  content: '';
+  position: absolute;
+  top: 45%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260px; height: 260px;
+  background-image: var(--phase-bg, none);
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 1.8s ease;
+}
+.tab-pane[data-tab="today"][data-phase-group]::before { opacity: 0.055; }
+
+/* Новолуние — тёмный круг, звёздное поле */
+.tab-pane[data-tab="today"][data-phase-group="new"]::before {
+  --phase-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='70' fill='%23222'/%3E%3Ccircle cx='100' cy='100' r='82' fill='none' stroke='%23555' stroke-width='0.8'/%3E%3Ccircle cx='42' cy='52' r='2' fill='%23999'/%3E%3Ccircle cx='162' cy='40' r='1.5' fill='%23999'/%3E%3Ccircle cx='170' cy='155' r='2' fill='%23999'/%3E%3Ccircle cx='35' cy='160' r='1.5' fill='%23999'/%3E%3Ccircle cx='100' cy='18' r='1.8' fill='%23999'/%3E%3Ccircle cx='185' cy='100' r='1.2' fill='%23999'/%3E%3C/svg%3E");
+}
+/* Растущая луна — серп справа */
+.tab-pane[data-tab="today"][data-phase-group="waxing"]::before {
+  --phase-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='70' fill='%23334'/%3E%3Cpath d='M100 30 C140 30 170 62 170 100 C170 138 140 170 100 170 C120 152 130 128 130 100 C130 72 120 48 100 30Z' fill='%23c8b060'/%3E%3C/svg%3E");
+}
+/* Полнолуние — светящийся круг */
+.tab-pane[data-tab="today"][data-phase-group="full"]::before {
+  --phase-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='72' fill='%23c8b060'/%3E%3Ccircle cx='100' cy='100' r='84' fill='none' stroke='%23c8b060' stroke-width='1.5'/%3E%3Ccircle cx='100' cy='100' r='96' fill='none' stroke='%23c8b060' stroke-width='0.8'/%3E%3C/svg%3E");
+}
+/* Убывающая луна — серп слева */
+.tab-pane[data-tab="today"][data-phase-group="waning"]::before {
+  --phase-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='70' fill='%23334'/%3E%3Cpath d='M100 30 C60 30 30 62 30 100 C30 138 60 170 100 170 C80 152 70 128 70 100 C70 72 80 48 100 30Z' fill='%23c8b060'/%3E%3C/svg%3E");
 }
 
 .domain-card.open {
