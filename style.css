@@ -92,6 +92,16 @@ ul { list-style: none; }
   background: var(--bg);
 }
 
+@keyframes screenFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes paneFadeIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── 6. СПЛЭШ ──────────────────────────────────────────── */
 #splash-screen {
   align-items: center; justify-content: center; z-index: 10;
@@ -107,7 +117,7 @@ ul { list-style: none; }
   background: radial-gradient(circle at 35% 35%,
     #fff7d6 0%, #ffd97d 35%, #c8a96e 65%, #8a6a2a 100%);
   box-shadow: 0 0 0 16px var(--gold-dim), 0 0 60px rgba(200,169,110,0.4);
-  animation: moonPulse 3s ease-in-out infinite;
+  animation: splashItemIn 0.5s ease both, moonPulse 3s 0.6s ease-in-out infinite;
   display: flex; align-items: center; justify-content: center;
   font-size: 0;
 }
@@ -118,10 +128,17 @@ ul { list-style: none; }
   font-family: var(--font-display);
   font-size: 38px; font-weight: 600;
   letter-spacing: 9px; text-transform: uppercase; color: var(--text);
+  animation: splashItemIn 0.5s 0.14s ease both;
 }
 
 .splash-sub {
   font-size: 13px; color: var(--text-hint); letter-spacing: 1.5px;
+  animation: splashItemIn 0.5s 0.26s ease both;
+}
+
+@keyframes splashItemIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── 7. ОНБОРДИНГ ──────────────────────────────────────── */
