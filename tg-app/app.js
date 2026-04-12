@@ -44,7 +44,7 @@ applyTheme();
 tg.onEvent?.('themeChanged', applyTheme);
 
 // ─── sessionStorage with date key ─────────────────────────────────────────────
-const _V = 'v6'; // увеличить при изменении структуры данных
+const _V = 'v7'; // увеличить при изменении структуры данных
 function _dk(k) { return k + '_' + _V + '_' + new Date().toLocaleDateString('ru-RU'); }
 function ssGet(k) { try { const v = sessionStorage.getItem(_dk(k)); return v ? JSON.parse(v) : null; } catch { return null; } }
 function ssSet(k, v) { try { sessionStorage.setItem(_dk(k), JSON.stringify(v)); } catch {} }
@@ -717,15 +717,12 @@ function applyTodayData(data) {
   // Basis — источник прогноза
   setText('today-basis', `${moon.lunarDay}-й лунный день`);
 
-  // Персональный совет: знак × цель пользователя
-  const _GOAL_DOMAIN_MAP = { relationships: 'love', career: 'work', health: 'health', selfknowledge: 'psych' };
-  const goalDomain = _GOAL_DOMAIN_MAP[savedGoal] || 'work';
+  // Персональный совет: знак × фаза луны (меняется каждые 3–4 дня)
   const signData = SIGNS.find(s => s.id === sign);
-  const goalDomainText = (DOMAINS?.[sign] || DOMAINS?.aries)?.[goalDomain] || phaseTips.good || '';
-  const _GOAL_PHRASE = { love: 'в отношениях', work: 'в карьере', health: 'для здоровья', psych: 'для самопознания' };
+  const phaseText = (ZODIAC_PHASE_TIPS?.[sign] || ZODIAC_PHASE_TIPS?.aries)?.[moon.phase] || phaseTips.good || '';
   const cardLabel = $('today-card-label');
-  if (cardLabel) cardLabel.textContent = `✦ Для ${signData?.ru || sign} ${_GOAL_PHRASE[goalDomain] || ''} сегодня`;
-  setText('today-good', goalDomainText);
+  if (cardLabel) cardLabel.textContent = `${moon.emoji} ${moon.phaseName} · ${signData?.ru || sign}`;
+  setText('today-good', phaseText);
   setText('today-avoid', phaseTips.avoid || '');
 
   // Практика лунного дня

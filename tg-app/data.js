@@ -519,7 +519,11 @@ const ZODIAC_PHASE_TIPS = {
  * текст (знак × фаза) + контекст (день планеты · лунный день).
  */
 function getDailyOracle(sign, phase, weekday, lunarDay) {
-  const text = (ZODIAC_PHASE_TIPS[sign] || ZODIAC_PHASE_TIPS.aries)[phase] || '';
+  const SIGN_LIST = ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+  const signIdx = Math.max(0, SIGN_LIST.indexOf(sign));
+  // Детерминированный выбор: каждый день — новый текст, уникальный для знака
+  const predIdx = ((lunarDay - 1) * 13 + signIdx * 3 + weekday) % PREDICTIONS.length;
+  const text = PREDICTIONS[predIdx] || PREDICTIONS[0];
   const planets = ['Солнца', 'Луны', 'Марса', 'Меркурия', 'Юпитера', 'Венеры', 'Сатурна'];
   const context = `День ${planets[weekday]} · ${lunarDay}-й лунный день`;
   return { text, context };
