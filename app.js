@@ -936,7 +936,8 @@ function renderMoon() {
 
 function applyMoonData(moon) {
   setText('moon-phase-name', moon.phaseName);
-  setText('moon-phase-emoji', moon.emoji);
+  // CSS-диск с реальной фазой вместо emoji
+  setHTML('moon-phase-emoji', _buildMoonDisc(moon.illumination, moon.angle));
   const deg = moon.moonLon != null ? ` · ${Math.floor(moon.moonLon % 30)}°` : '';
   setText('moon-sign-name', `Луна в ${moon.signRu}${deg} · ${moon.illumination}% освещённости`);
 
@@ -973,6 +974,60 @@ function applyMoonData(moon) {
     };
   }
 
+}
+
+/**
+ * Строит SVG-диск Луны с правильной фазой.
+ * angle: 0–360° (0=новолуние, 90=первая четверть, 180=полнолуние, 270=последняя четверть)
+ * illumination: 0–100%
+ */
+function _buildMoonDisc(illumination, angle) {
+  const r = 50, cx = 55, cy = 55;
+  // Растущая фаза: правая сторона освещена (0°–180°)
+  const waxing     = angle <= 180;
+  const cosA       = Math.cos(angle * Math.PI / 180);
+  const eRx        = Math.abs(cosA) * r;
+  // Горбатая фаза (>50% освещённости): эллипс рисуется СВЕТЛЫМ цветом
+  const isGibbous  = angle > 90 && angle <= 270;
+  const ellipseFill = isGibbous ? 'url(#mLit)' : '#1a1628';
+  const clipSide    = waxing ? 'mClipR' : 'mClipL';
+
+  return `<svg class="moon-disc-svg" viewBox="0 0 110 110" aria-label="Луна ${illumination}% освещена">
+  <defs>
+    <radialGradient id="mLit" cx="36%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#fffef0"/>
+      <stop offset="30%"  stop-color="#fde68a"/>
+      <stop offset="70%"  stop-color="#c8952e"/>
+      <stop offset="100%" stop-color="#8a6020"/>
+    </radialGradient>
+    <filter id="mGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Правая половина -->
+    <clipPath id="mClipR">
+      <rect x="${cx}" y="${cy - r - 1}" width="${r + 2}" height="${r * 2 + 2}"/>
+    </clipPath>
+    <!-- Левая половина -->
+    <clipPath id="mClipL">
+      <rect x="${cx - r - 2}" y="${cy - r - 1}" width="${r + 2}" height="${r * 2 + 2}"/>
+    </clipPath>
+  </defs>
+
+  <!-- Тёмная основа -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a1628"/>
+
+  <!-- Освещённая половина (обрезана по нужной стороне) -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#mLit)"
+    clip-path="url(#${clipSide})" filter="url(#mGlow)"/>
+
+  <!-- Терминаторный эллипс (серп → горб) -->
+  ${eRx > 1 ? `<ellipse cx="${cx}" cy="${cy}" rx="${eRx.toFixed(1)}" ry="${r}" fill="${ellipseFill}"/>` : ''}
+
+  <!-- Лёгкое ободок-свечение -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+    stroke="rgba(200,169,110,0.25)" stroke-width="1.5"/>
+</svg>`;
 }
 
 /** Строит SVG-арку лунного цикла (1–30 дней, угол 0–360°) */
