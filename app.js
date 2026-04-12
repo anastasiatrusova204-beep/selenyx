@@ -1793,12 +1793,6 @@ async function renderCalendar() {
   renderCalGrid();
   initCalNav();
   initViewToggle();
-
-  // База знаний — кнопка в хедере
-  $('kb-header-btn')?.addEventListener('click', () => {
-    tg.HapticFeedback.impactOccurred('light');
-    openKnowledge();
-  });
 }
 
 function initHeaderButtons() {
@@ -1808,6 +1802,12 @@ function initHeaderButtons() {
   if (nameEl && name) nameEl.textContent = name;
 
   $('settings-btn')?.addEventListener('click', openSettings);
+
+  // База знаний — кнопка в хедере (один раз при инициализации)
+  $('kb-header-btn')?.addEventListener('click', () => {
+    tg.HapticFeedback.impactOccurred('light');
+    openKnowledge();
+  });
 }
 
 // ─── Term Tooltips ─────────────────────────────────────────────────────────────
