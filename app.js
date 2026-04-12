@@ -1139,81 +1139,121 @@ function revealFortune() {
   if (fortuneRevealed) return;
   fortuneRevealed = true;
 
-  const cookie = $('oracle-cookie');
-  const veil   = $('oracle-veil');
+  const cookie    = $('oracle-cookie');
+  const veil      = $('oracle-veil');
   const particles = $('oracle-particles');
 
-  // 1. Cookie cracks + немедленный взрыв частиц
+  // 1. Crack + haptic
   if (cookie) cookie.classList.add('cracking');
   tg.HapticFeedback.impactOccurred('heavy');
 
-  // Частицы — сразу при тапе, до вуали
+  // 2. Вспышка — сразу в момент тапа
+  const flash = document.createElement('div');
+  flash.className = 'oracle-flash';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+
+  // 3. Взрыв частиц — мощный, 3 волны
   if (particles) {
     particles.innerHTML = '';
-    const count = 28;
-    const colors = ['#C8A96E','#F5C842','#fff8e7','#E8B96E','#FFD700','#ffffff'];
-    for (let i = 0; i < count; i++) {
-      const p = document.createElement('span');
+    const colors  = ['#FFD700','#F5C842','#E8B96E','#fff8e7','#ffffff','#FFF0A0'];
+    const colors2 = ['#FFD700','#FF9E2C','#FFF0A0'];
+
+    // Волна 1 — основной взрыв: 32 круглые частицы по всем углам
+    for (let i = 0; i < 32; i++) {
+      const p   = document.createElement('span');
       p.className = 'oracle-particle';
-      const angle = (360 / count) * i + Math.random() * 14 - 7;
-      const dist  = 120 + Math.random() * 200;
+      const angle = (360 / 32) * i + Math.random() * 10 - 5;
+      const dist  = 160 + Math.random() * 220;
       const rad   = (angle * Math.PI) / 180;
-      const size  = 5 + Math.random() * 10;
-      p.style.setProperty('--tx', `${Math.cos(rad) * dist}px`);
-      p.style.setProperty('--ty', `${Math.sin(rad) * dist}px`);
-      p.style.setProperty('--delay', `${(Math.random() * 0.1).toFixed(2)}s`);
-      p.style.setProperty('--dur',   `${(0.9 + Math.random() * 0.7).toFixed(2)}s`);
+      const size  = 5 + Math.random() * 11;
+      p.style.setProperty('--tx',    `${(Math.cos(rad) * dist).toFixed(1)}px`);
+      p.style.setProperty('--ty',    `${(Math.sin(rad) * dist).toFixed(1)}px`);
+      p.style.setProperty('--delay', `${(Math.random() * 0.06).toFixed(2)}s`);
+      p.style.setProperty('--dur',   `${(1.0 + Math.random() * 0.8).toFixed(2)}s`);
       p.style.setProperty('--size',  `${size.toFixed(0)}px`);
+      p.style.setProperty('--rot',   `${(90 + Math.random() * 180).toFixed(0)}deg`);
       p.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
       particles.appendChild(p);
     }
+
+    // Волна 2 — вытянутые искры-стрелки: 18 штук
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('span');
+      p.className = 'oracle-spark';
+      const angle = (360 / 18) * i + Math.random() * 15;
+      const dist  = 100 + Math.random() * 180;
+      const rad   = (angle * Math.PI) / 180;
+      p.style.setProperty('--tx',    `${(Math.cos(rad) * dist).toFixed(1)}px`);
+      p.style.setProperty('--ty',    `${(Math.sin(rad) * dist).toFixed(1)}px`);
+      p.style.setProperty('--delay', `${(0.02 + Math.random() * 0.08).toFixed(2)}s`);
+      p.style.setProperty('--dur',   `${(0.7 + Math.random() * 0.5).toFixed(2)}s`);
+      p.style.setProperty('--size',  `${(3 + Math.random() * 3).toFixed(0)}px`);
+      p.style.setProperty('--rot',   `${angle.toFixed(0)}deg`);
+      p.style.setProperty('--color', colors2[Math.floor(Math.random() * colors2.length)]);
+      particles.appendChild(p);
+    }
+
+    // Волна 3 — крупные золотые вспышки близко к центру: 8 штук
     for (let i = 0; i < 8; i++) {
       const p = document.createElement('span');
       p.className = 'oracle-particle';
       const angle = Math.random() * 360;
-      const dist  = 60 + Math.random() * 100;
+      const dist  = 55 + Math.random() * 90;
       const rad   = (angle * Math.PI) / 180;
-      p.style.setProperty('--tx', `${Math.cos(rad) * dist}px`);
-      p.style.setProperty('--ty', `${Math.sin(rad) * dist}px`);
+      p.style.setProperty('--tx',    `${(Math.cos(rad) * dist).toFixed(1)}px`);
+      p.style.setProperty('--ty',    `${(Math.sin(rad) * dist).toFixed(1)}px`);
       p.style.setProperty('--delay', '0s');
-      p.style.setProperty('--dur',   '0.5s');
-      p.style.setProperty('--size',  `${14 + Math.random() * 10}px`);
+      p.style.setProperty('--dur',   `${(0.5 + Math.random() * 0.3).toFixed(2)}s`);
+      p.style.setProperty('--size',  `${(16 + Math.random() * 12).toFixed(0)}px`);
+      p.style.setProperty('--rot',   '60deg');
       p.style.setProperty('--color', '#FFD700');
       particles.appendChild(p);
     }
   }
 
+  // 4. Вуаль появляется через 320мс
   setTimeout(() => {
-    // 2. Вуаль появляется ПОСЛЕ взрыва
     hide('oracle-cookie-wrap');
     if (veil) veil.classList.remove('hidden');
 
-    // 3. Get oracle data
+    // 5. Данные оракула
     const moon    = calcMoonData();
     const weekday = new Date().getDay();
     const oracle  = getDailyOracle(userSign || 'aries', moon.phase, weekday, moon.lunarDay);
+    setText('oracle-context', oracle.context);
 
-    // 5. Typewriter for prediction text (word by word)
+    // 6. Печатающий эффект: слово за словом, 155мс/слово, старт через 1100мс от тапа
     setTimeout(() => {
       tg.HapticFeedback.notificationOccurred('success');
       const predEl = $('oracle-prediction');
       if (predEl) {
-        predEl.textContent = '';
+        predEl.innerHTML = '';
+
+        // Курсор
+        const cursor = document.createElement('span');
+        cursor.className = 'oracle-cursor';
+        predEl.appendChild(cursor);
+
         const words = oracle.text.split(' ');
         let idx = 0;
         const interval = setInterval(() => {
           if (idx < words.length) {
-            predEl.textContent += (idx === 0 ? '' : ' ') + words[idx];
+            // Вставляем слово перед курсором
+            predEl.insertBefore(
+              document.createTextNode((idx === 0 ? '' : ' ') + words[idx]),
+              cursor
+            );
             idx++;
           } else {
             clearInterval(interval);
+            cursor.remove();
             wrapTerms(predEl);
           }
-        }, 80);
+        }, 155);
       }
-      setText('oracle-context', oracle.context);
 
-      // 6. Share button handler (button appears via CSS delay — 1.8s)
+      // 7. Кнопка поделиться (CSS задержка 2.8s от появления контента)
       const shareBtn = $('oracle-share');
       if (shareBtn) {
         shareBtn.onclick = () => {
@@ -1226,8 +1266,8 @@ function revealFortune() {
           tg.HapticFeedback.impactOccurred('medium');
         };
       }
-    }, 600);
-  }, 350);
+    }, 780);   // 320мс вуаль + 780мс = 1100мс от тапа
+  }, 320);
 }
 
 // ─── Settings overlay ─────────────────────────────────────────────────────────
