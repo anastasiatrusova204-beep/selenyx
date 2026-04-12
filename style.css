@@ -11,9 +11,7 @@
   --bg3:         #e8dfc9;
   --text:        #1c1508;
   --text-sub:    #6b5e45;
-  --text-hint:   #a8967a;
-  --accent:      #2AABEE;
-  --accent-dim:  rgba(42,171,238,0.12);
+  --text-hint:   #7a6850;
   --gold:        #b07d2c;
   --gold-light:  #d4a04a;
   --gold-dim:    rgba(176,125,44,0.13);
@@ -36,7 +34,7 @@
   --bg3:         #211e30;
   --text:        #ede6d5;
   --text-sub:    #8c7e68;
-  --text-hint:   #4d4438;
+  --text-hint:   #9a8870;
   --gold:        #d4a04a;
   --gold-light:  #e8c17a;
   --gold-dim:    rgba(212,160,74,0.13);
@@ -457,7 +455,7 @@ ul { list-style: none; }
 .header-actions { display: flex; gap: 4px; }
 
 .streak-badge {
-  font-size: 11px; font-weight: 600; color: var(--gold);
+  font-size: 12px; font-weight: 600; color: var(--gold);
   background: var(--gold-dim);
   border: 1px solid var(--gold-dim);
   border-radius: 20px;
@@ -530,7 +528,7 @@ ul { list-style: none; }
 
 .tab-icon  { font-size: 22px; line-height: 1; }
 .tab-label {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.3px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
   font-family: var(--font-body);
 }
 
@@ -550,9 +548,9 @@ ul { list-style: none; }
 
 .pane-scroll {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;
+  padding: 16px 16px; display: flex; flex-direction: column; gap: 14px;
   scrollbar-width: none;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
 }
 
 .pane-scroll::-webkit-scrollbar { display: none; }
@@ -573,7 +571,7 @@ ul { list-style: none; }
 
 /* Дисклеймер под tile-row */
 .science-note {
-  font-size: 10px; color: var(--text-hint);
+  font-size: 11px; color: var(--text-hint);
   text-align: center; letter-spacing: 0.3px;
   margin-top: -4px;
 }
@@ -628,7 +626,7 @@ ul { list-style: none; }
 }
 
 .card-label {
-  font-size: 10px; color: var(--gold);
+  font-size: 11px; color: var(--gold);
   text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
 }
 
@@ -661,7 +659,7 @@ ul { list-style: none; }
 }
 
 .mini-label {
-  font-size: 10px; color: var(--gold);
+  font-size: 11px; color: var(--gold);
   text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600;
 }
 
@@ -727,6 +725,14 @@ ul { list-style: none; }
   line-height: 1.35; letter-spacing: 0.2px;
 }
 
+/* ─── Section labels ────────────────────────────────────── */
+.section-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-hint);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 2px 2px 0;
+}
+
 /* ─── 13. ДОМЕНЫ ────────────────────────────────────────── */
 /* ── DOMAIN ACCORDION ───────────────────────────────── */
 .domain-accordion {
@@ -765,7 +771,7 @@ ul { list-style: none; }
 .domain-card.domain-primary:not(.open) .domain-card-header::after {
   content: '★ фокус';
   position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
-  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
   color: var(--domain-color);
   background: var(--card);
   padding: 3px 8px; border-radius: 12px;

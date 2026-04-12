@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=33">
+  <link rel="stylesheet" href="style.css?v=34">
   <style>/* critical: prevent domain-card from collapsing in flex context */
   .domain-card { flex-shrink: 0; }
   /* critical: header-icon-btn fallback if CDN serves old CSS */
@@ -249,6 +249,9 @@
           <button id="retention-close" class="retention-dismiss" aria-label="Закрыть">✕</button>
         </div>
 
+        <!-- Section: энергия дня -->
+        <p class="section-label">Энергия дня</p>
+
         <!-- Color accordion card -->
         <div class="domain-card" id="color-acc-card" style="--domain-color:#b07d3a;--domain-bg:rgba(176,125,58,0.07)">
           <button class="domain-card-header" aria-expanded="false">
@@ -274,6 +277,9 @@
           </button>
           <div class="domain-card-body" hidden></div>
         </div>
+
+        <!-- Section: сферы жизни -->
+        <p class="section-label">Сферы жизни</p>
 
         <!-- Domain accordion -->
         <div class="domain-accordion" id="domain-accordion">
