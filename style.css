@@ -698,7 +698,27 @@ ul { list-style: none; }
 
 .domain-card.open {
   border-color: var(--domain-color);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px var(--domain-color);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1), 0 0 0 1px var(--domain-color);
+}
+
+/* ── Приоритетный домен (по цели онбординга) ── */
+.domain-card.domain-primary {
+  border-color: color-mix(in srgb, var(--domain-color) 50%, transparent);
+  box-shadow: var(--shadow),
+    0 0 0 1px color-mix(in srgb, var(--domain-color) 28%, transparent),
+    0 4px 16px color-mix(in srgb, var(--domain-color) 10%, transparent);
+}
+
+/* Бейдж «★ фокус» в правом углу хедера */
+.domain-card.domain-primary:not(.open) .domain-card-header::after {
+  content: '★ фокус';
+  position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--domain-color);
+  background: var(--card);
+  padding: 3px 8px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--domain-color) 35%, transparent);
+  pointer-events: none;
 }
 
 .domain-card:not(.open):hover {
@@ -766,6 +786,15 @@ ul { list-style: none; }
 
 .domain-card-body {
   padding: 0 18px 18px;
+}
+
+/* Плавное появление контента при открытии */
+.domain-card-body:not([hidden]) {
+  animation: domainBodyReveal 0.26s cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes domainBodyReveal {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .domain-card-text {
