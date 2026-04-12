@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140">
+  <defs>
+    <linearGradient id="wc1" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#f0d878"/>
+      <stop offset="50%" stop-color="#c89040"/>
+      <stop offset="100%" stop-color="#7a5010"/>
+    </linearGradient>
+    <linearGradient id="wc2" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#e8c860"/>
+      <stop offset="60%" stop-color="#b07828"/>
+      <stop offset="100%" stop-color="#6a4008"/>
+    </linearGradient>
+    <linearGradient id="wc3" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#d4b050"/>
+      <stop offset="100%" stop-color="#8c5820"/>
+    </linearGradient>
+    <radialGradient id="wglow" cx="60%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#f0d060" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#8c5820" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="wf"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+
+  <!-- Atmospheric glow -->
+  <ellipse cx="145" cy="52" rx="85" ry="68" fill="url(#wglow)"/>
+  <ellipse cx="155" cy="42" rx="45" ry="38" fill="#f0d878" opacity="0.12" filter="url(#wf)"/>
+
+  <!-- Back crystal (smallest) -->
+  <polygon points="108,28 128,52 120,100 96,100 88,52"
+           fill="url(#wc3)" opacity="0.42"/>
+  <polygon points="108,28 128,52 108,58" fill="#e8d060" opacity="0.28"/>
+  <polygon points="108,28 88,52 108,58" fill="#9a6820" opacity="0.22"/>
+  <polygon points="108,28 128,52 120,100 96,100 88,52"
+           fill="none" stroke="#c8a030" stroke-width="1" opacity="0.55"/>
+
+  <!-- Middle crystal -->
+  <polygon points="148,12 178,46 166,108 130,108 118,46"
+           fill="url(#wc2)" opacity="0.55"/>
+  <polygon points="148,12 178,46 148,54" fill="#f4e070" opacity="0.35"/>
+  <polygon points="148,12 118,46 148,54" fill="#a87028" opacity="0.28"/>
+  <polygon points="148,12 178,46 166,108 130,108 118,46"
+           fill="none" stroke="#d4a830" stroke-width="1.5" opacity="0.7"/>
+
+  <!-- Front large crystal -->
+  <polygon points="168,6 198,44 185,112 151,112 138,44"
+           fill="url(#wc1)" opacity="0.62"/>
+  <polygon points="168,6 198,44 168,54" fill="#fff8a0" opacity="0.38"/>
+  <polygon points="168,6 138,44 168,54" fill="#b87828" opacity="0.3"/>
+  <polygon points="168,54 198,44 185,112 151,112 138,44"
+           fill="#d4a030" opacity="0.15"/>
+  <polygon points="168,6 198,44 185,112 151,112 138,44"
+           fill="none" stroke="#e8c040" stroke-width="2" opacity="0.75"/>
+
+  <!-- Light reflections -->
+  <path d="M162 14 L148 38" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+  <path d="M142 20 L132 40" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M172 8 L180 22" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- Sparkles -->
+  <circle cx="200" cy="38" r="3" fill="white" opacity="0.7"/>
+  <circle cx="194" cy="22" r="2" fill="white" opacity="0.6"/>
+  <circle cx="210" cy="55" r="1.5" fill="#f8e060" opacity="0.5"/>
+  <path d="M196 30 L200 26 L204 30 L200 34Z" fill="white" opacity="0.5"/>
+</svg>

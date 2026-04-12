@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <defs>
+    <radialGradient id="fmoon" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f8f0c0"/>
+      <stop offset="40%" stop-color="#e8d060"/>
+      <stop offset="75%" stop-color="#c8a030"/>
+      <stop offset="100%" stop-color="#8c6010"/>
+    </radialGradient>
+    <radialGradient id="fhalo1" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#e8c840" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#e8c840" stop-opacity="0.35"/>
+    </radialGradient>
+    <radialGradient id="fhalo2" cx="50%" cy="50%" r="50%">
+      <stop offset="80%" stop-color="#d4a820" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#d4a820" stop-opacity="0.18"/>
+    </radialGradient>
+    <filter id="ff1"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="ff2"><feGaussianBlur stdDeviation="10"/></filter>
+  </defs>
+
+  <!-- Outer soft halo -->
+  <circle cx="150" cy="150" r="145" fill="url(#fhalo2)" filter="url(#ff2)"/>
+  <!-- Inner halo -->
+  <circle cx="150" cy="150" r="120" fill="url(#fhalo1)" filter="url(#ff1)"/>
+  <!-- Halo rings -->
+  <circle cx="150" cy="150" r="108" fill="none" stroke="#d8b830" stroke-width="1.5" opacity="0.25"/>
+  <circle cx="150" cy="150" r="118" fill="none" stroke="#c8a820" stroke-width="0.8" opacity="0.15"/>
+
+  <!-- Moon disc -->
+  <circle cx="150" cy="150" r="92" fill="url(#fmoon)"/>
+
+  <!-- Moon surface (subtle craters / texture) -->
+  <circle cx="118" cy="125" r="18" fill="#d8b030" opacity="0.18"/>
+  <circle cx="172" cy="162" r="22" fill="#c0980" opacity="0.12"/>
+  <circle cx="140" cy="178" r="14" fill="#d4a820" opacity="0.15"/>
+  <circle cx="168" cy="120" r="10" fill="#e0c840" opacity="0.12"/>
+
+  <!-- Outline -->
+  <circle cx="150" cy="150" r="92" fill="none" stroke="#f8f0c0" stroke-width="1" opacity="0.4"/>
+</svg>
