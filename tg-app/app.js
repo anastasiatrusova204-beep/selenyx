@@ -98,6 +98,12 @@ function showScreen(id) {
     const el = $(s + '-screen');
     if (el) el.classList.toggle('hidden', s !== id);
   });
+  const el = $(id + '-screen');
+  if (el) {
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = 'screenFadeIn 0.35s ease forwards';
+  }
 }
 
 // ─── Splash ───────────────────────────────────────────────────────────────────
@@ -545,9 +551,18 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(btn =>
     btn.classList.toggle('active', btn.dataset.tab === tab)
   );
-  document.querySelectorAll('.tab-pane').forEach(pane =>
-    pane.classList.toggle('hidden', pane.dataset.tab !== tab)
-  );
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    const isActive = pane.dataset.tab === tab;
+    if (isActive) {
+      pane.classList.remove('hidden');
+      pane.style.animation = 'none';
+      pane.offsetHeight; // reflow
+      pane.style.animation = 'paneFadeIn 0.22s ease forwards';
+    } else {
+      pane.classList.add('hidden');
+      pane.style.animation = '';
+    }
+  });
 
   switch (tab) {
     case 'today':  renderToday();    break;
