@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="style.css?v=41">
   <style>/* critical: prevent domain-card from collapsing in flex context */
   .domain-card { flex-shrink: 0; }
   /* critical: header-icon-btn fallback if CDN serves old CSS */
@@ -514,19 +514,46 @@
   <!-- Tab bar -->
   <nav class="tab-bar" role="tablist">
     <button class="tab-btn active" data-tab="today" role="tab" aria-label="Мой день">
-      <span class="tab-icon">✨</span>
+      <span class="tab-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="128" cy="128" r="60" stroke="currentColor" stroke-width="16"/>
+          <line x1="128" y1="36" x2="128" y2="16" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="128" y1="240" x2="128" y2="220" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="36" y1="128" x2="16" y2="128" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="240" y1="128" x2="220" y2="128" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="65" y1="65" x2="51" y2="51" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="205" y1="205" x2="191" y2="191" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="65" y1="191" x2="51" y2="205" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="205" y1="51" x2="191" y2="65" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+        </svg>
+      </span>
       <span class="tab-label">День</span>
     </button>
     <button class="tab-btn" data-tab="moon" role="tab" aria-label="Луна">
-      <span class="tab-icon">🌙</span>
+      <span class="tab-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M216 112A88 88 0 1 1 144 40a72 72 0 0 0 72 72Z" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
       <span class="tab-label">Луна</span>
     </button>
     <button class="tab-btn" data-tab="cal" role="tab" aria-label="Месяц">
-      <span class="tab-icon">📅</span>
+      <span class="tab-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="32" y="48" width="192" height="176" rx="8" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="32" y1="104" x2="224" y2="104" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="176" y1="24" x2="176" y2="72" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+          <line x1="80" y1="24" x2="80" y2="72" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+        </svg>
+      </span>
       <span class="tab-label">Месяц</span>
     </button>
     <button class="tab-btn" data-tab="oracle" role="tab" aria-label="Оракул">
-      <span class="tab-icon">🥠</span>
+      <span class="tab-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M128 24L155.6 88.4L224 96L176 142.4L188.8 211.2L128 176L67.2 211.2L80 142.4L32 96L100.4 88.4Z" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
       <span class="tab-label">Оракул</span>
     </button>
   </nav>

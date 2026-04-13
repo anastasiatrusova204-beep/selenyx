@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════
    Selenyx Mini App — style.css
    Шрифты: Cormorant Garamond (display) + DM Sans (body)
-   Палитра: Telegram-native + #c8a96e gold
+   Палитра: Telegram-native + #c49a3c gold
 ═══════════════════════════════════════════════════════════ */
 
 /* ─── 1. CSS ПЕРЕМЕННЫЕ ─────────────────────────────────── */
@@ -12,14 +12,14 @@
   --text:        #1c1508;
   --text-sub:    #6b5e45;
   --text-hint:   #7a6850;
-  --gold:        #b07d2c;
-  --gold-light:  #d4a04a;
-  --gold-dim:    rgba(176,125,44,0.13);
+  --gold:        #c49a3c;
+  --gold-light:  #d4a847;
+  --gold-dim:    rgba(196,154,60,0.13);
   --card:        #fdf9f2;
-  --card-border: rgba(176,125,44,0.14);
+  --card-border: rgba(196,154,60,0.14);
   --shadow:      0 1px 8px rgba(120,80,20,0.07);
   --shadow-lg:   0 10px 44px rgba(120,80,20,0.16);
-  --divider:     rgba(176,125,44,0.13);
+  --divider:     rgba(196,154,60,0.13);
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body:    'DM Sans', -apple-system, system-ui, sans-serif;
   --r-xs: 8px; --r-sm: 12px; --r: 16px; --r-lg: 24px;
@@ -435,9 +435,7 @@ ul { list-style: none; }
   padding: 0 18px;
   padding-top: env(safe-area-inset-top);
   height: calc(var(--header-h) + env(safe-area-inset-top));
-  background: linear-gradient(180deg, var(--bg2) 0%, rgba(253,249,242,0.92) 100%);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: var(--bg2);
   border-bottom: 1px solid var(--divider);
   flex-shrink: 0; position: relative; z-index: 10;
 }
@@ -506,9 +504,7 @@ ul { list-style: none; }
 /* ─── 9. ТАБ-БАР ────────────────────────────────────────── */
 .tab-bar {
   display: flex;
-  background: linear-gradient(0deg, var(--bg2) 0%, rgba(253,249,242,0.94) 100%);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: var(--bg2);
   border-top: 1px solid var(--divider);
   padding-bottom: env(safe-area-inset-bottom);
   flex-shrink: 0; z-index: 50;
@@ -526,7 +522,7 @@ ul { list-style: none; }
 
 .tab-btn.active { color: var(--gold); }
 
-.tab-icon  { font-size: 22px; line-height: 1; }
+.tab-icon  { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; }
 .tab-label {
   font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
   font-family: var(--font-body);
@@ -621,8 +617,9 @@ ul { list-style: none; }
 }
 
 .card-basis {
-  font-size: 11px; color: var(--text-hint);
-  margin-bottom: 6px; line-height: 1.4;
+  font-family: var(--font-display);
+  font-size: 13px; font-style: italic; color: var(--gold);
+  margin-bottom: 6px; line-height: 1.4; letter-spacing: 0.3px;
 }
 
 .card-label {
@@ -777,20 +774,7 @@ ul { list-style: none; }
   --domain-svg: url('img/domain-psych.jpg');
 }
 
-/* ── ::before = градиентное свечение (оба орба) ── */
-.domain-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--orb1), var(--orb2);
-  opacity: 0;
-  transition: opacity 400ms ease;
-}
-.domain-card:not(.open)::before {
-  opacity: 1;
-  animation: domainOrbFloat 7s ease-in-out infinite;
-}
+/* ── ::before — не используется (убран орб-градиент) ── */
 
 /* ── ::after = JPG-иллюстрация на всю плитку ── */
 .domain-card::after {
@@ -806,7 +790,7 @@ ul { list-style: none; }
   transition: opacity 600ms ease;
 }
 .domain-card:not(.open)::after {
-  opacity: 0.38;
+  opacity: 0.55;
 }
 
 @keyframes domainOrbFloat {
@@ -823,7 +807,7 @@ ul { list-style: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .domain-card::before, .domain-card::after { animation: none !important; }
+  .domain-card::after { animation: none !important; }
 }
 
 /* ── Фон вкладки «День» — иллюстрация по фазе Луны ── */
@@ -841,7 +825,7 @@ ul { list-style: none; }
   z-index: -1;
   transition: opacity 1.8s ease;
 }
-.tab-pane[data-tab="today"][data-phase-group]::before { opacity: 0.12; }
+.tab-pane[data-tab="today"][data-phase-group]::before { opacity: 0.22; }
 
 /* Фоновые иллюстрации по фазе луны */
 .tab-pane[data-tab="today"][data-phase-group="new"]::before    { --phase-bg: url('img/phase-new.jpg'); }
@@ -1235,6 +1219,16 @@ select.form-input { cursor: pointer; }
 .tab-pane[data-tab="oracle"] {
   background: radial-gradient(ellipse at 50% 30%, #1e1630 0%, #0e0c18 55%, #18130a 100%);
 }
+/* Плавный переход от бежевой шапки к тёмному контенту */
+.tab-pane[data-tab="oracle"]::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 72px;
+  background: linear-gradient(to bottom, rgba(243,237,224,0.18) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
 
 .oracle-pane {
   align-items: center;
@@ -1570,7 +1564,9 @@ select.form-input { cursor: pointer; }
   letter-spacing: 0.2px;
 }
 .today-moon-inline {
-  font-size: 13px; color: var(--text-hint);
+  font-family: var(--font-display);
+  font-size: 15px; font-style: italic; color: var(--text-sub);
+  letter-spacing: 0.2px;
 }
 .today-goal-line {
   font-size: 12px; color: var(--gold);
