@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=45">
+  <link rel="stylesheet" href="style.css?v=46">
   <style>/* critical: prevent domain-card from collapsing in flex context */
   .domain-card { flex-shrink: 0; }
   /* critical: header-icon-btn fallback if CDN serves old CSS */
@@ -334,18 +334,13 @@
 
     <!-- MOON -->
     <section class="tab-pane hidden" data-tab="moon">
+      <div class="pane-scroll">
 
-      <!-- Тёмная сцена луны — hero-stage над контентом -->
-      <div class="moon-hero-stage">
         <div class="moon-hero">
           <div id="moon-phase-emoji" class="moon-big-emoji">🌙</div>
           <h2 id="moon-phase-name" class="moon-phase-title"></h2>
           <p id="moon-sign-name" class="moon-sign-sub"></p>
         </div>
-      </div>
-
-      <!-- Тёплый контент ниже сцены -->
-      <div class="pane-scroll moon-pane-scroll">
 
         <!-- Арка лунного цикла -->
         <div id="moon-cycle-arc" class="moon-cycle-arc-wrap"></div>
