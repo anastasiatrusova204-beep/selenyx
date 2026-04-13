@@ -621,8 +621,7 @@ function applyTodayData(data) {
   const dayNames = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
   const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   setText('today-date', `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]}`);
-  const deg = moon.moonLon != null ? ` ${Math.floor(moon.moonLon % 30)}°` : '';
-  setText('today-moon-inline', `${moon.emoji} ${moon.phaseName} · Луна в ${moon.signRu}${deg}`);
+  // today-moon-inline скрыт — лунные данные только на вкладке Луна
 
   // Фоновая иллюстрация по фазе луны
   const _PHASE_GROUPS = {
@@ -724,8 +723,7 @@ function applyTodayData(data) {
     numBody.innerHTML = `${numData?.text || numData?.hint ? `<p class="domain-card-text">${numData.text || numData.hint}</p>` : ''}${numData?.good ? `<p class="card-label mt">✦ Что поддерживает сегодня</p><p class="domain-card-text">${numData.good}</p>` : ''}${numData?.avoid ? `<p class="card-label mt">✦ Чего избегать</p><p class="domain-card-text">${numData.avoid}</p>` : ''}${numData?.practice ? `<p class="card-label mt">✦ Практика дня</p><p class="domain-card-text">${numData.practice}</p>` : ''}`;
   }
 
-  // Basis — источник прогноза
-  setText('today-basis', `${moon.lunarDay}-й лунный день`);
+  // today-basis скрыт — лунный день только на вкладке Луна
 
   // Персональный совет: знак × фаза луны (меняется каждые 3–4 дня)
   const signData = SIGNS.find(s => s.id === sign);
