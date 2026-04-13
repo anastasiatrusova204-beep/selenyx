@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=41">
+  <link rel="stylesheet" href="style.css?v=42">
   <style>/* critical: prevent domain-card from collapsing in flex context */
   .domain-card { flex-shrink: 0; }
   /* critical: header-icon-btn fallback if CDN serves old CSS */
@@ -231,12 +231,12 @@
         </div>
 
         <!-- Phase tips — главный блок дня -->
-        <div class="accent-card accent-card--gold">
+        <div id="today-forecast-card" class="accent-card accent-card--gold">
           <p id="today-basis" class="card-basis"></p>
           <p id="today-card-label" class="card-label">✦ Твой прогноз</p>
-          <p id="today-good" class="card-text"></p>
+          <p id="today-good" class="card-text forecast-text"></p>
           <p class="card-label mt">✦ Избегай</p>
-          <p id="today-avoid" class="card-text muted"></p>
+          <p id="today-avoid" class="card-text forecast-avoid muted"></p>
         </div>
 
         <!-- Retrograde planets (показывается только если есть активные) -->
@@ -281,52 +281,40 @@
         <!-- Section: сферы жизни -->
         <p class="section-label">Сферы жизни</p>
 
-        <!-- Domain accordion -->
-        <div class="domain-accordion" id="domain-accordion">
-          <div class="domain-card" data-domain="health">
-            <button class="domain-card-header" aria-expanded="false">
-              <span class="domain-card-icon">🏥</span>
-              <div class="domain-card-header-content">
-                <span class="domain-card-label">Здоровье</span>
-                <span class="domain-card-preview"></span>
-              </div>
-              <span class="domain-card-caret">›</span>
-            </button>
-            <div class="domain-card-body" hidden></div>
-          </div>
-          <div class="domain-card" data-domain="work">
-            <button class="domain-card-header" aria-expanded="false">
-              <span class="domain-card-icon">💼</span>
-              <div class="domain-card-header-content">
-                <span class="domain-card-label">Работа</span>
-                <span class="domain-card-preview"></span>
-              </div>
-              <span class="domain-card-caret">›</span>
-            </button>
-            <div class="domain-card-body" hidden></div>
-          </div>
-          <div class="domain-card" data-domain="love">
-            <button class="domain-card-header" aria-expanded="false">
-              <span class="domain-card-icon">❤️</span>
-              <div class="domain-card-header-content">
-                <span class="domain-card-label">Отношения</span>
-                <span class="domain-card-preview"></span>
-              </div>
-              <span class="domain-card-caret">›</span>
-            </button>
-            <div class="domain-card-body" hidden></div>
-          </div>
-          <div class="domain-card" data-domain="psych">
-            <button class="domain-card-header" aria-expanded="false">
-              <span class="domain-card-icon">🧠</span>
-              <div class="domain-card-header-content">
-                <span class="domain-card-label">Психология</span>
-                <span class="domain-card-preview"></span>
-              </div>
-              <span class="domain-card-caret">›</span>
-            </button>
-            <div class="domain-card-body" hidden></div>
-          </div>
+        <!-- Domain grid (2×2 image cards) -->
+        <div class="domain-grid" id="domain-accordion">
+          <button class="domain-grid-card" data-domain="health" type="button" aria-label="Здоровье">
+            <span class="domain-grid-badge hidden" aria-hidden="true">★ фокус</span>
+            <div class="domain-grid-content">
+              <span class="domain-grid-icon" aria-hidden="true">🏥</span>
+              <span class="domain-grid-title">Здоровье</span>
+              <span class="domain-card-preview domain-grid-preview"></span>
+            </div>
+          </button>
+          <button class="domain-grid-card" data-domain="work" type="button" aria-label="Работа">
+            <span class="domain-grid-badge hidden" aria-hidden="true">★ фокус</span>
+            <div class="domain-grid-content">
+              <span class="domain-grid-icon" aria-hidden="true">💼</span>
+              <span class="domain-grid-title">Работа</span>
+              <span class="domain-card-preview domain-grid-preview"></span>
+            </div>
+          </button>
+          <button class="domain-grid-card" data-domain="love" type="button" aria-label="Отношения">
+            <span class="domain-grid-badge hidden" aria-hidden="true">★ фокус</span>
+            <div class="domain-grid-content">
+              <span class="domain-grid-icon" aria-hidden="true">❤️</span>
+              <span class="domain-grid-title">Отношения</span>
+              <span class="domain-card-preview domain-grid-preview"></span>
+            </div>
+          </button>
+          <button class="domain-grid-card" data-domain="psych" type="button" aria-label="Психология">
+            <span class="domain-grid-badge hidden" aria-hidden="true">★ фокус</span>
+            <div class="domain-grid-content">
+              <span class="domain-grid-icon" aria-hidden="true">🧠</span>
+              <span class="domain-grid-title">Психология</span>
+              <span class="domain-card-preview domain-grid-preview"></span>
+            </div>
+          </button>
         </div>
 
         <!-- Диагностика дня — карточка-приглашение -->
@@ -741,6 +729,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=17"></script>
-<script src="app.js?v=54"></script>
+<script src="app.js?v=55"></script>
 </body>
 </html>
