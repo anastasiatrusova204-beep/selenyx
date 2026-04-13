@@ -100,42 +100,121 @@ ul { list-style: none; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── 6. СПЛЭШ ──────────────────────────────────────────── */
+/* ─── 6. СПЛЭШ — «Emergence» Celestial Premium ──────── */
 #splash-screen {
   align-items: center; justify-content: center; z-index: 10;
+  background: radial-gradient(ellipse at 50% 42%, #1e2d5e 0%, #080e28 52%, #04061a 100%);
+  position: relative;
+}
+
+/* Звёздное небо */
+#splash-screen::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 14%, rgba(255,255,255,0.72) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 30%  8%, rgba(255,255,255,0.48) 0%, transparent 100%),
+    radial-gradient(1.6px 1.6px at 72% 10%, rgba(255,255,255,0.62) 0%, transparent 100%),
+    radial-gradient(1.0px 1.0px at 88% 22%, rgba(255,255,255,0.42) 0%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 52%  5%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(0.9px 0.9px at  8% 48%, rgba(255,255,255,0.38) 0%, transparent 100%),
+    radial-gradient(1.3px 1.3px at 94% 60%, rgba(255,255,255,0.44) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 44% 82%, rgba(255,255,255,0.32) 0%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 18% 78%, rgba(255,255,255,0.40) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 65% 88%, rgba(255,255,255,0.36) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 80% 45%, rgba(255,255,255,0.30) 0%, transparent 100%),
+    radial-gradient(1.0px 1.0px at 35% 55%, rgba(255,255,255,0.35) 0%, transparent 100%);
+  animation: starTwinkle 7s ease-in-out infinite;
 }
 
 .splash-content {
+  position: relative; z-index: 1;
   display: flex; flex-direction: column;
-  align-items: center; gap: 16px;
+  align-items: center; gap: 22px;
 }
 
+/* CSS-луна: полная, тёплая, светящаяся — без emoji */
 .splash-moon {
-  width: 92px; height: 92px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%,
-    #fff7d6 0%, #ffd97d 35%, #c8a96e 65%, #8a6a2a 100%);
-  box-shadow: 0 0 0 16px var(--gold-dim), 0 0 60px rgba(200,169,110,0.4);
-  animation: splashItemIn 0.5s ease both, moonPulse 3s 0.6s ease-in-out infinite;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0;
+  width: 114px; height: 114px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%,
+      #fffef0 0%,
+      #fef3c7 16%,
+      #fcd34d 34%,
+      #d97706 58%,
+      #7c3200 80%,
+      #3c1000 100%);
+  box-shadow:
+    0 0 0 2px  rgba(255,220,100,0.14),
+    0 0 28px   rgba(255,185,50,0.60),
+    0 0 65px   rgba(255,150,30,0.30),
+    0 0 120px  rgba(200,100,20,0.16);
+  animation: splashMoonIn 1.0s cubic-bezier(0.22,1,0.36,1) both,
+             splashMoonBreath 4s 1.2s ease-in-out infinite;
+  font-size: 0; /* убираем emoji */
 }
 
-.splash-moon::after { content: '🌙'; font-size: 46px; line-height: 1; }
+/* Emoji удалён — только CSS-луна */
+.splash-moon::after { content: none; }
 
+@keyframes splashMoonIn {
+  from {
+    opacity: 0;
+    filter: blur(18px);
+    transform: scale(1.08);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+    box-shadow:
+      0 0 0 2px  rgba(255,220,100,0.14),
+      0 0 28px   rgba(255,185,50,0.60),
+      0 0 65px   rgba(255,150,30,0.30),
+      0 0 120px  rgba(200,100,20,0.16);
+  }
+}
+
+@keyframes splashMoonBreath {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px  rgba(255,220,100,0.14),
+      0 0 28px   rgba(255,185,50,0.55),
+      0 0 65px   rgba(255,150,30,0.28),
+      0 0 120px  rgba(200,100,20,0.14);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px  rgba(255,220,100,0.20),
+      0 0 38px   rgba(255,185,50,0.70),
+      0 0 85px   rgba(255,150,30,0.36),
+      0 0 150px  rgba(200,100,20,0.20);
+  }
+}
+
+/* Название — Cormorant italic, кремово-белый */
 .splash-title {
   font-family: var(--font-display);
-  font-size: 38px; font-weight: 600;
-  letter-spacing: 9px; text-transform: uppercase; color: var(--text);
-  animation: splashItemIn 0.5s 0.14s ease both;
+  font-size: 46px; font-weight: 400; font-style: italic;
+  letter-spacing: 7px;
+  text-transform: none;
+  color: rgba(245,238,225,0.96);
+  text-shadow: 0 0 40px rgba(196,154,60,0.38);
+  animation: splashItemIn 0.7s 0.22s cubic-bezier(0.22,1,0.36,1) both;
 }
 
+/* Подзаголовок — Cormorant italic, приглушённый gold */
 .splash-sub {
-  font-size: 13px; color: var(--text-hint); letter-spacing: 1.5px;
-  animation: splashItemIn 0.5s 0.26s ease both;
+  font-family: var(--font-display);
+  font-size: 14px; font-style: italic;
+  color: rgba(196,154,60,0.68);
+  letter-spacing: 2.5px;
+  animation: splashItemIn 0.7s 0.40s cubic-bezier(0.22,1,0.36,1) both;
 }
 
 @keyframes splashItemIn {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -2565,70 +2644,60 @@ select.form-input { cursor: pointer; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MOON TAB — HYBRID «Lunar Portrait»
-   Тёмная сцена-hero вверху + тёплый бежевый контент снизу
+   MOON TAB — единый стиль с вкладкой «День»
+   Тёмный ночной фон на всём pane + звёздный декор
 ═══════════════════════════════════════════════════════════ */
 
 .tab-pane[data-tab="moon"] {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  overflow: hidden;
-}
-
-/* ─── Hero Stage: тёмная атмосферная сцена ─── */
-.moon-hero-stage {
-  flex-shrink: 0;
-  position: relative;
+  isolation: isolate;
+  /* Ночное небо: глубокий индиго → почти чёрный */
   background: radial-gradient(
-    ellipse at 50% 65%,
-    #1e2d5e 0%,
-    #0d1540 45%,
-    #06091c 100%
+    ellipse at 50% 20%,
+    #1a1f3d 0%,
+    #0d1030 40%,
+    #070816 100%
   );
-  /* Скруглённый низ — мягкий переход к контенту */
-  border-radius: 0 0 32px 32px;
-  /* Тонкая тень вниз */
-  box-shadow: 0 8px 32px rgba(6,9,28,0.45);
-  overflow: hidden;
 }
 
-/* Звёздный декор на сцене */
-.moon-hero-stage::before {
+/* ─── Звёздное поле на всём фоне ─── */
+.tab-pane[data-tab="moon"]::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background-image:
-    radial-gradient(1.2px 1.2px at 10% 18%, rgba(255,255,255,0.65) 0%, transparent 100%),
-    radial-gradient(0.8px 0.8px at 28% 8%,  rgba(255,255,255,0.40) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 75% 12%, rgba(255,255,255,0.55) 0%, transparent 100%),
-    radial-gradient(0.9px 0.9px at 88% 28%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1.0px 1.0px at 55%  5%, rgba(255,255,255,0.48) 0%, transparent 100%),
-    radial-gradient(1.3px 1.3px at 18% 72%, rgba(255,255,255,0.38) 0%, transparent 100%),
-    radial-gradient(0.8px 0.8px at 92% 65%, rgba(255,255,255,0.42) 0%, transparent 100%),
-    radial-gradient(1.1px 1.1px at 42% 88%, rgba(255,255,255,0.32) 0%, transparent 100%),
-    radial-gradient(1.4px 1.4px at 6%  45%, rgba(255,255,255,0.36) 0%, transparent 100%),
-    radial-gradient(0.7px 0.7px at 70% 82%, rgba(255,255,255,0.30) 0%, transparent 100%);
+    radial-gradient(1.1px 1.1px at  8% 12%, rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 22%  5%, rgba(255,255,255,0.42) 0%, transparent 100%),
+    radial-gradient(1.4px 1.4px at 72%  9%, rgba(255,255,255,0.58) 0%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 91% 22%, rgba(255,255,255,0.38) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 50%  3%, rgba(255,255,255,0.50) 0%, transparent 100%),
+    radial-gradient(1.2px 1.2px at 15% 68%, rgba(255,255,255,0.34) 0%, transparent 100%),
+    radial-gradient(0.8px 0.8px at 95% 60%, rgba(255,255,255,0.40) 0%, transparent 100%),
+    radial-gradient(1.0px 1.0px at 38% 90%, rgba(255,255,255,0.28) 0%, transparent 100%),
+    radial-gradient(1.3px 1.3px at  4% 42%, rgba(255,255,255,0.33) 0%, transparent 100%),
+    radial-gradient(0.6px 0.6px at 65% 78%, rgba(255,255,255,0.26) 0%, transparent 100%),
+    radial-gradient(0.9px 0.9px at 33% 35%, rgba(255,255,255,0.32) 0%, transparent 100%),
+    radial-gradient(1.1px 1.1px at 82% 48%, rgba(255,255,255,0.30) 0%, transparent 100%),
+    radial-gradient(0.7px 0.7px at 58% 55%, rgba(255,255,255,0.24) 0%, transparent 100%);
   animation: starTwinkle 8s ease-in-out infinite;
 }
 
-/* Плавный переход от шапки к сцене */
-.moon-hero-stage::after {
+/* ─── Мягкий переход от шапки сверху ─── */
+.tab-pane[data-tab="moon"]::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 56px;
-  background: linear-gradient(to bottom, rgba(243,237,224,0.10) 0%, transparent 100%);
-  pointer-events: none; z-index: 1;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(7,8,22,0.55) 0%, transparent 100%);
+  pointer-events: none; z-index: 0;
 }
 
-/* ─── Moon Hero Layout ─── */
+/* ─── Moon Hero: центровка и отступы ─── */
 .tab-pane[data-tab="moon"] .moon-hero {
-  position: relative; z-index: 2;
-  padding: 28px 0 32px;
+  position: relative; z-index: 1;
+  padding: 32px 0 28px;
   gap: 12px;
 }
 
-/* ─── Диск луны: больше + корректный glow ─── */
+/* ─── Диск луны: 180px + атмосферный glow ─── */
 .tab-pane[data-tab="moon"] .moon-disc-svg {
   width: 180px; height: 180px;
   filter:
@@ -2638,7 +2707,7 @@ select.form-input { cursor: pointer; }
   animation: moonDiscIn 0.9s cubic-bezier(0.22,1,0.36,1) both;
 }
 
-/* Современная анимация входа: fade + мягкий blur → чёткость */
+/* Анимация входа диска луны: blur → чёткость */
 @keyframes moonDiscIn {
   from {
     opacity: 0;
@@ -2655,7 +2724,7 @@ select.form-input { cursor: pointer; }
   }
 }
 
-/* ─── Тексты на тёмной сцене ─── */
+/* ─── Тексты на тёмном фоне ─── */
 .tab-pane[data-tab="moon"] .moon-phase-title {
   font-size: 30px; font-style: italic;
   color: rgba(245,238,225,0.96);
@@ -2672,17 +2741,47 @@ select.form-input { cursor: pointer; }
   line-height: 1.4;
 }
 
-/* ─── Скролл-контент: тёплый бежевый ─── */
-.moon-pane-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  background: var(--bg);
-  padding: 16px 16px;
-  display: flex; flex-direction: column; gap: 14px;
-  scrollbar-width: none;
-  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+/* ─── Карточки: тёмное стекло поверх ночного фона ─── */
+.tab-pane[data-tab="moon"] .accent-card {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(212,168,74,0.18);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
-.moon-pane-scroll::-webkit-scrollbar { display: none; }
+.tab-pane[data-tab="moon"] .accent-card .card-label {
+  color: rgba(212,168,74,0.70);
+}
+
+.tab-pane[data-tab="moon"] .accent-card .card-text {
+  color: rgba(237,230,213,0.90);
+}
+
+.tab-pane[data-tab="moon"] #moon-lunar-info {
+  position: relative; z-index: 1;
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(212,168,74,0.18);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.tab-pane[data-tab="moon"] .moon-ld-header,
+.tab-pane[data-tab="moon"] .moon-ld-text p {
+  color: rgba(237,230,213,0.90);
+}
+
+.tab-pane[data-tab="moon"] .moon-ld-practice-btn {
+  color: rgba(212,168,74,0.85);
+  border-color: rgba(212,168,74,0.25);
+}
+
+/* Arc ring: белый на тёмном фоне */
+.tab-pane[data-tab="moon"] {
+  --bg3: rgba(255,255,255,0.08);
+}
+
+/* pane-scroll прозрачный — фон таба просвечивает */
+.tab-pane[data-tab="moon"] .pane-scroll {
+  background: transparent;
+  position: relative; z-index: 1;
+}
 
