@@ -756,25 +756,25 @@ ul { list-style: none; }
   --domain-color: #4a8c5c; --domain-bg: rgba(74,140,92,0.07);
   --orb1: radial-gradient(ellipse 70% 55% at 85% 25%, rgba(74,140,92,0.28) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 50% 70% at 15% 75%, rgba(120,190,100,0.18) 0%, transparent 60%);
-  --domain-svg: url('img/domain-health.svg');
+  --domain-svg: url('img/domain-health.jpg');
 }
 .domain-card[data-domain="work"] {
   --domain-color: #8c6e2a; --domain-bg: rgba(140,110,42,0.07);
   --orb1: radial-gradient(ellipse 65% 50% at 80% 20%, rgba(200,160,60,0.26) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 55% 65% at 20% 80%, rgba(140,100,30,0.18) 0%, transparent 60%);
-  --domain-svg: url('img/domain-work.svg');
+  --domain-svg: url('img/domain-work.jpg');
 }
 .domain-card[data-domain="love"] {
   --domain-color: #9c4060; --domain-bg: rgba(156,64,96,0.07);
   --orb1: radial-gradient(ellipse 72% 52% at 82% 22%, rgba(200,80,120,0.28) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 50% 68% at 18% 78%, rgba(150,50,80,0.20) 0%, transparent 60%);
-  --domain-svg: url('img/domain-love.svg');
+  --domain-svg: url('img/domain-love.jpg');
 }
 .domain-card[data-domain="psych"] {
   --domain-color: #5a4a8c; --domain-bg: rgba(90,74,140,0.07);
   --orb1: radial-gradient(ellipse 68% 54% at 84% 20%, rgba(120,90,200,0.28) 0%, transparent 65%);
   --orb2: radial-gradient(ellipse 52% 66% at 16% 80%, rgba(80,60,150,0.20) 0%, transparent 60%);
-  --domain-svg: url('img/domain-psych.svg');
+  --domain-svg: url('img/domain-psych.jpg');
 }
 
 /* ── ::before = градиентное свечение (оба орба) ── */
@@ -847,10 +847,10 @@ ul { list-style: none; }
 .tab-pane[data-tab="today"][data-phase-group]::before { opacity: 0.10; }
 
 /* Фоновые иллюстрации по фазе луны */
-.tab-pane[data-tab="today"][data-phase-group="new"]::before    { --phase-bg: url('img/phase-new.svg'); }
-.tab-pane[data-tab="today"][data-phase-group="waxing"]::before { --phase-bg: url('img/phase-waxing.svg'); }
-.tab-pane[data-tab="today"][data-phase-group="full"]::before   { --phase-bg: url('img/phase-full.svg'); }
-.tab-pane[data-tab="today"][data-phase-group="waning"]::before { --phase-bg: url('img/phase-waning.svg'); }
+.tab-pane[data-tab="today"][data-phase-group="new"]::before    { --phase-bg: url('img/phase-new.jpg'); }
+.tab-pane[data-tab="today"][data-phase-group="waxing"]::before { --phase-bg: url('img/phase-waxing.jpg'); }
+.tab-pane[data-tab="today"][data-phase-group="full"]::before   { --phase-bg: url('img/phase-full.jpg'); }
+.tab-pane[data-tab="today"][data-phase-group="waning"]::before { --phase-bg: url('img/phase-waning.jpg'); }
 
 .domain-card.open {
   border-color: var(--domain-color);
