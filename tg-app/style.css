@@ -565,6 +565,30 @@ ul { list-style: none; }
   box-shadow: var(--shadow), inset 0 0 0 1px var(--gold-dim);
 }
 
+/* ── Editorial forecast card (Today tab) ── */
+#today-forecast-card {
+  background: var(--card);
+  border: none;
+  border-left: 2.5px solid var(--gold);
+  border-radius: 0 var(--r) var(--r) 0;
+  box-shadow: none;
+  padding: 14px 18px 16px;
+  gap: 10px;
+}
+
+.forecast-text {
+  font-family: var(--font-display);
+  font-size: 16px; font-style: italic;
+  color: var(--text);
+  line-height: 1.65;
+}
+
+.forecast-avoid {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.55;
+}
+
 /* Дисклеймер под tile-row */
 .science-note {
   font-size: 11px; color: var(--text-hint);
@@ -731,7 +755,117 @@ ul { list-style: none; }
 }
 
 /* ─── 13. ДОМЕНЫ ────────────────────────────────────────── */
-/* ── DOMAIN ACCORDION ───────────────────────────────── */
+/* ── DOMAIN GRID (2×2 image cards) ──────────────────── */
+.domain-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.domain-grid-card {
+  position: relative;
+  height: 150px;
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--bg3);
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  isolation: isolate;
+  text-align: left;
+  padding: 0;
+}
+
+/* Image background */
+.domain-grid-card[data-domain="health"] { --domain-color: #4a8c5c; --domain-svg: url('img/domain-health.jpg'); }
+.domain-grid-card[data-domain="work"]   { --domain-color: #b07d2c; --domain-svg: url('img/domain-work.jpg'); }
+.domain-grid-card[data-domain="love"]   { --domain-color: #b05070; --domain-svg: url('img/domain-love.jpg'); }
+.domain-grid-card[data-domain="psych"]  { --domain-color: #6040a0; --domain-svg: url('img/domain-psych.jpg'); }
+
+.domain-grid-card::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background-image: var(--domain-svg);
+  background-size: cover; background-position: center;
+  opacity: 0.62;
+  transition: opacity 300ms ease, transform 420ms ease;
+}
+
+/* Dark gradient overlay — legibility */
+.domain-grid-card::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(
+    to top,
+    rgba(16, 10, 4, 0.78) 0%,
+    rgba(16, 10, 4, 0.20) 50%,
+    transparent 100%
+  );
+}
+
+.domain-grid-card:active {
+  transform: scale(0.96);
+}
+
+.domain-grid-card:active::before {
+  opacity: 0.80;
+  transform: scale(1.05);
+}
+
+/* ── Grid card content ── */
+.domain-grid-content {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 2;
+  padding: 10px 12px 13px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+
+.domain-grid-icon {
+  font-size: 17px; line-height: 1; margin-bottom: 3px;
+}
+
+.domain-grid-title {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 600; font-style: italic;
+  color: #fff;
+  line-height: 1.1;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.55);
+}
+
+.domain-grid-preview {
+  font-size: 11px;
+  color: rgba(255,255,255,0.62);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Primary domain — highlighted card */
+.domain-grid-card.domain-primary {
+  box-shadow: 0 0 0 2px var(--gold), var(--shadow);
+}
+
+.domain-grid-card.domain-primary::before {
+  opacity: 0.72;
+}
+
+/* Priority badge */
+.domain-grid-badge {
+  position: absolute;
+  top: 8px; right: 8px;
+  z-index: 3;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+  color: #1c1508;
+  background: var(--gold);
+  padding: 3px 7px;
+  border-radius: 10px;
+}
+
+/* ── DOMAIN ACCORDION (для Цвет + Число) ────────────── */
 .domain-accordion {
   display: flex; flex-direction: column; gap: 6px;
 }
@@ -1560,7 +1694,7 @@ select.form-input { cursor: pointer; }
 .today-header-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .today-date {
   font-family: var(--font-display);
-  font-size: 22px; font-weight: 600; color: var(--text);
+  font-size: 26px; font-weight: 600; color: var(--text);
   letter-spacing: 0.2px;
 }
 .today-moon-inline {

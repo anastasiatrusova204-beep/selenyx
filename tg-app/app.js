@@ -651,12 +651,12 @@ function applyTodayData(data) {
   }
 
   // Domain card previews
-  document.querySelectorAll('.domain-card').forEach(card => {
+  document.querySelectorAll('[data-domain]').forEach(card => {
     const domain = card.dataset.domain;
     const preview = card.querySelector('.domain-card-preview');
     if (preview) {
       const text = domains[domain] || '';
-      preview.textContent = text.length > 72 ? text.slice(0, 72) + '…' : text;
+      preview.textContent = text.length > 60 ? text.slice(0, 60) + '…' : text;
     }
   });
 
@@ -666,14 +666,14 @@ function applyTodayData(data) {
   if (primaryDomain) {
     const accordion = $('domain-accordion');
     if (accordion) {
-      const primary = accordion.querySelector(`.domain-card[data-domain="${primaryDomain}"]`);
-      // Убрать старый primary-маркер если был
-      accordion.querySelectorAll('.domain-primary').forEach(c => c.classList.remove('domain-primary'));
+      const primary = accordion.querySelector(`.domain-grid-card[data-domain="${primaryDomain}"]`);
+      accordion.querySelectorAll('.domain-primary').forEach(c => {
+        c.classList.remove('domain-primary');
+        c.querySelector('.domain-grid-badge')?.classList.add('hidden');
+      });
       if (primary) {
-        if (accordion.firstElementChild !== primary) {
-          accordion.insertBefore(primary, accordion.firstElementChild);
-        }
         primary.classList.add('domain-primary');
+        primary.querySelector('.domain-grid-badge')?.classList.remove('hidden');
       }
     }
   }
@@ -810,34 +810,17 @@ function applyTodayData(data) {
     });
   });
 
-  // Domain accordion — inline expandable cards (только карточки с data-domain)
-  document.querySelectorAll('.domain-card[data-domain]').forEach(card => {
-    const header = card.querySelector('.domain-card-header');
-    header.addEventListener('click', () => {
+  // Domain grid cards — tap → bottom sheet
+  document.querySelectorAll('.domain-grid-card[data-domain]').forEach(card => {
+    card.addEventListener('click', () => {
       const domain = card.dataset.domain;
-      const isOpen = card.classList.contains('open');
-
-      // Закрыть все
-      document.querySelectorAll('.domain-card').forEach(c => {
-        c.classList.remove('open');
-        c.querySelector('.domain-card-header').setAttribute('aria-expanded', 'false');
-        c.querySelector('.domain-card-body').hidden = true;
+      const meta = DOMAIN_META[domain] || {};
+      tg.HapticFeedback.impactOccurred('light');
+      openSheet({
+        icon: meta.icon,
+        title: meta.label,
+        text: domains[domain] || ''
       });
-
-      // Открыть текущий если был закрыт
-      if (!isOpen) {
-        tg.HapticFeedback.impactOccurred('light');
-        card.classList.add('open');
-        header.setAttribute('aria-expanded', 'true');
-        const body = card.querySelector('.domain-card-body');
-        body.hidden = false;
-        if (!body.dataset.rendered) {
-          body.innerHTML = `<p class="domain-card-text">${domains[domain] || ''}</p>`;
-          wrapTerms(body);
-          body.dataset.rendered = '1';
-        }
-        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-      }
     });
   });
 
