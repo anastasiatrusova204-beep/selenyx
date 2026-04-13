@@ -1044,8 +1044,8 @@ function _buildMoonDisc(illumination, angle) {
   <!-- Внутренний ореол -->
   <circle cx="${cx}" cy="${cy}" r="${r + 13}" fill="url(#mHalo1)" filter="url(#mSoft)"/>
 
-  <!-- Тёмная основа -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#0a0818"/>
+  <!-- Тёмная основа (чуть теплее — земное свечение) -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#121830"/>
 
   <!-- Кратеры / текстура поверхности -->
   <circle cx="${cx - 15}" cy="${cy - 17}" r="12" fill="#060412" opacity="0.55"/>
@@ -1061,8 +1061,10 @@ function _buildMoonDisc(illumination, angle) {
   <!-- Терминатор (мягкий) -->
   ${eRx > 1 ? `<ellipse cx="${cx}" cy="${cy}" rx="${eRx.toFixed(1)}" ry="${r}" fill="${ellipseFill}" filter="url(#mSoft)"/>` : ''}
 
-  <!-- Ободок (тонкий) -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#b45309" stroke-width="1.5" opacity="0.35"/>
+  <!-- Ободок атмосферы (тонкий, холодный) -->
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(180,200,255,0.22)" stroke-width="1.2"/>
+  <!-- Внешний ореол атмосферы -->
+  <circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="none" stroke="rgba(180,200,255,0.08)" stroke-width="2"/>
   <circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#fbbf24" stroke-width="0.7" opacity="0.14"/>
 </svg>`;
 }
