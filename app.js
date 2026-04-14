@@ -534,10 +534,16 @@ function calcStreak() {
 
   const badge = $('streak-badge');
   if (badge && streak >= 3) {
-    badge.textContent = `🔥 ${streak} дн.`;
-    badge.title = 'Дней подряд в Selenyx';
+    badge.innerHTML = `<span class="streak-fire">🔥</span><span class="streak-num">${streak}</span><span class="streak-label">дней подряд</span>`;
     badge.classList.remove('hidden');
-    badge.onclick = () => showToast(`${streak} дней подряд — ты замечательная! 🌙`, '#b07d2c');
+    badge.onclick = () => {
+      tg.HapticFeedback.impactOccurred('light');
+      tg.showPopup({
+        title: `🔥 Серия — ${streak} ${streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}`,
+        message: `Ты заходишь в Selenyx ${streak} дней подряд.\n\nЭто твой личный ритм — каждый день немного ближе к себе. Продолжай — энергия накапливается. 🌙`,
+        buttons: [{ type: 'ok', text: 'Буду держать ритм' }]
+      });
+    };
   } else if (badge) {
     badge.classList.add('hidden');
   }
