@@ -938,14 +938,12 @@ function renderMoon() {
 }
 
 function applyMoonData(moon) {
+  // Зодиакальная астролябия
+  setHTML('moon-wheel-wrap', _buildCelestialWheel(moon));
+
   setText('moon-phase-name', moon.phaseName);
-  // CSS-диск с реальной фазой вместо emoji
-  setHTML('moon-phase-emoji', _buildMoonDisc(moon.illumination, moon.angle));
   const deg = moon.moonLon != null ? ` · ${Math.floor(moon.moonLon % 30)}°` : '';
   setText('moon-sign-name', `Луна в ${moon.signRu}${deg} · ${moon.illumination}% освещённости`);
-
-  // Арка лунного цикла
-  setHTML('moon-cycle-arc', _buildCycleArc(moon.lunarDay, moon.angle));
 
   // Энергия знака где Луна сейчас (не знак пользователя, а астрономический)
   setText('moon-sign-energy-label', `🌙 Луна в ${moon.signRu} — что это значит`);
@@ -980,173 +978,268 @@ function applyMoonData(moon) {
 }
 
 /**
- * Строит SVG-диск Луны с правильной фазой.
- * angle: 0–360° (0=новолуние, 90=первая четверть, 180=полнолуние, 270=последняя четверть)
- * illumination: 0–100%
+ * Строит SVG-астролябию — зодиакальное колесо с положением Луны.
+ * Луна путешествует по эклиптике до своей реальной позиции.
  */
-function _buildMoonDisc(illumination, angle) {
-  const r = 52, cx = 68, cy = 68;
-  const waxing     = angle <= 180;
-  const cosA       = Math.cos(angle * Math.PI / 180);
-  const eRx        = Math.abs(cosA) * r;
-  const isGibbous  = angle > 90 && angle <= 270;
-  const ellipseFill = isGibbous ? 'url(#mLit)' : '#0a0818';
-  const clipSide    = waxing ? 'mClipR' : 'mClipL';
+function _buildCelestialWheel(moon) {
+  // ── Геометрия ──────────────────────────────────────────
+  const cx = 150, cy = 150;
+  const Ro = 118;   // внешнее кольцо зодиака
+  const Rl = 133;   // глифы знаков
+  const Rm = 96;    // позиция маркера Луны
+  const Ri = 66;    // внутреннее кольцо (дома)
+  const Rh = 28;    // хаб-центр
 
-  return `<svg class="moon-disc-svg" viewBox="0 0 136 136" aria-label="Луна ${illumination}% освещена">
-  <defs>
-    <radialGradient id="mLit" cx="28%" cy="20%" r="80%">
-      <stop offset="0%"   stop-color="#fffef8"/>
-      <stop offset="16%"  stop-color="#fef3c7"/>
-      <stop offset="44%"  stop-color="#d97706"/>
-      <stop offset="76%"  stop-color="#7c3200"/>
-      <stop offset="100%" stop-color="#3c1008"/>
-    </radialGradient>
-    <radialGradient id="mHalo1" cx="50%" cy="50%" r="50%">
-      <stop offset="50%" stop-color="#92400e" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.42"/>
-    </radialGradient>
-    <radialGradient id="mHalo2" cx="50%" cy="50%" r="50%">
-      <stop offset="68%" stop-color="#d97706" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#fde68a" stop-opacity="0.18"/>
-    </radialGradient>
-    <filter id="mGlowF" x="-70%" y="-70%" width="240%" height="240%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="mSoft"><feGaussianBlur stdDeviation="2.2"/></filter>
-    <clipPath id="mClipR">
-      <rect x="${cx}" y="${cy - r - 2}" width="${r + 3}" height="${r * 2 + 4}"/>
-    </clipPath>
-    <clipPath id="mClipL">
-      <rect x="${cx - r - 3}" y="${cy - r - 2}" width="${r + 3}" height="${r * 2 + 4}"/>
-    </clipPath>
-  </defs>
+  // ── Зодиакальные глифы и цвета стихий ──────────────────
+  const GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  const ELEM   = [
+    '#e87a58','#8baa88','#e8c870','#82aec8',  // огонь земля воздух вода
+    '#e8a840','#a8c88a','#c8a8e0','#a04040',
+    '#c09048','#7888a8','#7ab8e0','#8878c0',
+  ];
 
-  <!-- Звёзды фона -->
-  <circle cx="12" cy="14" r="1.2" fill="white" opacity="0.55"/>
-  <circle cx="120" cy="20" r="0.9" fill="white" opacity="0.50"/>
-  <circle cx="8"   cy="90" r="1.0" fill="white" opacity="0.44"/>
-  <circle cx="124" cy="82" r="1.3" fill="white" opacity="0.54"/>
-  <circle cx="20"  cy="124" r="0.8" fill="white" opacity="0.40"/>
-  <circle cx="114" cy="122" r="1.1" fill="white" opacity="0.46"/>
-  <circle cx="44"  cy="7"   r="0.7" fill="white" opacity="0.42"/>
-  <circle cx="94"  cy="5"   r="1.0" fill="white" opacity="0.47"/>
-  <circle cx="6"   cy="50"  r="0.8" fill="white" opacity="0.37"/>
-  <circle cx="130" cy="55"  r="0.9" fill="white" opacity="0.40"/>
-  <circle cx="28"  cy="8"   r="0.6" fill="white" opacity="0.35"/>
-  <circle cx="108" cy="8"   r="0.7" fill="white" opacity="0.38"/>
+  // ── Позиция Луны ────────────────────────────────────────
+  const lon        = moon.moonLon != null ? moon.moonLon : 0;
+  const signIdx    = Math.floor(lon / 30) % 12;
+  const moonAngDeg = lon - 90;                           // Овен на верхушке
+  const moonRad    = moonAngDeg * Math.PI / 180;
+  const moonX      = +(cx + Rm * Math.cos(moonRad)).toFixed(2);
+  const moonY      = +(cy + Rm * Math.sin(moonRad)).toFixed(2);
 
-  <!-- Внешний ореол (широкий, мягкий) -->
-  <circle cx="${cx}" cy="${cy}" r="${r + 24}" fill="url(#mHalo2)"/>
-  <!-- Внутренний ореол -->
-  <circle cx="${cx}" cy="${cy}" r="${r + 13}" fill="url(#mHalo1)" filter="url(#mSoft)"/>
-
-  <!-- Тёмная основа (чуть теплее — земное свечение) -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="#121830"/>
-
-  <!-- Кратеры / текстура поверхности -->
-  <circle cx="${cx - 15}" cy="${cy - 17}" r="12" fill="#060412" opacity="0.55"/>
-  <circle cx="${cx + 17}" cy="${cy + 9}"  r="16" fill="#060412" opacity="0.38"/>
-  <circle cx="${cx - 5}"  cy="${cy + 21}" r="10" fill="#060412" opacity="0.46"/>
-  <circle cx="${cx + 9}"  cy="${cy - 28}" r="7"  fill="#060412" opacity="0.32"/>
-  <circle cx="${cx - 24}" cy="${cy + 5}"  r="8"  fill="#060412" opacity="0.28"/>
-
-  <!-- Освещённая сторона -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#mLit)"
-    clip-path="url(#${clipSide})" filter="url(#mGlowF)"/>
-
-  <!-- Терминатор (мягкий) -->
-  ${eRx > 1 ? `<ellipse cx="${cx}" cy="${cy}" rx="${eRx.toFixed(1)}" ry="${r}" fill="${ellipseFill}" filter="url(#mSoft)"/>` : ''}
-
-  <!-- Ободок атмосферы (тонкий, холодный) -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(180,200,255,0.22)" stroke-width="1.2"/>
-  <!-- Внешний ореол атмосферы -->
-  <circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="none" stroke="rgba(180,200,255,0.08)" stroke-width="2"/>
-  <circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="none" stroke="#fbbf24" stroke-width="0.7" opacity="0.14"/>
-</svg>`;
-}
-
-/** Строит SVG-арку лунного цикла (1–30 дней, угол 0–360°) */
-function _buildCycleArc(lunarDay, angle) {
-  const r = 54, cx = 70, cy = 70, stroke = 5;
-  const circ   = 2 * Math.PI * r;
-  const pct    = (angle != null ? angle : ((lunarDay - 1) / 29.53) * 360) / 360;
-  const arcLen = pct * circ;
-  // Точка положения луны
-  const rad  = (angle != null ? angle : pct * 360) * Math.PI / 180 - Math.PI / 2;
-  const dotX = (cx + r * Math.cos(rad)).toFixed(1);
-  const dotY = (cy + r * Math.sin(rad)).toFixed(1);
-  // Стартовая позиция — новолуние (верхушка дуги)
+  // Стартовая позиция анимации Луны (от Овна, верх)
   const startX = cx;
-  const startY = (cy - r).toFixed(1);
-  const dashOff = (circ * 0.25).toFixed(1);
+  const startY = cy - Rm;
 
-  return `<svg class="cycle-arc" viewBox="0 0 140 140" aria-label="Лунный цикл: день ${lunarDay} из 29">
+  // Путь Луны по дуге от Овна до текущей позиции
+  // Луна идёт по кругу радиуса Rm от верхней точки до moonRad
+  const sweepDeg = ((lon % 360) + 360) % 360; // всегда 0-360
+  const largeArc = sweepDeg > 180 ? 1 : 0;
+  // midpoint для дуги (если sweepDeg > 0)
+  const midRad   = (sweepDeg / 2 - 90) * Math.PI / 180;
+  const midX     = +(cx + Rm * Math.cos(midRad)).toFixed(2);
+  const midY     = +(cy + Rm * Math.sin(midRad)).toFixed(2);
+  const moonPath = sweepDeg < 1
+    ? `M ${startX} ${startY}`
+    : `M ${startX} ${startY} A ${Rm} ${Rm} 0 ${largeArc} 1 ${moonX} ${moonY}`;
+  const moonPathLen = +(sweepDeg / 360 * 2 * Math.PI * Rm).toFixed(1);
+  const fullCirc    = +(2 * Math.PI * Rm).toFixed(1);
+
+  // ── Окружности ──────────────────────────────────────────
+  const outerC = +(2 * Math.PI * Ro).toFixed(1);
+  const innerC = +(2 * Math.PI * Ri).toFixed(1);
+
+  // ── Активный сектор ─────────────────────────────────────
+  function secPath(si) {
+    const s  = (si * 30 - 90) * Math.PI / 180;
+    const e  = ((si + 1) * 30 - 90) * Math.PI / 180;
+    const ix1 = +(cx + Ri * Math.cos(s)).toFixed(1), iy1 = +(cy + Ri * Math.sin(s)).toFixed(1);
+    const ox1 = +(cx + Ro * Math.cos(s)).toFixed(1), oy1 = +(cy + Ro * Math.sin(s)).toFixed(1);
+    const ox2 = +(cx + Ro * Math.cos(e)).toFixed(1), oy2 = +(cy + Ro * Math.sin(e)).toFixed(1);
+    const ix2 = +(cx + Ri * Math.cos(e)).toFixed(1), iy2 = +(cy + Ri * Math.sin(e)).toFixed(1);
+    return `M${ix1} ${iy1}L${ox1} ${oy1}A${Ro} ${Ro} 0 0 1 ${ox2} ${oy2}L${ix2} ${iy2}A${Ri} ${Ri} 0 0 0 ${ix1} ${iy1}Z`;
+  }
+
+  // ── Деления внешнего кольца (96 = каждые 3.75°, крупные — по 30°) ──
+  let ticks = '';
+  for (let i = 0; i < 96; i++) {
+    const ang   = (i * (360 / 96) - 90) * Math.PI / 180;
+    const major = i % 8 === 0;
+    const r1    = Ro - (major ? 9 : 4);
+    ticks += `<line x1="${+(cx+r1*Math.cos(ang)).toFixed(1)}" y1="${+(cy+r1*Math.sin(ang)).toFixed(1)}"
+      x2="${+(cx+Ro*Math.cos(ang)).toFixed(1)}" y2="${+(cy+Ro*Math.sin(ang)).toFixed(1)}"
+      stroke="rgba(196,154,60,${major ? '.45' : '.18'})" stroke-width="${major ? 1.4 : .7}"/>`;
+  }
+
+  // ── Разделительные спицы и домовые линии ────────────────
+  let spokes = '';
+  for (let i = 0; i < 12; i++) {
+    const ang = (i * 30 - 90) * Math.PI / 180;
+    const ix = +(cx + Ri * Math.cos(ang)).toFixed(1), iy = +(cy + Ri * Math.sin(ang)).toFixed(1);
+    const ox = +(cx + Ro * Math.cos(ang)).toFixed(1), oy = +(cy + Ro * Math.sin(ang)).toFixed(1);
+    const hx = +(cx + (Rh + 2) * Math.cos(ang)).toFixed(1), hy = +(cy + (Rh + 2) * Math.sin(ang)).toFixed(1);
+    // внешняя спица (между кольцами)
+    spokes += `<line x1="${ix}" y1="${iy}" x2="${ox}" y2="${oy}" stroke="rgba(196,154,60,.22)" stroke-width=".8"
+      class="cw-spoke" style="animation-delay:${(.42 + i * .045).toFixed(3)}s"/>`;
+    // внутренняя домовая линия (хаб → внутреннее кольцо)
+    spokes += `<line x1="${hx}" y1="${hy}" x2="${ix}" y2="${iy}" stroke="rgba(196,154,60,.10)" stroke-width=".5"
+      class="cw-spoke" style="animation-delay:${(.48 + i * .045).toFixed(3)}s"/>`;
+  }
+
+  // ── Глифы знаков ────────────────────────────────────────
+  let glyphs = '';
+  for (let i = 0; i < 12; i++) {
+    const ang    = ((i * 30 + 15) - 90) * Math.PI / 180;
+    const lx     = +(cx + Rl * Math.cos(ang)).toFixed(1);
+    const ly     = +(cy + Rl * Math.sin(ang)).toFixed(1);
+    const active = i === signIdx;
+    glyphs += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central"
+      font-size="${active ? 15 : 10}" fill="${active ? ELEM[i] : 'rgba(175,148,86,.48)'}"
+      class="cw-glyph" style="animation-delay:${(.58 + i * .055).toFixed(3)}s">${GLYPHS[i]}</text>`;
+  }
+
+  // ── CSS-анимации (внутри SVG <style> — изолированы) ─────
+  const styles = `
+    #cw-root { animation: cwAppear .85s cubic-bezier(.16,1,.3,1) both }
+    @keyframes cwAppear { from{opacity:0;transform:scale(.86)} to{opacity:1;transform:scale(1)} }
+
+    .cw-outer {
+      stroke-dasharray:${outerC} ${outerC};
+      stroke-dashoffset:${outerC};
+      animation:cwDraw 1.8s cubic-bezier(.16,1,.3,1) .12s forwards
+    }
+    .cw-inner {
+      stroke-dasharray:${innerC} ${innerC};
+      stroke-dashoffset:${innerC};
+      animation:cwDraw 1.2s cubic-bezier(.16,1,.3,1) .38s forwards
+    }
+    @keyframes cwDraw { to{stroke-dashoffset:0} }
+
+    .cw-spoke { opacity:0; animation:cwSpokeIn .3s ease forwards }
+    @keyframes cwSpokeIn { to{opacity:1} }
+
+    .cw-glyph {
+      opacity:0;
+      animation:cwGlyphIn .55s cubic-bezier(.34,1.56,.64,1) forwards
+    }
+    @keyframes cwGlyphIn {
+      from{opacity:0;transform-box:fill-box;transform:scale(.25)}
+      to{opacity:1;transform-box:fill-box;transform:scale(1)}
+    }
+
+    .cw-sector { opacity:0; animation:cwSecIn .7s ease 1.55s forwards }
+    @keyframes cwSecIn { to{opacity:1} }
+
+    /* Луна путешествует по дуге эклиптики */
+    .cw-trail {
+      stroke-dasharray:${moonPathLen} ${fullCirc};
+      stroke-dashoffset:${moonPathLen};
+      animation:cwTrail .9s cubic-bezier(.4,0,.2,1) 1.6s forwards
+    }
+    @keyframes cwTrail { to{stroke-dashoffset:0} }
+
+    .cw-moon-marker {
+      opacity:0;
+      transform-box:fill-box;
+      transform-origin:center center;
+      animation:cwMoonPop .65s cubic-bezier(.34,1.56,.64,1) ${(1.6 + (sweepDeg / 360) * 0.9 + 0.1).toFixed(2)}s forwards
+    }
+    @keyframes cwMoonPop {
+      from{opacity:0;transform:scale(.05)}
+      to{opacity:1;transform:scale(1)}
+    }
+
+    .cw-halo {
+      opacity:0;
+      transform-box:fill-box;
+      transform-origin:center center;
+      animation:cwHaloPulse 3s ease-in-out ${(1.6 + (sweepDeg / 360) * 0.9 + 0.25).toFixed(2)}s infinite
+    }
+    @keyframes cwHaloPulse {
+      0%{opacity:.12;transform:scale(1)}
+      50%{opacity:.55;transform:scale(1.7)}
+      100%{opacity:.12;transform:scale(1)}
+    }
+
+    /* Внешнее кольцо медленно вращается — астролябия живая */
+    .cw-spin {
+      transform-origin:150px 150px;
+      animation:cwSpin 110s linear infinite
+    }
+    @keyframes cwSpin { to{transform:rotate(360deg)} }
+
+    .cw-hub-text { animation:cwHubIn .5s ease 1.9s both }
+    @keyframes cwHubIn { from{opacity:0;transform-box:fill-box;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+  `;
+
+  return `<svg id="cw-root" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"
+    role="img" aria-label="Зодиакальное колесо — Луна в ${moon.signRu}, ${moon.lunarDay}-й лунный день"
+    style="width:100%;max-width:300px;display:block;margin:0 auto;overflow:visible">
   <defs>
-    <filter id="mGlow" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="b"/>
+    <radialGradient id="cwBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(20,14,44,.9)"/>
+      <stop offset="100%" stop-color="rgba(8,5,20,0)"/>
+    </radialGradient>
+    <radialGradient id="cwHub" cx="30%" cy="25%" r="85%">
+      <stop offset="0%" stop-color="#252048"/>
+      <stop offset="100%" stop-color="#0c0820"/>
+    </radialGradient>
+    <radialGradient id="cwMoon" cx="38%" cy="28%" r="80%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="55%" stop-color="#d4a847"/>
+      <stop offset="100%" stop-color="#7c3a08"/>
+    </radialGradient>
+    <filter id="cwGlw" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <style>
-      .arc-fill { animation: arcGrow 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
-      .arc-fill-glow { animation: arcGrow 1.2s cubic-bezier(0.16,1,0.3,1) forwards; }
-      @keyframes arcGrow {
-        from { stroke-dasharray: 0 ${circ.toFixed(1)}; }
-        to   { stroke-dasharray: ${arcLen.toFixed(1)} ${(circ - arcLen).toFixed(1)}; }
-      }
-      .arc-center { animation: arcNumIn 0.45s ease 0.9s both; transform-box: fill-box; transform-origin: 70px 64px; }
-      @keyframes arcNumIn {
-        from { opacity: 0; transform: scale(0.75); }
-        to   { opacity: 1; transform: scale(1); }
-      }
-    </style>
+    <filter id="cwGlwS" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>${styles}</style>
   </defs>
 
-  <!-- Фоновое кольцо -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
-    stroke="var(--bg3)" stroke-width="${stroke}"/>
+  <!-- Фоновое свечение центра -->
+  <circle cx="${cx}" cy="${cy}" r="148" fill="url(#cwBg)"/>
 
-  <!-- Glow-подложка дуги (шире, прозрачная) -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
-    class="arc-fill-glow"
-    stroke="var(--gold)" stroke-width="${stroke + 5}" stroke-linecap="round" opacity="0.18"
-    stroke-dasharray="0 ${circ.toFixed(1)}" stroke-dashoffset="${dashOff}"
-    transform="rotate(-90 ${cx} ${cy})"/>
-
-  <!-- Основная дуга (анимированная) -->
-  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
-    class="arc-fill"
-    stroke="var(--gold)" stroke-width="${stroke}" stroke-linecap="round"
-    stroke-dasharray="0 ${circ.toFixed(1)}" stroke-dashoffset="${dashOff}"
-    transform="rotate(-90 ${cx} ${cy})"/>
-
-  <!-- Пульсирующее кольцо за точкой -->
-  <circle cx="${dotX}" cy="${dotY}" r="9" fill="none"
-    stroke="rgba(200,169,110,0.5)" stroke-width="1.5">
-    <animate attributeName="r"       values="9;20;9"     dur="3s" repeatCount="indefinite"
-      calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-    <animate attributeName="opacity" values="0.55;0;0.55" dur="3s" repeatCount="indefinite"
-      calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/>
-  </circle>
-
-  <!-- Точка Луны (едет от новолуния до текущего положения) -->
-  <circle r="7.5" fill="var(--gold)" filter="url(#mGlow)">
-    <animate attributeName="cx" from="${startX}" to="${dotX}" dur="1.2s"
-      calcMode="spline" keySplines="0.16 1 0.3 1" fill="freeze"/>
-    <animate attributeName="cy" from="${startY}" to="${dotY}" dur="1.2s"
-      calcMode="spline" keySplines="0.16 1 0.3 1" fill="freeze"/>
-  </circle>
-
-  <!-- Число дня (fade + scale) -->
-  <g class="arc-center">
-    <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="arc-day-num">${lunarDay}</text>
-    <text x="${cx}" y="${cy + 16}" text-anchor="middle" class="arc-day-sub">лунный день</text>
+  <!-- ─── Вращающееся внешнее кольцо + деления ─── -->
+  <g class="cw-spin">
+    ${ticks}
+    <circle cx="${cx}" cy="${cy}" r="${Ro}" fill="none"
+      stroke="rgba(196,154,60,.58)" stroke-width="1.8" class="cw-outer"/>
   </g>
 
-  <!-- Метки фаз -->
-  <text x="${cx}" y="10"  text-anchor="middle" class="arc-label">🌑</text>
-  <text x="${cx}" y="136" text-anchor="middle" class="arc-label">🌕</text>
+  <!-- ─── Статика: внутреннее кольцо ─── -->
+  <circle cx="${cx}" cy="${cy}" r="${Ri}" fill="none"
+    stroke="rgba(196,154,60,.28)" stroke-width=".9" class="cw-inner"/>
+
+  <!-- ─── Спицы + домовые линии ─── -->
+  ${spokes}
+
+  <!-- ─── Активный сектор знака ─── -->
+  <path d="${secPath(signIdx)}"
+    fill="rgba(${ELEM[signIdx].slice(1).match(/../g).map(h=>parseInt(h,16)).join(',')}, .08)"
+    stroke="${ELEM[signIdx]}" stroke-width=".7" opacity=".7"
+    class="cw-sector"/>
+
+  <!-- ─── Глифы знаков ─── -->
+  ${glyphs}
+
+  <!-- ─── Хаб ─── -->
+  <circle cx="${cx}" cy="${cy}" r="${Rh + 4}" fill="none"
+    stroke="rgba(196,154,60,.18)" stroke-width=".6"/>
+  <circle cx="${cx}" cy="${cy}" r="${Rh}" fill="url(#cwHub)"
+    stroke="rgba(196,154,60,.42)" stroke-width="1.1"/>
+
+  <!-- Число лунного дня + надпись -->
+  <g class="cw-hub-text">
+    <text x="${cx}" y="${cy - 7}" text-anchor="middle" dominant-baseline="central"
+      font-family="'Cormorant Garamond',Georgia,serif" font-size="26" font-style="italic"
+      fill="rgba(237,218,165,.95)">${moon.lunarDay}</text>
+    <text x="${cx}" y="${cy + 12}" text-anchor="middle" dominant-baseline="central"
+      font-family="'DM Sans',sans-serif" font-size="6" letter-spacing="2.2"
+      fill="rgba(175,144,70,.60)">ЛУН ДЕНЬ</text>
+  </g>
+
+  <!-- ─── Хвост-след: дуга пройденного пути Луны ─── -->
+  ${moonPathLen > 2 ? `<path d="${moonPath}"
+    fill="none"
+    stroke="rgba(212,168,74,.35)" stroke-width="1.4" stroke-linecap="round"
+    class="cw-trail"/>` : ''}
+
+  <!-- ─── Гало Луны (пульсирует) ─── -->
+  <g transform="translate(${moonX},${moonY})" class="cw-halo" filter="url(#cwGlwS)">
+    <circle r="11" fill="rgba(212,168,74,.5)"/>
+  </g>
+
+  <!-- ─── Маркер Луны ─── -->
+  <g transform="translate(${moonX},${moonY})" class="cw-moon-marker" filter="url(#cwGlw)">
+    <circle r="9" fill="url(#cwMoon)"/>
+  </g>
+  <g transform="translate(${moonX},${moonY})" class="cw-moon-marker">
+    <circle r="3.5" fill="#fffef8"/>
+  </g>
+
 </svg>`;
 }
 
