@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=49">
+  <link rel="stylesheet" href="style.css?v=50">
   <style>/* critical: prevent domain-card from collapsing in flex context */
   .domain-card { flex-shrink: 0; }
   /* critical: header-icon-btn fallback if CDN serves old CSS */
@@ -203,7 +203,7 @@
   <!-- Header -->
   <header class="app-header">
     <h1 class="app-logo">🌙 Selenyx</h1>
-    <span id="streak-badge" class="streak-badge hidden"></span>
+    <span id="streak-badge" class="hidden"></span>
     <div class="header-actions">
       <button id="kb-header-btn" class="header-icon-btn" aria-label="База знаний">📚</button>
       <button id="settings-btn" class="header-profile-btn" aria-label="Профиль">
@@ -226,6 +226,7 @@
             <p id="today-date" class="today-date"></p>
             <p id="today-moon-inline" class="today-moon-inline hidden"></p>
             <p id="today-goal-line" class="today-goal-line hidden"></p>
+            <p id="today-streak-line" class="today-streak-line hidden"></p>
           </div>
           <button id="today-share" class="today-share-btn" aria-label="Поделиться энергией дня">Поделиться</button>
         </div>
@@ -314,6 +315,9 @@
             </div>
           </button>
         </div>
+
+        <!-- Натальная карта — заблокированная или показ -->
+        <div id="natal-promo-card" class="natal-promo-card"></div>
 
         <!-- Диагностика дня — карточка-приглашение -->
         <div id="diag-invite" class="diag-invite-card">
@@ -613,23 +617,6 @@
     </div>
 
     <button id="settings-save" class="btn-primary full-width">Сохранить</button>
-
-    <!-- Натальная карта в настройках -->
-    <div class="settings-divider"></div>
-    <div id="settings-natal-section">
-      <label class="form-label">Натальная карта</label>
-      <div id="settings-natal-result" class="hidden natal-mini-block"></div>
-      <div id="settings-natal-form">
-        <p class="settings-natal-hint">Введи дату и время рождения — покажу твои Солнце, Луну и Асцендент.</p>
-        <div class="settings-birth-row">
-          <input id="settings-birth-date" class="form-input" type="text" inputmode="numeric"
-            placeholder="ДД.ММ.ГГГГ" maxlength="10" autocomplete="bday" spellcheck="false">
-          <input id="settings-birth-time" class="form-input" type="text" inputmode="numeric"
-            placeholder="ЧЧ:ММ (необяз.)" maxlength="5" spellcheck="false">
-        </div>
-        <button id="settings-natal-save" class="btn-ghost full-width" style="margin-top:8px">Рассчитать ✨</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -741,6 +728,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=17"></script>
-<script src="app.js?v=61"></script>
+<script src="app.js?v=62"></script>
 </body>
 </html>

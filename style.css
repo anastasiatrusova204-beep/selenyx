@@ -531,17 +531,10 @@ ul { list-style: none; }
 
 .header-actions { display: flex; gap: 4px; }
 
-.streak-badge {
-  display: flex; flex-direction: column; align-items: center;
-  background: var(--gold-dim);
-  border: 1px solid rgba(176,125,44,0.25);
-  border-radius: 10px;
-  padding: 3px 9px 4px;
-  flex-shrink: 0; cursor: pointer; line-height: 1.1;
+/* streak line под датой в вкладке День */
+.today-streak-line {
+  font-size: 12px; color: var(--gold); margin-top: 3px; font-weight: 500;
 }
-.streak-fire { font-size: 11px; line-height: 1; }
-.streak-num  { font-size: 15px; font-weight: 700; color: var(--gold); line-height: 1.15; }
-.streak-label { font-size: 9px; color: var(--gold); opacity: .7; letter-spacing: .3px; white-space: nowrap; }
 
 .icon-btn {
   width: 40px; height: 40px;
@@ -1379,13 +1372,38 @@ select.form-input { cursor: pointer; }
 .natal-desc { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
 .sign-emoji { margin-right: 2px; }
 
-/* Settings overlay — natal section */
-.settings-divider { height: 1px; background: var(--divider); margin: 20px 0; }
-.settings-natal-hint { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin: 0 0 10px; }
-.settings-birth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.natal-mini-block { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
-  background: rgba(176,125,44,0.07); border-radius: var(--r-sm); border: 0.5px solid rgba(176,125,44,0.2); }
-.natal-mini-row { font-size: 14px; color: var(--text); line-height: 1.5; }
+/* ─── Натальная карта в вкладке День ─────────────────────── */
+
+/* Заблокированная */
+.natal-locked-card {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--divider); overflow: hidden;
+}
+.natal-locked-preview {
+  padding: 14px 16px 10px; opacity: .35; display: flex; flex-direction: column; gap: 8px;
+}
+.natal-locked-row { display: flex; align-items: center; gap: 10px; }
+.natal-planet-icon { font-size: 18px; flex-shrink: 0; }
+.natal-locked-text { font-size: 14px; color: var(--text); letter-spacing: 1px; }
+.natal-locked-cta {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; border-top: 1px solid var(--divider);
+  background: rgba(176,125,44,0.05);
+}
+.natal-lock-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.natal-locked-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.natal-locked-sub { font-size: 12px; color: var(--text-sub); margin: 0; line-height: 1.5; }
+.natal-unlock-btn { margin: 12px 16px 16px; width: calc(100% - 32px); }
+
+/* Разблокированная */
+.natal-unlocked-card {
+  background: rgba(176,125,44,0.07); border-radius: var(--r);
+  border: 0.5px solid rgba(176,125,44,0.25); padding: 4px 0;
+}
+.natal-unlocked-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
+.natal-unlocked-row + .natal-unlocked-row { border-top: 0.5px solid rgba(176,125,44,0.12); }
+.natal-planet-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.natal-planet-hint { font-size: 12px; color: var(--text-sub); }
 
 /* ─── 16. ВКЛАДКА СОВМЕСТИМОСТЬ ─────────────────────────── */
 .compat-grid {
@@ -1661,6 +1679,7 @@ select.form-input { cursor: pointer; }
   width: 100%; background: var(--card);
   border-radius: var(--r-lg) var(--r-lg) 0 0;
   padding: 20px;
+  max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 16px;
   animation: slideUp 250ms cubic-bezier(0.32,0.72,0,1);
