@@ -219,24 +219,52 @@ ul { list-style: none; }
 }
 
 /* ─── 7. ОНБОРДИНГ ──────────────────────────────────────── */
-#onboarding-screen { z-index: 9; overflow: hidden; }
+#onboarding-screen {
+  z-index: 9; overflow: hidden;
+  background: radial-gradient(ellipse at 50% -10%, #1c2050 0%, #0e1138 40%, #07081c 100%);
+}
 
-/* Фоновые золотые звёзды */
+/* Звёздное поле — белые далёкие звёзды */
 #onboarding-screen::before {
   content: '';
   position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background-image:
-    radial-gradient(1.5px 1.5px at 8%  12%, rgba(176,125,44,0.55) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 22% 28%, rgba(176,125,44,0.35) 0%, transparent 100%),
-    radial-gradient(2px   2px   at 78% 10%, rgba(176,125,44,0.45) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 90% 32%, rgba(176,125,44,0.3)  0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 55% 8%,  rgba(176,125,44,0.5)  0%, transparent 100%),
-    radial-gradient(1px   1px   at 10% 55%, rgba(176,125,44,0.3)  0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 88% 65%, rgba(176,125,44,0.4)  0%, transparent 100%),
-    radial-gradient(1px   1px   at 40% 80%, rgba(176,125,44,0.35) 0%, transparent 100%),
-    radial-gradient(2px   2px   at 68% 88%, rgba(176,125,44,0.45) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 25% 92%, rgba(176,125,44,0.3)  0%, transparent 100%);
-  animation: starTwinkle 6s ease-in-out infinite;
+    radial-gradient(1px   1px   at 5%   8%,  rgba(255,255,255,0.7)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 15%  20%, rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 28%  5%,  rgba(255,255,255,0.6)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 42%  15%, rgba(255,255,255,0.4)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 60%  7%,  rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 75%  18%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 88%  9%,  rgba(255,255,255,0.45) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 95%  25%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 10%  38%, rgba(255,255,255,0.3)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 33%  45%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 50%  35%, rgba(255,255,255,0.3)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 70%  42%, rgba(255,255,255,0.5)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 85%  50%, rgba(255,255,255,0.28) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 22%  62%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 48%  70%, rgba(255,255,255,0.25) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 78%  78%, rgba(255,255,255,0.4)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 35%  88%, rgba(255,255,255,0.3)  0%, transparent 100%),
+    radial-gradient(2px   2px   at 62%  92%, rgba(255,255,255,0.2)  0%, transparent 100%),
+    radial-gradient(1px   1px   at 90%  85%, rgba(255,255,255,0.35) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 8%   78%, rgba(255,255,255,0.25) 0%, transparent 100%);
+  animation: starTwinkle 9s ease-in-out infinite;
+}
+
+/* Звёздное поле — золотые ближние звёзды */
+#onboarding-screen::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(2px   2px   at 18%  14%, rgba(176,125,44,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 72%  22%, rgba(176,125,44,0.5) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 38%  72%, rgba(176,125,44,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 85%  60%, rgba(176,125,44,0.45) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 12%  80%, rgba(176,125,44,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 58%  15%, rgba(176,125,44,0.55) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 92%  45%, rgba(176,125,44,0.35) 0%, transparent 100%);
+  animation: starTwinkle 14s 5s ease-in-out infinite;
 }
 
 .ob-container {
@@ -247,171 +275,222 @@ ul { list-style: none; }
 .ob-slide {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 32px 28px 16px; gap: 18px; text-align: center;
+  padding: 32px 28px 16px; gap: 16px; text-align: center;
 }
 
 @keyframes obSlideIn {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(22px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.ob-illustration {
-  font-size: 72px; line-height: 1; margin-bottom: 4px;
-  filter: drop-shadow(0 0 20px rgba(176,125,44,0.45));
-  animation: obIllustIn 0.5s ease both;
+/* CSS луна на слайде 0 */
+.ob-moon-visual {
+  position: relative;
+  width: 88px; height: 88px;
+  margin-bottom: 4px;
+  animation: obMoonRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes obIllustIn {
-  from { opacity: 0; transform: scale(0.8) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+.ob-moon-orb {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: radial-gradient(ellipse at 38% 35%,
+    #fef3c7 0%, #f5d08a 20%, #d4962e 50%, #9a6318 78%, #5c3c10 100%);
+  box-shadow:
+    0 0 0 1px rgba(176,125,44,0.35),
+    0 0 18px 5px rgba(200,150,50,0.35),
+    0 0 45px 16px rgba(176,125,44,0.18),
+    0 0 90px 36px rgba(176,125,44,0.06);
+  animation: obMoonPulse 5s ease-in-out infinite;
+}
+
+/* Кратерный намёк */
+.ob-moon-orb::before {
+  content: '';
+  position: absolute; border-radius: 50%;
+  background: rgba(0,0,0,0.12);
+  width: 18px; height: 14px; top: 28px; left: 52px;
+  filter: blur(3px);
+}
+.ob-moon-orb::after {
+  content: '';
+  position: absolute; border-radius: 50%;
+  background: rgba(0,0,0,0.08);
+  width: 10px; height: 8px; top: 48px; left: 22px;
+  filter: blur(2px);
+}
+
+.ob-moon-halo {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 130px; height: 130px; border-radius: 50%;
+  border: 0.5px solid rgba(176,125,44,0.22);
+  animation: obHaloBreath 5s ease-in-out infinite;
+  pointer-events: none;
+}
+.ob-moon-halo::before {
+  content: '';
+  position: absolute; inset: -18px; border-radius: 50%;
+  border: 0.5px solid rgba(176,125,44,0.1);
+  animation: obHaloBreath 5s 1.5s ease-in-out infinite;
+}
+
+@keyframes obMoonRise {
+  from { opacity: 0; transform: scale(0.72) translateY(24px); filter: blur(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+@keyframes obMoonPulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(176,125,44,0.35), 0 0 18px 5px rgba(200,150,50,0.35), 0 0 45px 16px rgba(176,125,44,0.18), 0 0 90px 36px rgba(176,125,44,0.06); }
+  50%       { box-shadow: 0 0 0 1px rgba(176,125,44,0.5), 0 0 28px 10px rgba(200,150,50,0.5), 0 0 60px 24px rgba(176,125,44,0.28), 0 0 110px 50px rgba(176,125,44,0.1); }
+}
+@keyframes obHaloBreath {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.06); }
 }
 
 .ob-title {
   font-family: var(--font-display);
-  font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.2;
-  animation: obSlideIn 0.45s 0.1s ease both;
+  font-size: 32px; font-weight: 600; font-style: italic;
+  color: #f0e6cc; line-height: 1.2;
+  animation: obSlideIn 0.55s 0.1s ease both;
 }
 
 .ob-text {
-  font-size: 15px; color: var(--text-sub); line-height: 1.65;
-  max-width: 300px;
-  animation: obSlideIn 0.45s 0.2s ease both;
+  font-size: 14px; color: rgba(220,210,195,0.6); line-height: 1.7;
+  max-width: 290px;
+  animation: obSlideIn 0.55s 0.2s ease both;
 }
 
 .ob-list {
   display: flex; flex-direction: column; gap: 8px;
   text-align: left; width: 100%; max-width: 280px;
 }
-
 .ob-list li {
-  font-size: 15px; color: var(--text-sub);
+  font-size: 14px; color: rgba(220,210,195,0.65);
   padding: 10px 14px;
-  background: var(--bg2); border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.05); border-radius: var(--r-sm);
+  border: 0.5px solid rgba(255,255,255,0.08);
 }
 
+/* Знаки зодиака */
 .sign-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; width: 100%; max-width: 340px;
+  gap: 7px; width: 100%; max-width: 340px;
 }
-
 .sign-btn {
-  min-height: 52px; border-radius: var(--r-sm);
-  background: var(--bg2); border: 0.5px solid var(--divider);
-  font-size: 13px; font-weight: 500; color: var(--text-sub);
-  transition: all var(--t); padding: 6px 4px;
+  min-height: 52px; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  font-size: 13px; font-weight: 500; color: rgba(220,210,195,0.65);
+  transition: all 0.2s; padding: 6px 4px;
 }
-
 .sign-btn:active { transform: scale(0.95); }
-
 .sign-btn.active {
-  background: var(--gold); border-color: var(--gold);
-  color: #fff; font-weight: 600;
+  background: rgba(176,125,44,0.18); border-color: rgba(176,125,44,0.7);
+  color: #f0d080; font-weight: 600;
+  box-shadow: 0 0 12px rgba(176,125,44,0.2);
 }
 
-.ob-dots {
-  display: flex; gap: 8px; justify-content: center; padding: 12px 0;
-}
-
+/* Прогресс-точки */
+.ob-dots { display: flex; gap: 8px; justify-content: center; padding: 10px 0; }
 .ob-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--bg3); transition: all var(--t);
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); transition: all 0.35s;
 }
-
 .ob-dot.active {
-  background: var(--gold); transform: scale(1.2);
-  width: 20px; border-radius: 4px;
+  background: var(--gold); width: 24px; border-radius: 3px;
+  box-shadow: 0 0 8px rgba(176,125,44,0.55);
 }
 
+/* Кнопки онбординга */
 .ob-buttons {
-  padding: 12px 24px;
+  padding: 10px 24px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 8px;
 }
 
-/* Goal cards (онбординг) */
+/* Goal cards */
 .goal-cards {
-  display: flex; flex-direction: column; gap: 10px;
+  display: flex; flex-direction: column; gap: 9px;
   width: 100%; max-width: 320px;
 }
-
 .goal-card {
-  padding: 14px 18px; border-radius: var(--r-sm);
-  background: var(--bg2); border: 1.5px solid var(--divider);
-  font-size: 15px; font-weight: 500; color: var(--text-sub);
-  text-align: left; transition: all var(--t);
+  padding: 15px 18px; border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  font-size: 15px; font-weight: 500; color: rgba(220,210,195,0.75);
+  text-align: left; transition: all 0.2s;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
 }
-
 .goal-card:active { transform: scale(0.97); }
-
-/* State chips grid (онбординг слайд 2) */
-.state-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 8px; width: 100%; max-width: 320px; margin-top: 4px;
-}
-
-.state-chip {
-  padding: 11px 10px; border-radius: var(--r-sm);
-  background: var(--bg2); border: 1.5px solid var(--divider);
-  font-size: 14px; color: var(--text); text-align: left;
-  transition: all var(--t); touch-action: manipulation;
-}
-
-.state-chip:active { transform: scale(0.97); }
-
-.state-chip.active {
-  background: var(--gold-dim); border-color: var(--gold);
-  color: var(--gold); font-weight: 600;
-}
-
 .goal-card.active {
-  background: var(--gold-dim); border-color: var(--gold);
-  color: var(--gold); font-weight: 600;
+  background: rgba(176,125,44,0.14); border-color: rgba(176,125,44,0.65);
+  color: #f0d080; font-weight: 600;
+  box-shadow: 0 0 16px rgba(176,125,44,0.15);
 }
 
 /* Компактные goal-cards в настройках */
 .goal-cards--compact { gap: 7px; }
-
 .goal-cards--compact .goal-card {
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 10px 14px; font-size: 14px;
+  background: var(--bg2); border: 1.5px solid var(--divider);
+  color: var(--text-sub); backdrop-filter: none;
 }
+.goal-cards--compact .goal-card.active {
+  background: var(--gold-dim); border-color: var(--gold);
+  color: var(--gold); box-shadow: none;
+}
+
+/* State chips */
+.state-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 7px; width: 100%; max-width: 320px; margin-top: 4px;
+}
+.state-chip {
+  padding: 11px 10px; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  font-size: 13px; color: rgba(220,210,195,0.7); text-align: left;
+  transition: all 0.2s; touch-action: manipulation;
+}
+.state-chip:active { transform: scale(0.97); }
+.state-chip.active {
+  background: rgba(176,125,44,0.14); border-color: rgba(176,125,44,0.6);
+  color: #f0d080; font-weight: 600;
+}
+
+/* Кнопки пропустить / назад */
+.ob-skip-btn { font-size: 13px; color: rgba(255,255,255,0.28); background: none; border: none; }
+.ob-back-btn { font-size: 18px; color: rgba(255,255,255,0.3); background: none; border: none; }
 
 /* Text input (онбординг) */
 .ob-text-input {
   width: 100%; max-width: 300px;
-  padding: 14px 16px; border-radius: var(--r-sm);
-  border: 1.5px solid var(--divider);
-  background: var(--bg2); color: var(--text);
+  padding: 14px 16px; border-radius: 12px;
+  border: 0.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9);
   font-family: var(--font-body); font-size: 16px;
-  outline: none; transition: border-color var(--t);
+  outline: none; transition: border-color 0.2s;
   -webkit-appearance: none; appearance: none;
 }
-
-.ob-text-input:focus { border-color: var(--gold); }
+.ob-text-input:focus { border-color: rgba(176,125,44,0.8); }
+.ob-text-input option { background: #0d1035; color: #f0e6cc; }
 
 /* Birth date row */
-.birth-row {
-  display: flex; gap: 8px; width: 100%; max-width: 300px;
-}
-
-.birth-field {
-  padding: 14px 10px; text-align: center;
-}
-
+.birth-row { display: flex; gap: 8px; width: 100%; max-width: 300px; }
+.birth-field { padding: 14px 10px; text-align: center; }
 .birth-field[type="number"] { width: 72px; flex-shrink: 0; }
 .birth-field[type="number"]::-webkit-inner-spin-button,
 .birth-field[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-
 .birth-month { flex: 1; text-align: left; }
 
 /* Micro-insight */
 .ob-insight {
   max-width: 300px; padding: 12px 16px;
-  background: var(--gold-dim); border-radius: var(--r-sm);
-  border-left: 3px solid var(--gold);
-  font-size: 14px; color: var(--text-sub); line-height: 1.6;
+  background: rgba(176,125,44,0.1); border-radius: 12px;
+  border-left: 2px solid rgba(176,125,44,0.6);
+  font-size: 14px; color: rgba(240,224,180,0.85); line-height: 1.6;
   text-align: left;
-  animation: fadeInUp 0.3s ease;
+  animation: obSlideIn 0.4s ease both;
 }
 
 /* Roadmap screen */
@@ -1192,6 +1271,13 @@ ul { list-style: none; }
 
 .sheet-divider {
   height: 1px; background: var(--card-border); margin: 2px 0;
+}
+
+/* Динамическая секция "Сегодня" в шторке — выше основного текста */
+#sheet-sections-top:not(:empty) {
+  margin-bottom: 12px; padding: 10px 12px;
+  background: rgba(176,125,44,0.07); border-radius: var(--r-sm);
+  border-left: 2px solid rgba(176,125,44,0.4);
 }
 
 .sheet-section { display: flex; flex-direction: column; gap: 4px; }
