@@ -533,7 +533,7 @@ function calcStreak() {
   }
 
   const badge = $('streak-badge');
-  if (badge && streak >= 2) {
+  if (badge && streak >= 7) {
     badge.textContent = `${streak} дн.`;
     badge.classList.remove('hidden');
   }
@@ -726,12 +726,11 @@ function applyTodayData(data) {
   // today-basis скрыт — лунный день только на вкладке Луна
 
   // Персональный совет: знак × фаза луны (меняется каждые 3–4 дня)
-  const signData = SIGNS.find(s => s.id === sign);
   const phaseText = (ZODIAC_PHASE_TIPS?.[sign] || ZODIAC_PHASE_TIPS?.aries)?.[moon.phase] || phaseTips.good || '';
   const cardLabel = $('today-card-label');
-  if (cardLabel) cardLabel.textContent = `${moon.emoji} ${moon.phaseName} · ${signData?.ru || sign}`;
+  if (cardLabel) cardLabel.textContent = '✦ Прогноз дня';
   setText('today-good', phaseText);
-  setText('today-avoid', phaseTips.avoid || '');
+  // today-avoid убран — дублировал "избегай" из раздела Числа дня
 
   // Практика лунного дня
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
@@ -1229,15 +1228,15 @@ function _buildCelestialWheel(moon) {
 
   <!-- ─── Гало Луны (пульсирует) ─── -->
   <g transform="translate(${moonX},${moonY})" class="cw-halo" filter="url(#cwGlwS)">
-    <circle r="11" fill="rgba(212,168,74,.5)"/>
+    <circle r="16" fill="rgba(212,168,74,.45)"/>
   </g>
 
   <!-- ─── Маркер Луны ─── -->
   <g transform="translate(${moonX},${moonY})" class="cw-moon-marker" filter="url(#cwGlw)">
-    <circle r="9" fill="url(#cwMoon)"/>
+    <circle r="14" fill="url(#cwMoon)"/>
   </g>
   <g transform="translate(${moonX},${moonY})" class="cw-moon-marker">
-    <circle r="3.5" fill="#fffef8"/>
+    <circle r="5.5" fill="#fffef8"/>
   </g>
 
 </svg>`;
