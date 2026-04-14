@@ -364,7 +364,7 @@ function showObSlide(idx) {
       el.classList.remove('hidden');
       el.style.animation = 'none';
       el.offsetHeight; // reflow
-      el.style.animation = 'obSlideIn 0.28s ease forwards';
+      el.style.animation = 'obSlideIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards';
       // Сбросить анимации дочерних элементов для повторного воспроизведения
       el.querySelectorAll('.ob-illustration, .ob-title, .ob-text').forEach(child => {
         child.style.animation = 'none';
@@ -838,10 +838,24 @@ function applyTodayData(data) {
       const domain = card.dataset.domain;
       const meta = DOMAIN_META[domain] || {};
       tg.HapticFeedback.impactOccurred('light');
+
+      // Динамический контекст: лунный день + фаза (меняются каждый день)
+      const ld = LUNAR_DAYS[moon.lunarDay] || {};
+      const domainDayAngles = {
+        health:  ld.practice || phaseTips.good || '',
+        work:    ld.energy   || phaseTips.good || '',
+        love:    ld.hint     || phaseTips.good || '',
+        psych:   ld.hint     || phaseTips.good || '',
+      };
+      const todayAngle = domainDayAngles[domain] || '';
+
       openSheet({
         icon: meta.icon,
         title: meta.label,
-        text: domains[domain] || ''
+        text: domains[domain] || '',
+        topSections: todayAngle ? [
+          { label: `✦ Сегодня · ${moon.lunarDay}-й лунный день`, sub: todayAngle }
+        ] : undefined
       });
     });
   });
@@ -911,24 +925,26 @@ const DOMAIN_META = {
   psych:  { label: 'Психология', icon: '🧠' },
 };
 
-// { icon: html|text, title, text, sections: [{label, sub, muted?}] }
-function openSheet({ icon, title, text, sections }) {
+// { icon: html|text, title, text, topSections?, sections: [{label, sub, muted?}] }
+function openSheet({ icon, title, text, sections, topSections }) {
   setHTML('sheet-domain-icon',  icon);
   setText('sheet-domain-title', title);
   setText('sheet-domain-text',  text);
 
-  // Динамические секции
+  const renderSections = (arr) => (arr || [])
+    .filter(s => s.sub)
+    .map(s => `<div class="sheet-section">
+      <p class="sheet-label${s.muted ? ' muted' : ''}">${s.label}</p>
+      <p class="sheet-sub${s.muted ? ' muted' : ''}">${s.sub}</p>
+    </div>`).join('');
+
+  // Секции ВЫШЕ основного текста (динамический контекст дня)
+  const topEl = $('sheet-sections-top');
+  if (topEl) topEl.innerHTML = renderSections(topSections || sections || []);
+
+  // Секции НИЖЕ основного текста
   const body = $('sheet-sections');
-  if (body) {
-    body.innerHTML = (sections || [])
-      .filter(s => s.sub)
-      .map(s => `
-        <div class="sheet-section">
-          <p class="sheet-label${s.muted ? ' muted' : ''}">${s.label}</p>
-          <p class="sheet-sub${s.muted ? ' muted' : ''}">${s.sub}</p>
-        </div>`)
-      .join('');
-  }
+  if (body) body.innerHTML = topSections ? renderSections(sections || []) : '';
 
   // Wrap astrology terms for tooltip
   wrapTerms(document.querySelector('.domain-sheet-body'));
@@ -1038,10 +1054,6 @@ function _buildCelestialWheel(moon) {
   // Луна идёт по кругу радиуса Rm от верхней точки до moonRad
   const sweepDeg = ((lon % 360) + 360) % 360; // всегда 0-360
   const largeArc = sweepDeg > 180 ? 1 : 0;
-  // midpoint для дуги (если sweepDeg > 0)
-  const midRad   = (sweepDeg / 2 - 90) * Math.PI / 180;
-  const midX     = +(cx + Rm * Math.cos(midRad)).toFixed(2);
-  const midY     = +(cy + Rm * Math.sin(midRad)).toFixed(2);
   const moonPath = sweepDeg < 1
     ? `M ${startX} ${startY}`
     : `M ${startX} ${startY} A ${Rm} ${Rm} 0 ${largeArc} 1 ${moonX} ${moonY}`;

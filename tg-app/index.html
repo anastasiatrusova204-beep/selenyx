@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css?v=50">
+  <link rel="stylesheet" href="style.css?v=51">
   <style>/* critical: prevent domain-card from collapsing in flex context */
   .domain-card { flex-shrink: 0; }
   /* critical: header-icon-btn fallback if CDN serves old CSS */
@@ -36,9 +36,12 @@
 
     <!-- Slide 0: Welcome -->
     <div id="ob-slide-0" class="ob-slide">
-      <div class="ob-illustration">🌙</div>
+      <div class="ob-moon-visual">
+        <div class="ob-moon-orb"></div>
+        <div class="ob-moon-halo"></div>
+      </div>
       <h2 class="ob-title">Каждое утро — один ответ</h2>
-      <p class="ob-text">Куда направить силы сегодня. Без гаданий — на основе реального положения Луны прямо сейчас.</p>
+      <p class="ob-text">Куда направить силы сегодня. На основе реального положения Луны прямо сейчас — без гаданий.</p>
     </div>
 
     <!-- Slide 1: Goal -->
@@ -634,6 +637,7 @@
       <button id="domain-sheet-close" class="icon-btn" aria-label="Закрыть">✕</button>
     </div>
     <div class="domain-sheet-body">
+      <div id="sheet-sections-top"></div>
       <p id="sheet-domain-text" class="sheet-text"></p>
       <div id="sheet-sections"></div>
     </div>
@@ -728,6 +732,6 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <script src="data.js?v=17"></script>
-<script src="app.js?v=62"></script>
+<script src="app.js?v=63"></script>
 </body>
 </html>
