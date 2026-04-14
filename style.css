@@ -1376,6 +1376,14 @@ select.form-input { cursor: pointer; }
 .natal-desc { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
 .sign-emoji { margin-right: 2px; }
 
+/* Settings overlay — natal section */
+.settings-divider { height: 1px; background: var(--divider); margin: 20px 0; }
+.settings-natal-hint { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin: 0 0 10px; }
+.settings-birth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.natal-mini-block { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
+  background: rgba(176,125,44,0.07); border-radius: var(--r-sm); border: 0.5px solid rgba(176,125,44,0.2); }
+.natal-mini-row { font-size: 14px; color: var(--text); line-height: 1.5; }
+
 /* ─── 16. ВКЛАДКА СОВМЕСТИМОСТЬ ─────────────────────────── */
 .compat-grid {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
