@@ -1,15 +1,15 @@
 # tg-app/CLAUDE.md — документация Mini App Selenyx
 
-> Обновлён: 2026-04-12
+> Обновлён: 2026-04-14
 
 ## Актуальные версии
 
 | Файл | Версия | Назначение |
 |------|--------|-----------|
 | `index.html` | — | HTML-структура: сплэш, онбординг, вкладки, оверлеи |
-| `style.css` | v=46 | Стили, анимации, тёмная тема |
+| `style.css` | v=47 | Стили, анимации, тёмная тема |
 | `data.js` | v=17 | Контентные данные + расчёты |
-| `app.js` | v=51 | Логика навигации, Telegram SDK, рендеринг |
+| `app.js` | v=58 | Логика навигации, Telegram SDK, рендеринг |
 
 ---
 
@@ -45,10 +45,10 @@ DOMContentLoaded → initSplash()
 | Вкладка / блок | Источник данных |
 |----------------|----------------|
 | День — карточка прогноза | `ZODIAC_PHASE_TIPS[sign][phase]` |
-| День — домены (аккордеон) | `DOMAINS[sign][domain]` |
+| День — домены (2×2 сетка) | `DOMAINS[sign][domain]` |
 | День — «Избегай» | `PHASE_TIPS[phase].avoid` |
+| Луна — колесо + лунный день | `LUNAR_DAYS[day]` (в хабе колеса) |
 | Луна — энергия знака | `MOON_SIGN_ENERGY[sign]` |
-| Луна — лунный день | `LUNAR_DAYS[day]` |
 | Оракул | `PREDICTIONS[idx]` — детерминированная ротация по дню |
 | Нумерология | `NUMEROLOGY[1–9]` — поля: text/good/avoid/practice/planet |
 
@@ -73,6 +73,29 @@ const predIdx = ((lunarDay - 1) * 13 + signIdx * 3 + weekday) % PREDICTIONS.leng
 
 ---
 
+## Вкладка «День» — актуальный layout
+
+- **Фон:** иллюстрация по фазе Луны (`data-phase-group` на `.tab-pane`) — opacity 0.22
+- **Карточка прогноза** (`#today-forecast-card`): editorial-стиль, левая золотая граница, Cormorant italic
+- **Домены:** 2×2 сетка (`domain-grid-card`) с JPG-фонами (`img/domain-*.jpg`), клик → `openSheet()`
+- **Контент вкладки:** только ZODIAC_PHASE_TIPS и DOMAINS — лунный контент убран на вкладку Луна
+
+---
+
+## Вкладка «Луна» — актуальный layout
+
+- **Фон:** тёмное ночное небо на всём `tab-pane` (radial-gradient + звёздный `::before`)
+- **Астролябия** (`#moon-wheel-wrap`): SVG-зодиакальное колесо, генерируется `_buildCelestialWheel(moon)` в app.js
+  - Внешнее кольцо прорисовывается (stroke-dashoffset) и вращается 110s/об
+  - 12 глифов знаков зодиака — материализуются stagger 55мс
+  - Активный сектор знака — цвет по стихии (огонь/земля/воздух/вода)
+  - Луна путешествует по дуге от Овна до текущей позиции
+  - В хабе: номер лунного дня
+- **Под колесом:** `#moon-phase-name` (фаза) + `#moon-sign-name` (знак + градус + %)
+- **Карточки:** `accent-card` с тёмным стеклом (`rgba(255,255,255,0.06)`)
+
+---
+
 ## Кэш и версии
 
 **sessionStorage** — ключ `_dk(k)` = `k + '_' + _V + '_' + дата`:
@@ -83,7 +106,8 @@ const predIdx = ((lunarDay - 1) * 13 + signIdx * 3 + weekday) % PREDICTIONS.leng
 **Инвалидация при деплое** — бампать версии в `index.html`:
 ```html
 <script src="data.js?v=17"></script>
-<script src="app.js?v=51"></script>
+<script src="app.js?v=58"></script>
+<link rel="stylesheet" href="style.css?v=47">
 ```
 
 ---
@@ -123,3 +147,11 @@ python3 -m http.server 8080 --directory tg-app/
 ```
 
 SDK-заглушка в `app.js` эмулирует `window.Telegram.WebApp`.
+
+---
+
+## Деплой tg-app/ → GitHub Pages
+
+```bash
+git subtree split --prefix=tg-app -b tmp && git push origin tmp:gh-pages --force && git branch -D tmp
+```
