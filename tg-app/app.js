@@ -533,9 +533,13 @@ function calcStreak() {
   }
 
   const badge = $('streak-badge');
-  if (badge && streak >= 7) {
-    badge.textContent = `${streak} дн.`;
+  if (badge && streak >= 3) {
+    badge.textContent = `🔥 ${streak} дн.`;
+    badge.title = 'Дней подряд в Selenyx';
     badge.classList.remove('hidden');
+    badge.onclick = () => showToast(`${streak} дней подряд — ты замечательная! 🌙`, '#b07d2c');
+  } else if (badge) {
+    badge.classList.add('hidden');
   }
 
   // Еженедельный итог: каждые 7 дней, только один раз за milestone
@@ -691,7 +695,9 @@ function applyTodayData(data) {
           </div>`
         ).join('');
     } else {
-      retroEl.classList.add('hidden');
+      retroEl.classList.remove('hidden');
+      retroEl.innerHTML = `<p class="retro-card-title">✨ Планеты прямые</p>
+        <p class="domain-card-text" style="margin-top:4px;opacity:.75">Нет активных ретроградов — благоприятное время для новых начинаний и важных решений.</p>`;
     }
   }
 
@@ -720,7 +726,20 @@ function applyTodayData(data) {
   // Number accordion — body
   const numBody = document.querySelector('#num-acc-card .domain-card-body');
   if (numBody) {
-    numBody.innerHTML = `${numData?.text || numData?.hint ? `<p class="domain-card-text">${numData.text || numData.hint}</p>` : ''}${numData?.good ? `<p class="card-label mt">✦ Что поддерживает сегодня</p><p class="domain-card-text">${numData.good}</p>` : ''}${numData?.avoid ? `<p class="card-label mt">✦ Чего избегать</p><p class="domain-card-text">${numData.avoid}</p>` : ''}${numData?.practice ? `<p class="card-label mt">✦ Практика дня</p><p class="domain-card-text">${numData.practice}</p>` : ''}`;
+    // Personal life path number (число судьбы)
+    let lifePathHtml = '';
+    if (userBirth?.date) {
+      const lifeNum = calcDayNumber(new Date(userBirth.date.replace(/(\d{2})\.(\d{2})\.(\d{4})/, '$3-$2-$1')));
+      const lifeData = NUMEROLOGY[lifeNum] || {};
+      lifePathHtml = `<p class="card-label mt" style="opacity:.55;font-size:11px;letter-spacing:.06em">ЧИСЛО СУДЬБЫ</p>
+        <p class="domain-card-text" style="font-weight:700;font-size:17px;color:var(--gold);margin:2px 0 2px">${lifeNum} — ${lifeData.name || ''}</p>
+        ${lifeData.text || lifeData.hint ? `<p class="domain-card-text" style="opacity:.8">${lifeData.text || lifeData.hint}</p>` : ''}
+        <p style="margin-top:6px;margin-bottom:0;font-size:11px;opacity:.4;text-align:right">← изменить в настройках</p>`;
+    } else {
+      lifePathHtml = `<p class="card-label mt" style="opacity:.55;font-size:11px;letter-spacing:.06em">ЧИСЛО СУДЬБЫ</p>
+        <p class="domain-card-text" style="opacity:.55">Добавь дату рождения в <span style="color:var(--gold);cursor:pointer" onclick="openSettings()">Настройках</span> — рассчитаю твоё личное число судьбы и натальную карту.</p>`;
+    }
+    numBody.innerHTML = `${numData?.text || numData?.hint ? `<p class="domain-card-text">${numData.text || numData.hint}</p>` : ''}${numData?.good ? `<p class="card-label mt">✦ Что поддерживает сегодня</p><p class="domain-card-text">${numData.good}</p>` : ''}${numData?.avoid ? `<p class="card-label mt">✦ Чего избегать</p><p class="domain-card-text">${numData.avoid}</p>` : ''}${numData?.practice ? `<p class="card-label mt">✦ Практика дня</p><p class="domain-card-text">${numData.practice}</p>` : ''}${lifePathHtml}`;
   }
 
   // today-basis скрыт — лунный день только на вкладке Луна
@@ -1557,6 +1576,55 @@ function openSettings() {
 
   $('settings-save')?.addEventListener('click', saveSettings);
   $('settings-close')?.addEventListener('click', closeSettings);
+
+  // Natal section
+  _refreshSettingsNatal();
+  const natalSaveBtn = $('settings-natal-save');
+  if (natalSaveBtn && !natalSaveBtn.dataset.init) {
+    natalSaveBtn.dataset.init = '1';
+    natalSaveBtn.addEventListener('click', _saveSettingsNatal);
+  }
+}
+
+function _refreshSettingsNatal() {
+  const resultEl = $('settings-natal-result');
+  const formEl   = $('settings-natal-form');
+  if (!resultEl || !formEl) return;
+
+  if (userBirth?.date) {
+    const natal = calcNatalChart(userBirth.date, userBirth.time || '');
+    if (natal) {
+      const nSun  = SIGNS.find(s => s.id === natal.sun)  || {};
+      const nMoon = SIGNS.find(s => s.id === natal.moon) || {};
+      const nAsc  = SIGNS.find(s => s.id === natal.asc)  || {};
+      resultEl.innerHTML = `
+        <div class="natal-mini-row">${nSun.emoji || '☀️'} <b>Солнце</b> в ${nSun.ru || natal.sun}</div>
+        <div class="natal-mini-row">${nMoon.emoji || '🌙'} <b>Луна</b> в ${nMoon.ru || natal.moon}</div>
+        ${natal.asc ? `<div class="natal-mini-row">⬆️ <b>Асцендент</b> в ${nAsc.ru || natal.asc}</div>` : ''}
+        <button class="btn-ghost full-width" style="margin-top:10px;font-size:12px;opacity:.55"
+          onclick="localStorage.removeItem('userBirth');userBirth=null;_refreshSettingsNatal();">Изменить дату рождения</button>`;
+      resultEl.classList.remove('hidden');
+      formEl.classList.add('hidden');
+      return;
+    }
+  }
+  resultEl.classList.add('hidden');
+  formEl.classList.remove('hidden');
+}
+
+function _saveSettingsNatal() {
+  const d = $('settings-birth-date')?.value?.trim();
+  const t = $('settings-birth-time')?.value?.trim() || '';
+  if (!d || !/^\d{2}\.\d{2}\.\d{4}$/.test(d)) {
+    showToast('Формат даты: ДД.ММ.ГГГГ', '#c0392b');
+    return;
+  }
+  userBirth = { date: d, time: t };
+  localStorage.setItem('userBirth', JSON.stringify(userBirth));
+  tg.HapticFeedback.notificationOccurred('success');
+  showToast('Карта сохранена ✓', '#27ae60');
+  sessionStorage.clear(); // сбросить кэш — число судьбы пересчитается
+  _refreshSettingsNatal();
 }
 
 function closeSettings() {
