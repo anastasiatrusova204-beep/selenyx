@@ -532,20 +532,17 @@ function calcStreak() {
     localStorage.setItem('streakDate', today);
   }
 
-  const badge = $('streak-badge');
-  if (badge && streak >= 3) {
-    badge.innerHTML = `<span class="streak-fire">🔥</span><span class="streak-num">${streak}</span><span class="streak-label">дней подряд</span>`;
-    badge.classList.remove('hidden');
-    badge.onclick = () => {
-      tg.HapticFeedback.impactOccurred('light');
-      tg.showPopup({
-        title: `🔥 Серия — ${streak} ${streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}`,
-        message: `Ты заходишь в Selenyx ${streak} дней подряд.\n\nЭто твой личный ритм — каждый день немного ближе к себе. Продолжай — энергия накапливается. 🌙`,
-        buttons: [{ type: 'ok', text: 'Буду держать ритм' }]
-      });
-    };
-  } else if (badge) {
-    badge.classList.add('hidden');
+  // Streak line in Today tab (instead of cryptic header badge)
+  const streakLine = $('today-streak-line');
+  if (streakLine) {
+    if (streak >= 3) {
+      const s = streak;
+      const word = s === 1 ? 'день' : s < 5 ? 'дня' : 'дней';
+      streakLine.textContent = `🔥 Ты в Selenyx ${s} ${word} подряд`;
+      streakLine.classList.remove('hidden');
+    } else {
+      streakLine.classList.add('hidden');
+    }
   }
 
   // Еженедельный итог: каждые 7 дней, только один раз за milestone
@@ -795,6 +792,9 @@ function applyTodayData(data) {
       });
     });
   }
+
+  // Натальная карта — промо-карточка (заблокированная или с данными)
+  _renderNatalPromo();
 
   // Listeners добавляются только один раз
   if (_todayInited) return;
@@ -1397,6 +1397,95 @@ function showCompatResult(target) {
   }
 }
 
+// ─── Natal promo card (в вкладке День) ────────────────────────────────────────
+function _renderNatalPromo() {
+  const card = $('natal-promo-card');
+  if (!card) return;
+
+  if (userBirth?.date) {
+    // Показываем натальные данные (разблокировано)
+    const natal = calcNatalChart(userBirth.date, userBirth.time || '');
+    if (!natal) { card.innerHTML = ''; return; }
+    const nSun  = SIGNS.find(s => s.id === natal.sun)  || {};
+    const nMoon = SIGNS.find(s => s.id === natal.moon) || {};
+    const nAsc  = SIGNS.find(s => s.id === natal.asc)  || {};
+    card.innerHTML = `
+      <p class="section-label" style="margin-top:20px">Натальная карта</p>
+      <div class="natal-unlocked-card">
+        <div class="natal-unlocked-row">
+          <span class="natal-planet-icon">${nSun.emoji || '☀️'}</span>
+          <div><span class="natal-planet-name">Солнце в ${nSun.ru || natal.sun}</span><br><span class="natal-planet-hint">${(SIGNS.find(s=>s.id===natal.sun)||{}).desc?.slice(0,60)||''}</span></div>
+        </div>
+        <div class="natal-unlocked-row">
+          <span class="natal-planet-icon">${nMoon.emoji || '🌙'}</span>
+          <div><span class="natal-planet-name">Луна в ${nMoon.ru || natal.moon}</span><br><span class="natal-planet-hint">${(SIGNS.find(s=>s.id===natal.moon)||{}).desc?.slice(0,60)||''}</span></div>
+        </div>
+        ${natal.asc ? `<div class="natal-unlocked-row">
+          <span class="natal-planet-icon">⬆️</span>
+          <div><span class="natal-planet-name">Асцендент в ${nAsc.ru || natal.asc}</span></div>
+        </div>` : ''}
+      </div>`;
+  } else {
+    // Заблокированная карточка
+    card.innerHTML = `
+      <p class="section-label" style="margin-top:20px">Натальная карта</p>
+      <div class="natal-locked-card" id="natal-locked-trigger">
+        <div class="natal-locked-preview">
+          <div class="natal-locked-row"><span class="natal-planet-icon">☀️</span><span class="natal-locked-text">Солнце в ·····</span></div>
+          <div class="natal-locked-row"><span class="natal-planet-icon">🌙</span><span class="natal-locked-text">Луна в ·····</span></div>
+          <div class="natal-locked-row"><span class="natal-planet-icon">⬆️</span><span class="natal-locked-text">Асцендент в ·····</span></div>
+        </div>
+        <div class="natal-locked-cta">
+          <span class="natal-lock-icon">🔒</span>
+          <div>
+            <p class="natal-locked-title">Персональная натальная карта</p>
+            <p class="natal-locked-sub">Введи дату рождения — рассчитаю положение планет в момент твоего появления на свет</p>
+          </div>
+        </div>
+        <button class="btn-gold full-width natal-unlock-btn">Рассчитать бесплатно ✨</button>
+      </div>`;
+    $('natal-locked-trigger')?.querySelector('.natal-unlock-btn')?.addEventListener('click', () => {
+      _openNatalSheet();
+    });
+  }
+}
+
+function _openNatalSheet() {
+  openSheet('Натальная карта', `
+    <p style="font-size:14px;color:var(--text-sub);margin:0 0 16px;line-height:1.55">Введи дату рождения — рассчитаю положение Солнца, Луны и Асцендента в момент твоего появления на свет.</p>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">Дата рождения</label>
+      <input id="natal-sheet-date" class="form-input" type="text" inputmode="numeric"
+        placeholder="ДД.ММ.ГГГГ" maxlength="10" autocomplete="bday" spellcheck="false"
+        value="${userBirth?.date || ''}">
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Время рождения <span style="font-size:11px;opacity:.6">(необязательно — нужно для Асцендента)</span></label>
+      <input id="natal-sheet-time" class="form-input" type="text" inputmode="numeric"
+        placeholder="ЧЧ:ММ" maxlength="5" spellcheck="false"
+        value="${userBirth?.time || ''}">
+    </div>
+    <button id="natal-sheet-save" class="btn-primary full-width">Рассчитать ✨</button>
+  `);
+  setTimeout(() => {
+    $('natal-sheet-save')?.addEventListener('click', () => {
+      const d = $('natal-sheet-date')?.value?.trim();
+      const t = $('natal-sheet-time')?.value?.trim() || '';
+      if (!d || !/^\d{2}\.\d{2}\.\d{4}$/.test(d)) {
+        showToast('Формат даты: ДД.ММ.ГГГГ', '#c0392b');
+        return;
+      }
+      userBirth = { date: d, time: t };
+      localStorage.setItem('userBirth', JSON.stringify(userBirth));
+      tg.HapticFeedback.notificationOccurred('success');
+      showToast('Карта сохранена ✓', '#27ae60');
+      sessionStorage.clear();
+      closeSheet();
+      _renderNatalPromo();
+    });
+  }, 100);
+}
+
 // ─── Oracle tab ───────────────────────────────────────────────────────────────
 let fortuneRevealed = false;
 
@@ -1582,55 +1671,6 @@ function openSettings() {
 
   $('settings-save')?.addEventListener('click', saveSettings);
   $('settings-close')?.addEventListener('click', closeSettings);
-
-  // Natal section
-  _refreshSettingsNatal();
-  const natalSaveBtn = $('settings-natal-save');
-  if (natalSaveBtn && !natalSaveBtn.dataset.init) {
-    natalSaveBtn.dataset.init = '1';
-    natalSaveBtn.addEventListener('click', _saveSettingsNatal);
-  }
-}
-
-function _refreshSettingsNatal() {
-  const resultEl = $('settings-natal-result');
-  const formEl   = $('settings-natal-form');
-  if (!resultEl || !formEl) return;
-
-  if (userBirth?.date) {
-    const natal = calcNatalChart(userBirth.date, userBirth.time || '');
-    if (natal) {
-      const nSun  = SIGNS.find(s => s.id === natal.sun)  || {};
-      const nMoon = SIGNS.find(s => s.id === natal.moon) || {};
-      const nAsc  = SIGNS.find(s => s.id === natal.asc)  || {};
-      resultEl.innerHTML = `
-        <div class="natal-mini-row">${nSun.emoji || '☀️'} <b>Солнце</b> в ${nSun.ru || natal.sun}</div>
-        <div class="natal-mini-row">${nMoon.emoji || '🌙'} <b>Луна</b> в ${nMoon.ru || natal.moon}</div>
-        ${natal.asc ? `<div class="natal-mini-row">⬆️ <b>Асцендент</b> в ${nAsc.ru || natal.asc}</div>` : ''}
-        <button class="btn-ghost full-width" style="margin-top:10px;font-size:12px;opacity:.55"
-          onclick="localStorage.removeItem('userBirth');userBirth=null;_refreshSettingsNatal();">Изменить дату рождения</button>`;
-      resultEl.classList.remove('hidden');
-      formEl.classList.add('hidden');
-      return;
-    }
-  }
-  resultEl.classList.add('hidden');
-  formEl.classList.remove('hidden');
-}
-
-function _saveSettingsNatal() {
-  const d = $('settings-birth-date')?.value?.trim();
-  const t = $('settings-birth-time')?.value?.trim() || '';
-  if (!d || !/^\d{2}\.\d{2}\.\d{4}$/.test(d)) {
-    showToast('Формат даты: ДД.ММ.ГГГГ', '#c0392b');
-    return;
-  }
-  userBirth = { date: d, time: t };
-  localStorage.setItem('userBirth', JSON.stringify(userBirth));
-  tg.HapticFeedback.notificationOccurred('success');
-  showToast('Карта сохранена ✓', '#27ae60');
-  sessionStorage.clear(); // сбросить кэш — число судьбы пересчитается
-  _refreshSettingsNatal();
 }
 
 function closeSettings() {
