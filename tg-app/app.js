@@ -866,10 +866,18 @@ function applyTodayData(data) {
       };
       const dyn = domainDynamic[domain];
 
+      // Основной текст — меняется по фазе/дню (разный источник для каждого домена)
+      const domainBody = {
+        health: phaseTips.avoid,
+        work:   phaseText,
+        love:   ld.practice,
+        psych:  moonSignEnergy,
+      }[domain] || '';
+
       openSheet({
         icon: meta.icon,
         title: meta.label,
-        text: domains[domain] || '',
+        text: domainBody,
         topSections: dyn?.text ? [{ label: dyn.label, sub: dyn.text }] : undefined
       });
     });
