@@ -1273,6 +1273,8 @@ ul { list-style: none; }
   height: 1px; background: var(--card-border); margin: 2px 0;
 }
 
+#sheet-domain-text:empty { display: none; }
+
 /* Динамическая секция "Сегодня" в шторке — выше основного текста */
 #sheet-sections-top:not(:empty) {
   margin-bottom: 12px; padding: 10px 12px;
