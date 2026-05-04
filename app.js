@@ -747,17 +747,20 @@ function applyTodayData(data) {
 
   // today-basis скрыт — лунный день только на вкладке Луна
 
-  // Персональный совет: знак × фаза луны (меняется каждые 3–4 дня)
-  const phaseText = (ZODIAC_PHASE_TIPS?.[sign] || ZODIAC_PHASE_TIPS?.aries)?.[moon.phase] || phaseTips.good || '';
-  const cardLabel = $('today-card-label');
-  if (cardLabel) cardLabel.textContent = '✦ Прогноз дня';
-  setText('today-good', phaseText);
-  // today-avoid убран — дублировал "избегай" из раздела Числа дня
-
-  // Практика лунного дня
+  // Лунный день — меняется КАЖДЫЙ ДЕНЬ (30 вариантов)
   const ld = LUNAR_DAYS[moon.lunarDay] || {};
-  setText('today-practice-day', `${ld.symbol || '🌙'} ${moon.lunarDay}-й лунный день · ${ld.name || ''}`);
-  setText('today-practice-text', ld.hint || '');
+  // Персональный прогноз по знаку — меняется раз в 3–4 дня (96 вариантов)
+  const phaseText = (ZODIAC_PHASE_TIPS?.[sign] || ZODIAC_PHASE_TIPS?.aries)?.[moon.phase] || phaseTips.good || '';
+
+  // Карточка прогноза: главный текст — лунный день (ежедневно),
+  // вторичный текст — прогноз по знаку (реже, но персональный)
+  const cardLabel = $('today-card-label');
+  if (cardLabel) cardLabel.textContent = `✦ ${moon.lunarDay}-й лунный день · ${ld.name || 'Лунный день'}`;
+  const cardEl = $('today-good');
+  if (cardEl) {
+    cardEl.innerHTML = (ld.hint ? `<span>${ld.hint}</span>` : '') +
+      (phaseText ? `<span class="forecast-sign-tip">${phaseText}</span>` : '');
+  }
 
   // Feedback buttons — сбрасываем состояние каждый день
   const fbToday = new Date().toISOString().slice(0, 10);
