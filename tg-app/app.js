@@ -839,23 +839,38 @@ function applyTodayData(data) {
       const meta = DOMAIN_META[domain] || {};
       tg.HapticFeedback.impactOccurred('light');
 
-      // Динамический контекст: лунный день + фаза (меняются каждый день)
+      // Динамический контекст — каждый домен из РАЗНОГО источника данных
       const ld = LUNAR_DAYS[moon.lunarDay] || {};
-      const domainDayAngles = {
-        health:  ld.practice || phaseTips.good || '',
-        work:    ld.energy   || phaseTips.good || '',
-        love:    ld.hint     || phaseTips.good || '',
-        psych:   ld.hint     || phaseTips.good || '',
+      const moonSignEnergy = (MOON_SIGN_ENERGY || {})[moon.sign] || '';
+      const domainDynamic = {
+        // Практика лунного дня (меняется ежедневно, 30 вариантов)
+        health: {
+          label: `✦ Практика дня · ${ld.name || moon.lunarDay + '-й лунный день'}`,
+          text:  ld.practice || ''
+        },
+        // Энергия лунной фазы (меняется каждые 3–4 дня, 8 вариантов)
+        work: {
+          label: `✦ Фаза Луны · ${moon.phaseName || ''}`,
+          text:  phaseTips.good || ''
+        },
+        // Луна в знаке (меняется каждые 2–3 дня, 12 вариантов)
+        love: {
+          label: `✦ Луна в ${moon.signRu || moon.sign}`,
+          text:  moonSignEnergy
+        },
+        // Смысл лунного дня (меняется ежедневно, другой текст чем health)
+        psych: {
+          label: `✦ ${moon.lunarDay}-й лунный день · ${ld.name || ''}`,
+          text:  ld.hint || ''
+        },
       };
-      const todayAngle = domainDayAngles[domain] || '';
+      const dyn = domainDynamic[domain];
 
       openSheet({
         icon: meta.icon,
         title: meta.label,
         text: domains[domain] || '',
-        topSections: todayAngle ? [
-          { label: `✦ Сегодня · ${moon.lunarDay}-й лунный день`, sub: todayAngle }
-        ] : undefined
+        topSections: dyn?.text ? [{ label: dyn.label, sub: dyn.text }] : undefined
       });
     });
   });
