@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/session_start_project.py 2>/dev/null || echo '{\"systemMessage\":\"=== ОРКЕСТРАТОР ===\\nПрочитай STATUS.md → DECISIONS.md → назови задачу → делегируй агенту.\"}'"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"{\\\"systemMessage\\\":\\\"Orchestrator Protocol: классифицируй задачу → назови агента вслух → вызови через Agent tool (агенты: ~/Documents/Projects/team/claude-workspace/.agents/). Правило XII: решение → файл сразу. Правило XI: ошибки при валидации → исправить автономно, без вопросов → сдать рабочее.\\\"}\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"{\\\"systemMessage\\\":\\\"=== ЗАКРЫТИЕ СЕССИИ Selenyx ===\\\\n1. Обнови STATUS.md: что сделано, блокеры, следующий шаг\\\\n2. Обнови DECISIONS.md если было решение\\\\n3. Если были изменения кода → git commit → тройная валидация (Правило XI)\\\\n4. Деплой на Beget → проверить systemctl status selenyx\\\"}\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
