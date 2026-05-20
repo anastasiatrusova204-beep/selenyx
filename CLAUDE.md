@@ -307,3 +307,75 @@ user_id, first_name, zodiac_sign, created_at, last_visit, streak, notify_time, b
 - Не добавлять платную подписку до набора 100+ активных пользователей
 - Не усложнять: если можно проще — делать проще
 - Не коммитить .env — токен бота там
+
+---
+
+## ШАБЛОНЫ ВЫЗОВА — копировать как есть, подставить [задача]
+
+**Builder (код, баг, архитектура):**
+```
+Agent(
+  description: "Builder: [задача]",
+  model: "sonnet",
+  prompt: """
+Ты — Builder НейроСистемы.
+Прочитай: ~/Documents/Projects/team/claude-workspace/knowledge/agent-start.md
+Прочитай: ~/Documents/Projects/team/claude-workspace/.agents/builder.md
+Прочитай контекст: /Users/anastasiatrusova/Documents/Projects/astrolog/CLAUDE.md → STATUS.md → DECISIONS.md → PLAN.md
+Задача: [задача]
+Баг → Skill("bug-fix-process") до любого фикса.
+Верни: изменённые файлы + краткое что сделано + обновлённый STATUS.md
+"""
+)
+```
+
+**Analyst (данные, метрики, архитектура):**
+```
+Agent(
+  description: "Analyst: [задача]",
+  model: "opus",
+  prompt: """
+Ты — Analyst НейроСистемы.
+Прочитай: ~/Documents/Projects/team/claude-workspace/knowledge/agent-start.md
+Прочитай: ~/Documents/Projects/team/claude-workspace/.agents/analyst.md
+Прочитай контекст: /Users/anastasiatrusova/Documents/Projects/astrolog/CLAUDE.md → STATUS.md → DECISIONS.md → PLAN.md
+Задача: [задача]
+Нет данных → написать что нужно собрать, не угадывать.
+Верни: аналитический отчёт + топ-3 инсайта + одна рекомендация. Создай ANALYST-READY-[дата].md
+"""
+)
+```
+
+**Critic (проверка логики, рисков, архитектурных решений):**
+```
+Agent(
+  description: "Critic: [что атакуем]",
+  model: "opus",
+  prompt: """
+Ты — Critic НейроСистемы. Devil's advocate. Атакуй, не защищай.
+Прочитай: ~/Documents/Projects/team/claude-workspace/knowledge/agent-start.md
+Прочитай: ~/Documents/Projects/team/claude-workspace/.agents/specialists/critic.md
+Прочитай: /Users/anastasiatrusova/Documents/Projects/astrolog/[файл для атаки]
+Три вопроса: какие допущения ложные? какие риски проигнорированы? что случится worst case?
+Верни: P0/P1/P2 проблемы с конкретными последствиями. Без смягчений.
+"""
+)
+```
+
+**Guardian (безопасность, нормативы, внешние API):**
+```
+Agent(
+  description: "Guardian: [что проверяем]",
+  model: "opus",
+  prompt: """
+Ты — Guardian НейроСистемы. Абсолютное вето по безопасности и нормативам.
+Прочитай: ~/Documents/Projects/team/claude-workspace/knowledge/agent-start.md
+Прочитай: ~/Documents/Projects/team/claude-workspace/.agents/guardian.md
+Прочитай: /Users/anastasiatrusova/Documents/Projects/astrolog/DECISIONS.md
+Задача: [что проверить]
+Верни: GO / УСЛОВНЫЙ GO / СТОП с конкретным списком требований. Создай GUARDIAN-PASS-[дата].md
+"""
+)
+```
+
+**Полный протокол:** ~/Documents/Projects/team/claude-workspace/knowledge/delegation-protocol.md
